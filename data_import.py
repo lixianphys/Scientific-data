@@ -2,7 +2,7 @@ import os
 import glob
 import numpy as np
 # path = input()
-path = '//system01\QT\Lixian\data\QC 0492 0h\QC 0492 0H-difTemp\gatesweep\B-3T-Extn1mV_I_38_Rxx_BE_Rxy_BC_Gate4tom6V (02)'
+path = 'YOUR PATH HERE'
 os.chdir(path)
 
 fname = sorted(glob.glob('TempControl*.dat')) # sort the filenames by their value
