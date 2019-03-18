@@ -1,5 +1,5 @@
 ## import data from multiple files with names of a specific pattern
-```
+```python
 import os
 import glob
 import numpy as np
