@@ -1,25 +1,40 @@
-import os
-import glob
-import numpy as np
-# path = input()
-path = 'YOUR PATH HERE'
-os.chdir(path)
+class sciData_bswp:
+            '''define a class for bfield sweep type data'''
+            def __init__(self,name,bfield,rxx,rxy,tmp):
+                self.name = name
+                self.bfield = bfield
+                self.rxx = rxx
+                self.rxy = rxy
+                self.tmp = tmp
 
-fname = sorted(glob.glob('TempControl*.dat')) # sort the filenames by their value
-print('dictionary keys:')
-Dic_data = {}
+class sciData_gswp:
+            '''define a closs for gatevoltage sweep type data'''
+            def __init__(self,name,gatevoltage,rxx,rxy,tmp):
+                self.name = name
+                self.gvolt = gatevoltage
+                self.rxx = rxx
+                self.rxy = rxy
+                self.tmp = tmp
 
-class sData:  # define a class type as a container
-            def __init__(self, Name, Gatevoltage, Temp, Rxx,Rxy):
-                self.name = Name
-                self.gVolt = Gatevoltage
-                self.tmp = Temp
-                self.rxx = Rxx
-                self.rxy = Rxy
-
-for f in fname:
-            read_data = np.loadtxt(f,skiprows=32,usecols=(0,3,7,-2))
-            read_data = np.array(read_data)
-            Dic_data[f] = sData(f,read_data[:,0],read_data[:,1],read_data[:,2],read_data[:,3])
-            print(f)
+def import_col(directory,fname,cols,skiprows,class_type,rxx_sign,rxy_sign):
+            '''import multiple files to consititute a new dictionary type data including all
+               cols = [bfield, rxx, rxy, temp] for bswp
+               cols = [gvolt, rxx, rxy, temp] for gswp'''
+            import numpy
+            Dic_data = {}
+            if class_type == 'bs':
+                for f in fname:
+                        print(f)
+                        read_data = numpy.loadtxt(f, skiprows=skiprows, usecols=cols)
+                        read_data = numpy.array(read_data)
+                        Dic_data[f] =  sciData_bswp(f, read_data[:, 0], rxx_sign*read_data[:, 1], rxy_sign*read_data[:, 2], read_data[:,3])
+            elif class_type =='gs':
+                for f in fname:
+                        read_data = numpy.loadtxt(f, skiprows=skiprows, usecols=cols)
+                        read_data = numpy.array(read_data)
+                        Dic_data[f] = sciData_gswp(f, read_data[:, 0], rxx_sign*read_data[:, 1], rxy_sign*read_data[:, 2],read_data[:,3])
+            else:
+                print('The class_type is not supported in import_col funtion')
+                Dic_data = None
+            return Dic_data # return the dictionary type data
 
