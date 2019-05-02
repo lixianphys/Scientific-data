@@ -16,13 +16,16 @@ class Datajungle:
     AspRatio: aspect ratio of Hall bar, set to 3 by default
     CHILDREN CLASS:
     Databs, Datags'''
-    def __init__(self,directory,step,ucols,spr,Ref,AspRatio=3):
+    def __init__(self,directory,step,ucols,nms,spr,Ref,AspRatio=3):
         self.dir = directory
         self.step = step
         self.AspRatio = AspRatio
         self.ucols = ucols
+        self.nms = nms
         self.spr = spr
         self.ref = Ref
+		
+		
 
         
 class Databs(Datajungle):
@@ -31,12 +34,12 @@ class Databs(Datajungle):
     getdata: return a panda.DataFrame type data
     hallfit: linear hall fit and return density and mobility in a DataFrame format
     plotdata: plot magnetic field sweep type data in a specific way'''
-    def getdata(self,nms = ['bf','curr','uxx','uxy']):
+    def getdata(self):
         databundle = pd.DataFrame()
         Ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
             data['rxx'] = data.uxx/data.curr*Ref
             data['rxy'] = data.uxy/data.curr*Ref
             data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
@@ -45,13 +48,13 @@ class Databs(Datajungle):
             databundle = databundle.append(data)
         return databundle
 
-    def hallfit(self,fitrange,nms = ['bf','curr','uxx','uxy']):
+    def hallfit(self,fitrange):
         Dens = []
         Mob = []
         Ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
             data['rxx'] = data.uxx/data.curr*Ref
             data['rxy'] = data.uxy/data.curr*Ref
             bf_fit = data['bf'][(data['bf']<fitrange[1])&(data['bf']>fitrange[0])]
@@ -63,7 +66,7 @@ class Databs(Datajungle):
         FitRes = pd.DataFrame({'gate':self.step,'dens':Dens,'mob':Mob})
         return FitRes
     
-    def plotdata(self,nms = ['bf','curr','uxx','uxy']):
+    def plotdata(self,label_value = '$U_g$={:02.2f}V' ):
         font = {'family' : 'normal','weight' : 'normal','size'   : 15}
         matplotlib.rc('font', **font)
         jet= plt.get_cmap('jet')
@@ -76,14 +79,14 @@ class Databs(Datajungle):
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
             line_color = next(colors)
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
             data['rxx'] = data.uxx/data.curr*Ref
             data['rxy'] = data.uxy/data.curr*Ref
             data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
             data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
-            ax_rxx.plot(data.bf,data['rxx'],color = line_color,label='$U_g$={:02.2f}V'.format(self.step[i]))
-            ax_rxy.plot(data.bf,data['rxy'],color = line_color,label='$U_g$={:02.2f}V'.format(self.step[i]))
-            ax_sxy.plot(data.bf,data['sxy'],color = line_color,label='$U_g$={:02.2f}V'.format(self.step[i]))
+            ax_rxx.plot(data.bf,data['rxx'],color = line_color,label=label_value.format(self.step[i]))
+            ax_rxy.plot(data.bf,data['rxy'],color = line_color,label=label_value.format(self.step[i]))
+            ax_sxy.plot(data.bf,data['sxy'],color = line_color,label=label_value.format(self.step[i]))
         ax_rxx.set_xlabel('$B_{field}(T)$',fontsize = 18)
         ax_rxx.set_ylabel('$R_{xx}(\Omega)$',fontsize = 18)
         ax_rxy.set_xlabel('$B_{field}(T)$',fontsize = 18)
@@ -105,12 +108,12 @@ class Datags(Datajungle):
     METHODS:
     getdata: return a panda.DataFrame type data
     plotdata: plot gate sweep type data in a specific way'''
-    def getdata(self,nms = ['gate','curr','uxx','uxy']):
-        databundle = pd.DataFrame()s
+    def getdata(self):
+        databundle = pd.DataFrame()
         Ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
             data['rxx'] = data.uxx/data.curr*Ref
             data['rxy'] = data.uxy/data.curr*Ref
             data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
@@ -118,7 +121,7 @@ class Datags(Datajungle):
             data['bf'] = self.step[i]
             databundle = databundle.append(data)
         return databundle
-    def plotdata(self,nms = ['gate','curr','uxx','uxy']):
+    def plotdata(self,label_value='$B$={:02.2f}T'):
         font = {'family' : 'normal','weight' : 'normal','size' : 15}
         matplotlib.rc('font', **font)
         jet= plt.get_cmap('jet')
@@ -131,14 +134,14 @@ class Datags(Datajungle):
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
             line_color = next(colors)
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
             data['rxx'] = data.uxx/data.curr*Ref
             data['rxy'] = data.uxy/data.curr*Ref
             data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
             data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
-            ax_rxx.plot(data.gate,data['rxx'],color = line_color,label='$B$={:02.2f}T'.format(self.step[i]))
-            ax_rxy.plot(data.gate,data['rxy'],color = line_color,label='$B$={:02.2f}T'.format(self.step[i]))
-            ax_sxy.plot(data.gate,data['sxy'],color = line_color,label='$B$={:02.2f}T'.format(self.step[i]))
+            ax_rxx.plot(data.gate,data['rxx'],color = line_color,label=label_value.format(self.step[i]))
+            ax_rxy.plot(data.gate,data['rxy'],color = line_color,label=label_value.format(self.step[i]))
+            ax_sxy.plot(data.gate,data['sxy'],color = line_color,label=label_value.format(self.step[i]))
         ax_rxx.set_xlabel('$U_g(V)$',fontsize = 18)
         ax_rxx.set_ylabel('$R_{xx}(\Omega)$',fontsize = 18)
         ax_rxy.set_xlabel('$U_g(V)$',fontsize = 18)

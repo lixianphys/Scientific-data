@@ -24,8 +24,6 @@ def H1st_ft(Bf,Rxx,Rxy,AspRatio=3,threshold = 25):
             density = 1 / fitParams[1] / e0 / 1e4
             rxx0 = Rxx.tolist()[list(map(abs,Bf.tolist())).index(min(map(abs,Bf.tolist())))]
             mobility = AspRatio / density / e0 / rxx0
-            plt.plot(Bf, Rxy, "b-", Bf, func_one(Bf, *fitParams), "r-")
-            plt.show()
         else:
             print('The fitting results is not acceptable, fitCov is {}'.format(fitCovariances))
             plt.plot(Bf, Rxy, "b-", Bf, func_one(Bf, *fitParams), "r-")
