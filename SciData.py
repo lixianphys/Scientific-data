@@ -3,8 +3,24 @@ import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 from pd_Hallfit import H1st_ft
+
 e0 = 1.6021766208E-19 # The elementary charge
 h0 = 6.62607015E-34 # The Planck's constant
+
+def extents(f):
+    delta = f[1] - f[0]
+    return [f[0] - delta/2, f[-1] + delta/2]
+def plot_esh(handle,list_esh):
+    '''
+    handle: 'matplotlib.axes._subplots.AxesSubplot'
+    list_esh: list[int] 
+    no return
+    '''
+    for esh in list_esh:
+            handle.axhline(y=esh,linestyle=':',color='c')
+    return
+
+
 
 class Datajungle:
     ''' Parent Class for Generic data type
@@ -24,10 +40,7 @@ class Datajungle:
         self.nms = nms
         self.spr = spr
         self.ref = Ref
-		
-		
-
-        
+	           
 class Databs(Datajungle):
     '''Inherent from Class Datajungle
     METHODS:
@@ -156,3 +169,109 @@ class Datags(Datajungle):
                    ax_rxy.axhline(y=h0/e0**2/mark,linestyle=':',color='c')
         return ax_rxx,ax_rxy,ax_sxy
 
+class Datafc(Datajungle):
+    '''Inherent from Class Datajungle
+    METHODS:
+    plotfc: plot fanchart
+    getdata: return x, y and a 2D array with z-value
+    plotbs: extract magnetic field sweeps
+    plotgs: plot single sxy vs gate sweeps'''
+    def plotfc(self,vm,vmx):
+        diffsxy2D = pd.DataFrame()
+        Ref = self.ref
+        AspRatio = self.AspRatio
+        for i in range(len(self.dir)):
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data['rxx'] = data.uxx/data.curr*Ref
+            data['rxy'] = data.uxy/data.curr*Ref
+            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['diffsxy'] = data['sxy'].diff()/(data['gate'][0]-data['gate'][1])
+            data['bf'] = self.step[i]
+            diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
+        x = data['gate']    
+        y = self.step
+        fig = plt.figure(figsize=(15,15))
+        ax1 = fig.add_subplot(111)
+        plt.imshow(diffsxy2D,aspect='auto', interpolation='bilinear',extent=extents(x.tolist()) + extents(y), origin='lower',cmap='jet',vmin=vm, vmax=vmx)
+        ax1.set_ylabel('B(T)')
+        ax1.set_xlabel('$U_{tg}(V)$')
+        return ax1
+    def getdata(self):
+        databundle = pd.DataFrame()
+        diffsxy2D = pd.DataFrame()
+        Ref = self.ref
+        AspRatio = self.AspRatios
+        for i in range(len(self.dir)):
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data['rxx'] = data.uxx/data.curr*Ref
+            data['rxy'] = data.uxy/data.curr*Ref
+            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['diffsxy'] = data['sxy'].diff()/(data['gate'][0]-data['gate'][1])
+            data['bf'] = self.step[i]
+            diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
+            databundle = databundle.append(data)
+        datafc = {'x':data['gate'],'y':self.step,'z':diffsxy2D}
+        return datafc, databundle
+    def plotbs(self,gate_list):
+        databundle = pd.DataFrame()
+        Ref = self.ref
+        AspRatio = self.AspRatio
+        font = {'family' : 'normal','weight' : 'normal','size'   : 15}
+        matplotlib.rc('font', **font)
+        for i in range(len(self.dir)):
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data['rxx'] = data.uxx/data.curr*Ref
+            data['rxy'] = data.uxy/data.curr*Ref
+            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['bf'] = self.step[i]
+            databundle = databundle.append(data)
+        fig = plt.figure(figsize=(10,10))
+        ax1 = plt.subplot(2,1,1)
+        ax2 = plt.subplot(2,1,2)
+        jet= plt.get_cmap('jet')
+        colors = iter(jet(np.linspace(0,1,len(gate_list))))
+        for i in range(len(gate_list)):
+            line_color = next(colors)
+            x = databundle['bf'].unique()
+            y1 = databundle[databundle['gate']==gate_list[i]].rxx
+            y2 = databundle[databundle['gate']==gate_list[i]].rxy
+            ax1.plot(x,y1,color=line_color,label = '$U_g$ = {:02.2f}V'.format(gate_list[i]))
+            ax2.plot(x,y2,color=line_color,label = '$U_g$ = {:02.2f}V'.format(gate_list[i]))
+        ax1.set_xlabel('B(T)')
+        ax1.set_ylabel('$R_{xx}(\Omega)$')
+        ax1.legend()
+        ax2.set_xlabel('B(T)')
+        ax2.set_ylabel('$R_{xy}(\Omega)$')
+        ax2.legend()
+        return ax1,ax2
+    def plotsxy(self,b_list):
+        databundle = pd.DataFrame()
+        Ref = self.ref
+        AspRatio = self.AspRatio
+        font = {'family' : 'normal','weight' : 'normal','size'   : 15}
+        matplotlib.rc('font', **font)
+        for i in range(len(self.dir)):
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data['rxx'] = data.uxx/data.curr*Ref
+            data['rxy'] = data.uxy/data.curr*Ref
+            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['bf'] = self.step[i]
+            databundle = databundle.append(data)
+        fig = plt.figure(figsize=(12,5))
+        ax1 = plt.subplot(1,1,1)
+        jet= plt.get_cmap('jet')
+        colors = iter(jet(np.linspace(0,1,len(b_list))))
+        for i in range(len(b_list)):
+            line_color = next(colors)
+            x = databundle['gate'].unique()
+            y1 = databundle[databundle['bf']==b_list[i]].sxy/e0**2*h0
+            ax1.plot(x,y1,color=line_color,label = 'B= {:02.2f}T'.format(b_list[i]))
+        plot_esh(ax1,range(-10,11))
+        ax1.set_xlabel('$U_g(V)$')
+        ax1.set_ylabel('$\sigma_{xy}(e^2/h)$')
+        ax1.legend()
+        return ax1
