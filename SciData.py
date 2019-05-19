@@ -13,7 +13,7 @@ def extents(f):
 def plot_esh(handle,list_esh):
     '''
     handle: 'matplotlib.axes._subplots.AxesSubplot'
-    list_esh: list[int] 
+    list_esh: list[int]
     no return
     '''
     for esh in list_esh:
@@ -28,19 +28,19 @@ class Datajungle:
     directory: list of file names
     step: step values
     ucols and spr : usecols and skiprows for panda.DataFrame type
-    Ref: reference resistance in series
-    AspRatio: aspect ratio of Hall bar, set to 3 by default
+    ref: reference resistance in series
+    asp_ratio: aspect ratio of Hall bar, set to 3 by default
     CHILDREN CLASS:
     Databs, Datags'''
-    def __init__(self,directory,step,ucols,nms,spr,Ref,AspRatio=3):
+    def __init__(self,directory,step,ucols,nms,spr,ref,asp_ratio=3):
         self.dir = directory
         self.step = step
-        self.AspRatio = AspRatio
+        self.asp_ratio = asp_ratio
         self.ucols = ucols
         self.nms = nms
         self.spr = spr
-        self.ref = Ref
-	           
+        self.ref = ref
+
 class Databs(Datajungle):
     '''Inherent from Class Datajungle
     METHODS:
@@ -49,14 +49,14 @@ class Databs(Datajungle):
     plotdata: plot magnetic field sweep type data in a specific way'''
     def getdata(self):
         databundle = pd.DataFrame()
-        Ref = self.ref
-        AspRatio = self.AspRatio
+        ref = self.ref
+        asp_ratio = self.asp_ratio
         for i in range(len(self.dir)):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
-            data['rxx'] = data.uxx/data.curr*Ref
-            data['rxy'] = data.uxy/data.curr*Ref
-            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
+            data['rxx'] = data.uxx/data.curr*ref
+            data['rxy'] = data.uxy/data.curr*ref
+            data['sxx'] = data['rxx']/((data['rxx']/asp_ratio)**2+data['rxy']**2)/e0**2*h0
+            data['sxy'] = data['rxy']/((data['rxx']/asp_ratio)**2+data['rxy']**2)/e0**2*h0
             data['gate'] = self.step[i]
             databundle = databundle.append(data)
         return databundle
@@ -64,21 +64,21 @@ class Databs(Datajungle):
     def hallfit(self,fitrange):
         Dens = []
         Mob = []
-        Ref = self.ref
-        AspRatio = self.AspRatio
+        ref = self.ref
+        asp_ratio = self.asp_ratio
         for i in range(len(self.dir)):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
-            data['rxx'] = data.uxx/data.curr*Ref
-            data['rxy'] = data.uxy/data.curr*Ref
+            data['rxx'] = data.uxx/data.curr*ref
+            data['rxy'] = data.uxy/data.curr*ref
             bf_fit = data['bf'][(data['bf']<fitrange[1])&(data['bf']>fitrange[0])]
             rxx_fit = data['rxx'][(data['bf']<fitrange[1])&(data['bf']>fitrange[0])]
             rxy_fit = data['rxy'][(data['bf']<fitrange[1])&(data['bf']>fitrange[0])]
             dens,mob = H1st_ft(bf_fit,rxx_fit,rxy_fit)
             Dens.append(dens)
             Mob.append(mob)
-        FitRes = pd.DataFrame({'gate':self.step,'dens':Dens,'mob':Mob})
-        return FitRes
-    
+        fit_res = pd.DataFrame({'gate':self.step,'dens':Dens,'mob':Mob})
+        return fit_res
+
     def plotdata(self,label_value = '$U_g$={:02.2f}V' ):
         font = {'family' : 'normal','weight' : 'normal','size'   : 15}
         matplotlib.rc('font', **font)
@@ -88,15 +88,15 @@ class Databs(Datajungle):
         ax_rxy = plt.subplot(2,1,1)
         ax_rxx = plt.subplot(2,2,3)
         ax_sxy = plt.subplot(2,2,4)
-        Ref = self.ref
-        AspRatio = self.AspRatio
+        ref = self.ref
+        asp_ratio = self.asp_ratio
         for i in range(len(self.dir)):
             line_color = next(colors)
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
-            data['rxx'] = data.uxx/data.curr*Ref
-            data['rxy'] = data.uxy/data.curr*Ref
-            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
+            data['rxx'] = data.uxx/data.curr*ref
+            data['rxy'] = data.uxy/data.curr*ref
+            data['sxx'] = data['rxx']/((data['rxx']/asp_ratio)**2+data['rxy']**2)/e0**2*h0
+            data['sxy'] = data['rxy']/((data['rxx']/asp_ratio)**2+data['rxy']**2)/e0**2*h0
             ax_rxx.plot(data.bf,data['rxx'],color = line_color,label=label_value.format(self.step[i]))
             ax_rxy.plot(data.bf,data['rxy'],color = line_color,label=label_value.format(self.step[i]))
             ax_sxy.plot(data.bf,data['sxy'],color = line_color,label=label_value.format(self.step[i]))
@@ -113,9 +113,9 @@ class Databs(Datajungle):
         for mark in [-5,-4,-3,-2,-1,1,2,3,4,5]:
                    ax_rxy.axhline(y=h0/e0**2/mark,linestyle=':',color='c')
         return ax_rxx,ax_rxy,ax_sxy
-        
 
-    
+
+
 class Datags(Datajungle):
     '''Inherent from Class Datajungle
     METHODS:
@@ -123,14 +123,14 @@ class Datags(Datajungle):
     plotdata: plot gate sweep type data in a specific way'''
     def getdata(self):
         databundle = pd.DataFrame()
-        Ref = self.ref
-        AspRatio = self.AspRatio
+        ref = self.ref
+        asp_ratio = self.asp_ratio
         for i in range(len(self.dir)):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
-            data['rxx'] = data.uxx/data.curr*Ref
-            data['rxy'] = data.uxy/data.curr*Ref
-            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
+            data['rxx'] = data.uxx/data.curr*ref
+            data['rxy'] = data.uxy/data.curr*ref
+            data['sxx'] = data['rxx']/((data['rxx']/asp_ratio)**2+data['rxy']**2)/e0**2*h0
+            data['sxy'] = data['rxy']/((data['rxx']/asp_ratio)**2+data['rxy']**2)/e0**2*h0
             data['bf'] = self.step[i]
             databundle = databundle.append(data)
         return databundle
@@ -143,15 +143,15 @@ class Datags(Datajungle):
         ax_rxy = plt.subplot(2,1,1)
         ax_rxx = plt.subplot(2,2,3)
         ax_sxy = plt.subplot(2,2,4)
-        Ref = self.ref
-        AspRatio = self.AspRatio
+        ref = self.ref
+        asp_ratio = self.asp_ratio
         for i in range(len(self.dir)):
             line_color = next(colors)
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
-            data['rxx'] = data.uxx/data.curr*Ref
-            data['rxy'] = data.uxy/data.curr*Ref
-            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
+            data['rxx'] = data.uxx/data.curr*ref
+            data['rxy'] = data.uxy/data.curr*ref
+            data['sxx'] = data['rxx']/((data['rxx']/asp_ratio)**2+data['rxy']**2)/e0**2*h0
+            data['sxy'] = data['rxy']/((data['rxx']/asp_ratio)**2+data['rxy']**2)/e0**2*h0
             ax_rxx.plot(data.gate,data['rxx'],color = line_color,label=label_value.format(self.step[i]))
             ax_rxy.plot(data.gate,data['rxy'],color = line_color,label=label_value.format(self.step[i]))
             ax_sxy.plot(data.gate,data['sxy'],color = line_color,label=label_value.format(self.step[i]))
@@ -178,18 +178,18 @@ class Datafc(Datajungle):
     plotgs: plot single sxy vs gate sweeps'''
     def plotfc(self,vm,vmx):
         diffsxy2D = pd.DataFrame()
-        Ref = self.ref
-        AspRatio = self.AspRatio
+        ref = self.ref
+        asp_ratio = self.asp_ratio
         for i in range(len(self.dir)):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
-            data['rxx'] = data.uxx/data.curr*Ref
-            data['rxy'] = data.uxy/data.curr*Ref
-            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['rxx'] = data.uxx/data.curr*ref
+            data['rxy'] = data.uxy/data.curr*ref
+            data['sxx'] = data['rxx']/((data['rxx']/asp_ratio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/asp_ratio)**2+data['rxy']**2)
             data['diffsxy'] = data['sxy'].diff()/(data['gate'][0]-data['gate'][1])
             data['bf'] = self.step[i]
             diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
-        x = data['gate']    
+        x = data['gate']
         y = self.step
         fig = plt.figure(figsize=(15,15))
         ax1 = fig.add_subplot(111)
@@ -200,14 +200,14 @@ class Datafc(Datajungle):
     def getdata(self):
         databundle = pd.DataFrame()
         diffsxy2D = pd.DataFrame()
-        Ref = self.ref
-        AspRatio = self.AspRatios
+        ref = self.ref
+        asp_ratio = self.asp_ratio
         for i in range(len(self.dir)):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
-            data['rxx'] = data.uxx/data.curr*Ref
-            data['rxy'] = data.uxy/data.curr*Ref
-            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['rxx'] = data.uxx/data.curr*ref
+            data['rxy'] = data.uxy/data.curr*ref
+            data['sxx'] = data['rxx']/((data['rxx']/asp_ratio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/asp_ratio)**2+data['rxy']**2)
             data['diffsxy'] = data['sxy'].diff()/(data['gate'][0]-data['gate'][1])
             data['bf'] = self.step[i]
             diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
@@ -216,16 +216,16 @@ class Datafc(Datajungle):
         return datafc, databundle
     def plotbs(self,gate_list):
         databundle = pd.DataFrame()
-        Ref = self.ref
-        AspRatio = self.AspRatio
+        ref = self.ref
+        asp_ratio = self.asp_ratio
         font = {'family' : 'normal','weight' : 'normal','size'   : 15}
         matplotlib.rc('font', **font)
         for i in range(len(self.dir)):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
-            data['rxx'] = data.uxx/data.curr*Ref
-            data['rxy'] = data.uxy/data.curr*Ref
-            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['rxx'] = data.uxx/data.curr*ref
+            data['rxy'] = data.uxy/data.curr*ref
+            data['sxx'] = data['rxx']/((data['rxx']/asp_ratio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/asp_ratio)**2+data['rxy']**2)
             data['bf'] = self.step[i]
             databundle = databundle.append(data)
         fig = plt.figure(figsize=(10,10))
@@ -249,16 +249,16 @@ class Datafc(Datajungle):
         return ax1,ax2
     def plotsxy(self,b_list):
         databundle = pd.DataFrame()
-        Ref = self.ref
-        AspRatio = self.AspRatio
+        ref = self.ref
+        asp_ratio = self.asp_ratio
         font = {'family' : 'normal','weight' : 'normal','size'   : 15}
         matplotlib.rc('font', **font)
         for i in range(len(self.dir)):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
-            data['rxx'] = data.uxx/data.curr*Ref
-            data['rxy'] = data.uxy/data.curr*Ref
-            data['sxx'] = data['rxx']/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['rxx'] = data.uxx/data.curr*ref
+            data['rxy'] = data.uxy/data.curr*ref
+            data['sxx'] = data['rxx']/((data['rxx']/asp_ratio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/asp_ratio)**2+data['rxy']**2)
             data['bf'] = self.step[i]
             databundle = databundle.append(data)
         fig = plt.figure(figsize=(12,5))
