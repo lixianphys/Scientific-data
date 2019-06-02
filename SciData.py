@@ -411,16 +411,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-# Test
-step_10V = np.linspace(10,-0.04,252)
-ucols = (0,2,3,4)
-nms = ['gate','uxx','uxy','curr']
-spr = 36
-Ref = 10003
-Fanc_fnm_bg_10V = dir2fnm(r'G:\local data\qc461_gr_we01\raw_data\QC0461 GR ICP I_18T\Fanchart\Fanchart_bg_10V_fine (01)')
-Fanc_DJ_bg_10V = Datafc(Fanc_fnm_bg_10V,step_10V,ucols,nms,spr,Ref)
-
-# print(Fanc_DJ_bg_10V)
-print(Fanc_DJ_bg_10V)
