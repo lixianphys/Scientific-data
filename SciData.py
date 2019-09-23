@@ -548,8 +548,9 @@ class Datafc(Datajungle):
             diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
             rxx2D = rxx2D.append(data['rxx'])
             sxy2D = sxy2D.append(data['sxy'])
+            sxx2D = sxx2D.append(data['sxx'])
             databundle = databundle.append(data)
-        datafc = {'x':databundle['gate'].unique(),'y':self.step,'z1':diffsxy2D,'z2':rxx2D,'z3':sxy2D}
+        datafc = {'x':databundle['gate'].unique(),'y':self.step,'z1':diffsxy2D,'z2':rxx2D,'z3':sxy2D,'z4':sxx2D}
         return datafc, databundle
 
     def plotbs(self,gate_list):
