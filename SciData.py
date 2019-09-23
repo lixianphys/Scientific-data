@@ -535,6 +535,7 @@ class Datafc(Datajungle):
         diffsxy2D = pd.DataFrame()
         rxx2D = pd.DataFrame()
         sxy2D = pd.DataFrame()
+        sxx2D = pd.DataFrame()
         ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
