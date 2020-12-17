@@ -25,5 +25,5 @@ plt.rc('lines', linewidth=2)
 
 # interface
 print('welcome')
-print('You are using the init.py located in ', init.__file__)
+print('You are using the init.py located in ', __file__)
 print('You are using the SciData package located in ', SciData.__file__)
