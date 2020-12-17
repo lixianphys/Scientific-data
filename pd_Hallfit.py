@@ -39,11 +39,10 @@ def H2nd_ft(Bf,Rxx,Rxy,AspRatio=3):
     sxy = Rxy / ((Rxx / AspRatio) ** 2 + Rxy ** 2)
     try:
             popt, pcov = curve_fit(func_two, Bf, sxy, bounds=((2e13, 1, -1e16, 0.1), (2e15, 100, -1e14, 10)))
-            plt.plot(Bf, sxy, "b-", Bf, func_two(Bf, *popt), "r-")
-            plt.show()
+            # plt.plot(Bf, sxy, "b-", Bf, func_two(Bf, *popt), "r-")
             print('The fitCov is {}'.format(pcov))
     except:
             print('The fitting program failed')
-    return  popt
+    return  popt,func_two(Bf, *popt)
 
 
