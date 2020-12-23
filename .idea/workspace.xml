@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f75f49a2-d095-4381-955a-66e9825ba83d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/functions.py" beforeDir="false" afterPath="$PROJECT_DIR$/functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/physconst.py" beforeDir="false" afterPath="$PROJECT_DIR$/physconst.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/insulating state_hgmnte.ipynb" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -12,35 +11,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="FileEditorManager">
-    <leaf>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/functions_LandauLL.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="257">
-              <caret line="413" lean-forward="true" selection-start-line="413" selection-end-line="413" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/insulating state_hgmnte.ipynb">
-          <provider selected="true" editor-type-id="ipnb-editor">
-            <state>
-              <selected id="2" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/physconst.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <caret lean-forward="true" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf />
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -107,8 +78,7 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="137" y="77" width="1700" height="937" extended-state="0" />
-    <editor active="true" />
+    <frame x="137" y="77" width="1700" height="937" extended-state="1" />
     <layout>
       <window_info id="Favorites" side_tool="true" />
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.24969916" />
@@ -130,26 +100,22 @@
     </layout>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/physconst.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret lean-forward="true" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/insulating state_hgmnte.ipynb">
       <provider selected="true" editor-type-id="ipnb-editor">
         <state>
-          <selected id="0" />
+          <selected id="2" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/functions_LandauLL.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="257">
-          <caret line="413" lean-forward="true" selection-start-line="413" selection-end-line="413" />
+        <state relative-caret-position="6224">
+          <caret line="413" selection-start-line="413" selection-end-line="413" />
         </state>
       </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/physconst.py">
+      <provider selected="true" editor-type-id="text-editor" />
     </entry>
   </component>
 </project>
