@@ -1,7 +1,5 @@
 # python package import
 import physconst
-import SciData
-import functions
 
 
 # General use
