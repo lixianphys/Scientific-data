@@ -1,9 +1,9 @@
+
 import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
-import physconst
-import functions
+from physconst import *
 
 class Datajungle:
     ''' Parent Class for Generic data type

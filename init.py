@@ -1,12 +1,18 @@
-# import python package
-import numpy as np
-import pandas as pd
-import os
-import pathlib
+# import python p
+from physconst import *
 
-from SciData import *
-from functions import *
-import physconst
+
+# Standard library imports
+import os
+
+# Third party imports
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Local application import
+from Scientific_data import *
+
+
 
 # plot settings
 plt.rc('lines', lw=1, color='k')  # thicker black lines

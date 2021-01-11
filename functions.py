@@ -1,5 +1,6 @@
 # python package import
 import physconst
+from scipy.optimize import curve_fit
 
 
 # General use
