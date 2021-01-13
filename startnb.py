@@ -1,7 +1,3 @@
-# import python p
-from physconst import *
-
-
 # Standard library imports
 import os
 
@@ -10,11 +6,14 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # Local application import
-from Scientific_data import *
+# from Scientific_data import *
+import SciData
+from SciData import *
+from functions import *
+from physconst import *
 
 
-
-# plot settings
+# plot default
 plt.rc('lines', lw=1, color='k')  # thicker black lines
 plt.rc('grid', c='0.5', ls='-', lw=0.5)  # solid gray grid lines
 plt.rc('savefig', dpi=600)  # higher res outputs

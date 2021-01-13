@@ -1,9 +1,17 @@
+# Standard library imports
+import os
 
-import numpy as np
-import pandas as pd
-import matplotlib
+# Third party imports
 import matplotlib.pyplot as plt
+import pandas as pd
+import numpy as np
+from scipy.optimize import curve_fit
+
+# Local application import
 from physconst import *
+
+
+
 
 class Datajungle:
     ''' Parent Class for Generic data type
