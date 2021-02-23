@@ -1,3 +1,4 @@
+#Copyright 2021 Lixian WANG. All Rights Reserved.
 # Standard library imports
 import os
 
