@@ -2,6 +2,7 @@
 import os
 
 # Third party imports
+import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -9,18 +10,22 @@ from scipy.optimize import curve_fit
 
 # Local application import
 from physconst import *
-
+from functions import *
 
 
 
 class Datajungle:
     ''' Parent Class for Generic data type
-    ATTRIBUTES:
-    directory: list of file names
+    Auguments:
+    directory: list of filenames
     step: step values
-    ucols and spr : usecols and skiprows for panda.DataFrame type
+    ucols: extracted columns from original source file
+    spr: skipped rows in the header of source file 
     ref: reference resistance in series
     AspRatio: aspect ratio of Hall bar, set to 3 by default
+
+    Return:
+
     CHILDREN CLASS:
     Databs, Datags'''
     def __init__(self,directory,step,ucols,nms,spr,ref,AspRatio=3):
@@ -72,7 +77,7 @@ class Databs(Datajungle):
             bf_fit = data['bf'][(data['bf']<fitrange[1])&(data['bf']>fitrange[0])]
             rxx_fit = data['rxx'][(data['bf']<fitrange[1])&(data['bf']>fitrange[0])]
             rxy_fit = data['rxy'][(data['bf']<fitrange[1])&(data['bf']>fitrange[0])]
-            dens,mob = H1st_ft(bf_fit,rxx_fit,rxy_fit)
+            dens,mob = H1st_ft(bf_fit,rxx_fit,rxy_fit,AspRatio=AspRatio)
             Dens.append(dens)
             Mob.append(mob)
         FitRes = pd.DataFrame({'gate':self.step,'dens':Dens,'mob':Mob})
@@ -99,12 +104,12 @@ class Databs(Datajungle):
             ax_rxx.plot(data.bf,data['rxx'],color = line_color,label=label_value.format(self.step[i]))
             ax_rxy.plot(data.bf,data['rxy'],color = line_color,label=label_value.format(self.step[i]))
             ax_sxy.plot(data.bf,data['sxy'],color = line_color,label=label_value.format(self.step[i]))
-        ax_rxx.set_xlabel('$B_{field}(T)$',fontsize = 18)
-        ax_rxx.set_ylabel('$R_{xx}(\Omega)$',fontsize = 18)
-        ax_rxy.set_xlabel('$B_{field}(T)$',fontsize = 18)
-        ax_rxy.set_ylabel('$R_{xy}(\Omega)$',fontsize = 18)
-        ax_sxy.set_xlabel('$B_{field}(T)$',fontsize = 18)
-        ax_sxy.set_ylabel('$\sigma_{xy}(e^2/h)$',fontsize = 18)
+        ax_rxx.set_xlabel(r'$B_{field}(T)$',fontsize = 18)
+        ax_rxx.set_ylabel(r'$R_{xx}(\Omega)$',fontsize = 18)
+        ax_rxy.set_xlabel(r'$B_{field}(T)$',fontsize = 18)
+        ax_rxy.set_ylabel(r'$R_{xy}(\Omega)$',fontsize = 18)
+        ax_sxy.set_xlabel(r'$B_{field}(T)$',fontsize = 18)
+        ax_sxy.set_ylabel(r'$\sigma_{xy}(e^2/h)$',fontsize = 18)
         ax_sxy.set_ylim([-10,10])
         ax_rxy.legend(loc = 'best')
         for mark in range(-5,6):
@@ -161,12 +166,12 @@ class Datags(Datajungle):
             ax_rxx.plot(data.gate,data['rxx'],color = line_color,label=label_value.format(self.step[i]))
             ax_rxy.plot(data.gate,data['rxy'],color = line_color,label=label_value.format(self.step[i]))
             ax_sxy.plot(data.gate,data['sxy'],color = line_color,label=label_value.format(self.step[i]))
-        ax_rxx.set_xlabel('$U_g(V)$',fontsize = 18)
-        ax_rxx.set_ylabel('$R_{xx}(\Omega)$',fontsize = 18)
-        ax_rxy.set_xlabel('$U_g(V)$',fontsize = 18)
-        ax_rxy.set_ylabel('$R_{xy}(\Omega)$',fontsize = 18)
-        ax_sxy.set_xlabel('$U_g(V)$',fontsize = 18)
-        ax_sxy.set_ylabel('$\sigma_{xy}(e^2/h)$',fontsize = 18)
+        ax_rxx.set_xlabel(r'$U_g(V)$',fontsize = 18)
+        ax_rxx.set_ylabel(r'$R_{xx}(\Omega)$',fontsize = 18)
+        ax_rxy.set_xlabel(r'$U_g(V)$',fontsize = 18)
+        ax_rxy.set_ylabel(r'$R_{xy}(\Omega)$',fontsize = 18)
+        ax_sxy.set_xlabel(r'$U_g(V)$',fontsize = 18)
+        ax_sxy.set_ylabel(r'$\sigma_{xy}(e^2/h)$',fontsize = 18)
         ax_sxy.set_ylim([-10,10])
         ax_rxy.legend(loc = 'best')
         for mark in range(-5,6):
@@ -269,11 +274,11 @@ class Datafc(Datajungle):
             y2 = databundle[databundle['gate']==gate_list[i]].rxy
             ax1.plot(x,y1,color=line_color,label = '$U_g$ = {:02.2f}V'.format(gate_list[i]))
             ax2.plot(x,y2,color=line_color,label = '$U_g$ = {:02.2f}V'.format(gate_list[i]))
-        ax1.set_xlabel('B(T)')
-        ax1.set_ylabel('$R_{xx}(\Omega)$')
+        ax1.set_xlabel(r'B(T)')
+        ax1.set_ylabel(r'$R_{xx}(\Omega)$')
         ax1.legend()
-        ax2.set_xlabel('B(T)')
-        ax2.set_ylabel('$R_{xy}(\Omega)$')
+        ax2.set_xlabel(r'B(T)')
+        ax2.set_ylabel(r'$R_{xy}(\Omega)$')
         ax2.legend()
         return ax1,ax2
 
@@ -300,8 +305,8 @@ class Datafc(Datajungle):
             x = databundle['gate'].unique()
             y1 = databundle[databundle['bf']==b_list[i]].sxy/e0**2*h0
             ax1.plot(x,y1,color=line_color,label = 'B= {:02.2f}T'.format(b_list[i]))
-        ax1.set_xlabel('$U_g(V)$')
-        ax1.set_ylabel('$\sigma_{xy}(e^2/h)$')
+        ax1.set_xlabel(r'$U_g(V)$')
+        ax1.set_ylabel(r'$\sigma_{xy}(e^2/h)$')
         ax1.legend()
         return ax1
 

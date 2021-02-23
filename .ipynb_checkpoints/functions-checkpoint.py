@@ -10,6 +10,8 @@ from scipy.optimize import curve_fit
 # Local application import
 from physconst import *
 
+
+
 # General use
 def dir2fnm(directory):
     '''
@@ -80,6 +82,7 @@ def H1st_ft(Bf,Rxx,Rxy,AspRatio=3,threshold = 25):
     def func_one(x, a, b):
         return a + b * x
     e0 = 1.6021766208E-19
+    h0 = 6.62607015E-34
     try:
         fitParams, fitCovariances = curve_fit(func_one, Bf, Rxy)
     except:
@@ -112,6 +115,7 @@ def H2nd_ft(Bf,Rxx,Rxy,AspRatio=3):
     def func_two(x, n1, m1, n2, m2):
         return e0 * x * (n1 * m1 ** 2 / (1 + m1 ** 2 * x ** 2) + n2 * m2 ** 2 / (1 + m2 ** 2 * x ** 2)) #model from PHYSICAL REVIEW B 95, 115126 (2017)
     e0 = 1.6021766208E-19
+    h0 = 6.62607015E-34
     sxy = Rxy / ((Rxx / AspRatio) ** 2 + Rxy ** 2)
     try:
             popt, pcov = curve_fit(func_two, Bf, sxy, bounds=((2e13, 1, -1e16, 0.1), (2e15, 100, -1e14, 10)))
@@ -273,23 +277,22 @@ def fc_interp(x_vec,y_vec,z_df,diff = True,mult_factor=3):
 
 # Plotting
 
-def quickplot(path, num_plot, PhyQty, ref, skiprows, nms, ucols, AspRatio=3):
+def quickplot(path, PhyQty, ref, skiprows, nms, ucols, asp_r=3):
     '''
     Quick plot for multiple files containing the same type of data
-    Arguments:
-    path: The directory of multiple files
-    PhyQty: The physical quantities to be plotted('bf','gate','rxx','rxy','sxx','sxy' and etc)
-    ref: reference resistor
-    skiprows: skipped rows from the header
-    nms: Names for all used columns
-    ucols: Used columns
-    AspRatio: The aspect ratio of the Hall bar. Default is 3
 
-    Return: 
-    the handle of axes to facilitate further adjustment if necessary
+    :param path: The directory of the folder containing multiple files
+    :param PhyQty: The physical quantities to be plotted: 'bf','gate','rxx','rxy','sxx','sxy' and etc.
+    :param ref: Resistor for reference use
+    :param skiprows: Skip # rows from the header
+    :param nms: Names for all used columns
+    :param ucols: Used columns
+    :param asp_r: The aspect ratio of the Hall bar. Default is 3
+
+    :return: the handle of axes to facilitate further adjustment if necessary
     '''
 
-    fig = plt.figure(figsize=(10, 5 * len(PhyQty)))
+    fig = plt.figure(figsize=(10, 5 * len(plots)))
     fnm = dir2fnm(path)
     jet = plt.get_cmap('jet')
     colors = iter(jet(np.linspace(0, 1, len(fnm))))
@@ -304,9 +307,9 @@ def quickplot(path, num_plot, PhyQty, ref, skiprows, nms, ucols, AspRatio=3):
         data = pd.read_csv(file, sep="\t", skiprows=skiprows, usecols=ucols, names=nms, header=None)
         data['rxx'] = data.uxx / data.curr * ref
         data['rxy'] = data.uxy / data.curr * ref
-        data['sxx'] = data['rxx'] / AspRatio / ((data['rxx'] / AspRatio) ** 2 + data['rxy'] ** 2) / e0 ** 2 * h0
-        data['sxy'] = data['rxy'] / ((data['rxx'] / AspRatio) ** 2 + data['rxy'] ** 2) / e0 ** 2 * h0
-        if len(PhyQty)>1:
+        data['sxx'] = data['rxx'] / asp_r / ((data['rxx'] / asp_r) ** 2 + data['rxy'] ** 2) / e0 ** 2 * h0
+        data['sxy'] = data['rxy'] / ((data['rxx'] / asp_r) ** 2 + data['rxy'] ** 2) / e0 ** 2 * h0
+        if len(plots)>1:
             for index, phyqty in enumerate(PhyQty):
                 plot_ax = plots_ax[index]
                 plot_ax.plot(data.x, data[phyqty], color=color)
@@ -392,20 +395,20 @@ def plot_fc_analysis(datafc, label, vmin=-0.005, vmax=0, equal_spaced=True, bgor
             data_p = df_range(data, 'bf', [uplim - 0.001, uplim + 0.001])
             data_pbybf = df_range(diffsxy_bybf, 'bf', [uplim - 0.001, uplim + 0.001])
 
-        ax2.plot(data_p.gate, data_p.sxy / e0 ** 2 * h0, 'k-', linewidth=3, label=r'$\sigma_{xy}(e^2/h)$')
+        ax2.plot(data_p.gate, data_p.sxy / e0 ** 2 * h0, 'k-', linewidth=3, label='$\sigma_{xy}(e^2/h)$')
 
         if axis_diff == 'gate':
-            ax3.plot(data_p.gate[1:], -data_p.diffsxy[1:], 'r-', linewidth=2, label=r'$-d\sigma_{xy}/dU_{tg}$')
-            ax3.set_ylabel(r'$-d\sigma_{xy}/dU_{tg}$')
+            ax3.plot(data_p.gate[1:], -data_p.diffsxy[1:], 'r-', linewidth=2, label='$-d\sigma_{xy}/dU_{tg}$')
+            ax3.set_ylabel('$-d\sigma_{xy}/dU_{tg}$')
         else:
-            ax3.plot(x_bybf[1:], -data_pbybf.sxy[1:], 'r-', linewidth=2, label=r'$-d\sigma_{xy}/dB$')
-            ax3.set_ylabel(r'$-d\sigma_{xy}/dB$')
+            ax3.plot(x_bybf[1:], -data_pbybf.sxy[1:], 'r-', linewidth=2, label='$-d\sigma_{xy}/dB$')
+            ax3.set_ylabel('$-d\sigma_{xy}/dB$')
 
         ax2.set_xlim([min(gates), max(gates)])
         ax2.set_ylim([-5, 15])
         ax2.legend(bbox_to_anchor=(0, 0.8), loc='center left')
         ax3.legend(bbox_to_anchor=(0.15, 0.8), loc='center left')
-        ax2.set_ylabel(r'$\sigma_{xy}/(e^2/h)$')
+        ax2.set_ylabel('$\sigma_{xy}/(e^2/h)$')
 
         ax2.axhline(y=0, linestyle=':', color='c', linewidth=2)
         [ax2.axhline(y=yi, linestyle=':', color='y', linewidth=2) for yi in range(1, 15)]
@@ -415,7 +418,7 @@ def plot_fc_analysis(datafc, label, vmin=-0.005, vmax=0, equal_spaced=True, bgor
         ax4.plot(data_gp.rxy, data_gp.bf, 'k-', linewidth=3, label='$r_{xy}$')
         ax4.set_xlim([min(data_gp.rxy) - 500, max(data_gp.rxy) + 500])
         ax4.set_ylim([min(bf), max(bf)])
-        ax4.set_xlabel(r'$R_{xy}(\Omega)$')
+        ax4.set_xlabel('$R_{xy}(\Omega)$')
         [ax4.axvline(x=h0 / e0 ** 2 / xi, linestyle=':', color='y', linewidth=2) for xi in range(1, 10)]
         [ax4.axvline(x=-h0 / e0 ** 2 / xi, linestyle=':', color='g', linewidth=2) for xi in range(1, 10)]
         props = dict(boxstyle='round', fc='b', alpha=0.5)
@@ -445,7 +448,7 @@ def plot_fc_analysis(datafc, label, vmin=-0.005, vmax=0, equal_spaced=True, bgor
 
 def plot_fftmap(datafc, vmin=0, vmax=25, tgorbg=True,bf_range = [0.25, 1]):
     from ipywidgets import interactive, FloatSlider
-    _, data = datafc.getdata()
+    fc, data = datafc.getdata()
     gates = data['gate'].apply(lambda x: round(x, 3)).unique()
     gate_step = abs(np.mean(np.diff(gates)))
     ## extract pieces of data
@@ -475,9 +478,9 @@ def plot_fftmap(datafc, vmin=0, vmax=25, tgorbg=True,bf_range = [0.25, 1]):
                          cmap='inferno', vmin=vmin, vmax=vmax)
         ax1.set_ylim([min(gates), max(gates)])
         if tgorbg:
-            ax1.set_ylabel(r'$U_{tg}$ (V)')
+            ax1.set_ylabel('$U_{tg}$ (V)')
         else:
-            ax1.set_ylabel(r'$U_{bg}$ (V)')
+            ax1.set_ylabel('$U_{bg}$ (V)')
         ax1.axhline(y=volt_slice, color='w', linestyle=':', linewidth=2)
         ax2 = plt.subplot2grid((5, 5), (3, 0), colspan=3, rowspan=2)
         ax2.plot(n2d, fft2d[y.index(volt_slice), :], '-x')
@@ -490,10 +493,10 @@ def plot_fftmap(datafc, vmin=0, vmax=25, tgorbg=True,bf_range = [0.25, 1]):
                  label='raw data - background')
         ax4 = plt.twinx(ax3)
         ax4.plot(1 / data_pp.bf, data_pp.rxx.values, 'b-x', linewidth=1, label='raw data')
-        ax3.set_xlabel(r'$B^{-1} (T^{-1})$')
+        ax3.set_xlabel('$B^{-1} (T^{-1})$')
         #         ax3.yaxis.tick_right()
         #         ax3.yaxis.set_label_position('right')
-        ax3.set_ylabel(r'$R_{xx} (\Omega)$')
+        ax3.set_ylabel('$R_{xx} (\Omega)$')
         #         ax3.set_xlim([0.25,0.6])
         ax3.legend(loc='lower right')
         ax4.legend(loc='upper right')

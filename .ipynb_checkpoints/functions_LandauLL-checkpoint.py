@@ -338,6 +338,8 @@ class TBLLsimu():
         Calculate the landau levels in energy versus magnetic field from all bands
         '''
         vf = self.vf
+        sigmaE = self.sigmaE
+        sigmaH = self.sigmaH
         gfactor = self.gfactor
         meff = self.meff
 
@@ -375,6 +377,11 @@ class TBLLsimu():
         '''
         Calculate the landau levels in density versus magnetic field from all bands
         '''
+        vf = self.vf
+        sigmaE = self.sigmaE
+        sigmaH = self.sigmaH
+        gfactor = self.gfactor
+        meff = self.meff
 
         N_top_surface = []
         N_bottom_surface = []
@@ -527,7 +534,8 @@ class TBLLsimu():
 
         Ets = -hbar * vf * (4 * np.pi * den_top) ** 0.5
         Ebs = -hbar * vf * (4 * np.pi * den_bot) ** 0.5
-        
+        lldegeneracy = Bfield * np.cos(angle * np.pi / 180) * e0 / h0
+
         fig = plt.figure(figsize=(8, 8))
         ax = fig.add_subplot(111)
 
