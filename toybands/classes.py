@@ -161,14 +161,14 @@ class Band:
                 ]
                 return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls)
 
-def print_band(band):
-    if not isinstance(band,Band):
-        raise TypeError(f'{band} is not a Band object')
-    band_dict = band.__dict__
-    print('---------------------------')
-    print(band)
-    [print(f'{key}={band_dict.get(key)}') for key in band_dict.keys()]
-    print('---------------------------')
+    def print_band(self):
+        band_dict = self.__dict__
+        print('---------------------------')
+        print(self)
+        [print(f'{key}={band_dict.get(key)}') for key in band_dict.keys()]
+        print('---------------------------')
+    def get_info(self):
+        return self.__dict__
 
 
 class System:
@@ -184,11 +184,13 @@ class System:
         else:
             warnings.warn(f"Initialization of an empty System")
 
-    def get_band(self):
+    def get_info(self):
+        band_info = []
         for band in self.bands:
-            print_band(band)
-        # map((lambda x: print_band(x)),self.bands)
-        # return pd.DataFrame[band.__dict__ for band in self.bands]
+            band_dict = band.__dict__
+            band_dict.update({'name':self})
+            band_info.append(band_dict)
+        return pd.DataFrame(band_info)
 
     def add_band(self, band):
         if not isinstance(band, Band):
