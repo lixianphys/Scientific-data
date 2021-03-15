@@ -9,37 +9,20 @@ import numpy as np
 import pandas as pd
 from functools import reduce
 
-from SciData.physconst import *
-from SciData.toybands.functions import *
-
+from physconst import *
+from toybands.functions import *
 
 
 class Band:
-    def __init__(self, density, is_cond, is_dirac, gfactor, **kwargs):
+    def __init__(self, density, is_cond, is_dirac, gfactor, M, vf, meff, spin):
         self.density = abs(density)
         self.is_cond = is_cond
         self.is_dirac = is_dirac
         self.gfactor = gfactor
-
-        for key, value in kwargs.items():
-            if key == "M" and is_dirac:
-                self.M = value
-            elif key == "vf" and is_dirac:
-                self.vf = value
-            elif key == "meff" and not is_dirac:
-                self.meff = value
-            elif key == "spin" and not is_dirac:
-                self.spin = value
-            elif (key == "M" or key == "vf") and not is_dirac:
-                raise ValueError(
-                    "Conventional bands do not have M and vf as parameters, use meff and spin"
-                )
-            elif (key == "meff" or key == "spin") and is_dirac:
-                raise ValueError(
-                    "Dirac bands do not have meff and spin as parameters, use vf and M"
-                )
-            elif key not in ["M", "vf", "meff", "spin"]:
-                raise ValueError(f"Invalid argument {key}")
+        self.M = M
+        self.vf = vf
+        self.meff = meff
+        self.spin = spin
 
         if is_dirac and is_cond:
             self.Ebb = -hbar * self.vf * (4 * np.pi * self.density) ** 0.5
@@ -49,7 +32,6 @@ class Band:
             self.Ebb = -(hbar ** 2) * self.density * np.pi / (self.meff * me) / 2
         elif not is_dirac and not is_cond:
             self.Ebb = (hbar ** 2) * self.density * np.pi / (self.meff * me) / 2
-
 
     def cal_energy(self, b_list, Nmax, angle_in_deg):
         if not isinstance(b_list, list):
@@ -163,10 +145,11 @@ class Band:
 
     def print_band(self):
         band_dict = self.__dict__
-        print('---------------------------')
+        print("---------------------------")
         print(self)
-        [print(f'{key}={band_dict.get(key)}') for key in band_dict.keys()]
-        print('---------------------------')
+        [print(f"{key}={band_dict.get(key)}") for key in band_dict.keys()]
+        print("---------------------------")
+
     def get_info(self):
         return self.__dict__
 
@@ -219,12 +202,7 @@ class System:
         elif not self.bands:
             raise ValueError(f"No band added")
         else:
-            # print(
-            #     [
-            #         band
-            #         for band in self.bands
-            #     ]
-            # )
+
             return reduce(
                 (lambda x, y: add_list(x, y)),
                 [
