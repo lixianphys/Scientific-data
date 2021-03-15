@@ -188,7 +188,6 @@ class System:
         band_info = []
         for band in self.bands:
             band_dict = band.__dict__
-            band_dict.update({'name':self})
             band_info.append(band_dict)
         return pd.DataFrame(band_info)
 
