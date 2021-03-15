@@ -9,18 +9,14 @@ import numpy as np
 import pandas as pd
 from functools import reduce
 
-from functions import *
+from SciData.physconst import *
+from SciData.toybands.functions import *
 
-e0 = 1.6021766208e-19  # The elementary charge
-h0 = 6.62607015e-34  # The Planck's constant
-hbar = h0 / np.pi / 2
-muB = -9.284764e-24
-me = 9.109e-31  # The static mass of electron
 
 
 class Band:
     def __init__(self, density, is_cond, is_dirac, gfactor, **kwargs):
-        self.density = density
+        self.density = abs(density)
         self.is_cond = is_cond
         self.is_dirac = is_dirac
         self.gfactor = gfactor
@@ -45,10 +41,15 @@ class Band:
             elif key not in ["M", "vf", "meff", "spin"]:
                 raise ValueError(f"Invalid argument {key}")
 
-        if is_dirac:
+        if is_dirac and is_cond:
             self.Ebb = -hbar * self.vf * (4 * np.pi * self.density) ** 0.5
-        else:
+        elif is_dirac and not is_cond:
+            self.Ebb = hbar * self.vf * (4 * np.pi * self.density) ** 0.5
+        elif not is_dirac and is_cond:
             self.Ebb = -(hbar ** 2) * self.density * np.pi / (self.meff * me) / 2
+        elif not is_dirac and not is_cond:
+            self.Ebb = (hbar ** 2) * self.density * np.pi / (self.meff * me) / 2
+
 
     def cal_energy(self, b_list, Nmax, angle_in_deg):
         if not isinstance(b_list, list):
@@ -160,6 +161,15 @@ class Band:
                 ]
                 return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls)
 
+def print_band(band):
+    if not isinstance(band,Band):
+        raise TypeError(f'{band} is not a Band object')
+    band_dict = band.__dict__
+    print('---------------------------')
+    print(band)
+    [print(f'{key}={band_dict.get(key)}') for key in band_dict.keys()]
+    print('---------------------------')
+
 
 class System:
     def __init__(self, *args):
@@ -175,7 +185,10 @@ class System:
             warnings.warn(f"Initialization of an empty System")
 
     def get_band(self):
-        return self.bands
+        for band in self.bands:
+            print_band(band)
+        # map((lambda x: print_band(x)),self.bands)
+        # return pd.DataFrame[band.__dict__ for band in self.bands]
 
     def add_band(self, band):
         if not isinstance(band, Band):
@@ -195,13 +208,13 @@ class System:
 
     def tot_density(self):
         if self.bands:
-            return reduce((lambda x, y: x + y), [band.den for band in self.bands])
+            return reduce((lambda x, y: x + y), [band.density for band in self.bands])
         else:
             return 0
 
     def dos_gen(self, e_list, B, Nmax, angle_in_deg, sigma):
         if not isinstance(e_list, list):
-            raise ValueError(f"{e_list} is not a list")
+            raise TypeError(f"{e_list} is not a list")
         elif not self.bands:
             raise ValueError(f"No band added")
         else:
@@ -222,7 +235,7 @@ class System:
     def mu(self, e_list, B, Nmax, angle_in_deg, sigma):
 
         return np.interp(
-            x=self.tot_density,
+            x=self.tot_density(),
             xp=self.dos_gen(e_list, B, Nmax, angle_in_deg, sigma),
             fp=e_list,
         )

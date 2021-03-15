@@ -1,5 +1,9 @@
+"""
+All the functions
+"""
 import os
 import sys
+import pdb
 
 import numpy as np
 import pandas as pd
@@ -7,12 +11,9 @@ import pandas as pd
 from functools import reduce
 from scipy.integrate import quad
 
+from SciData.physconst import *
 
-e0 = 1.6021766208e-19  # The elementary charge
-h0 = 6.62607015e-34  # The Planck's constant
-hbar = h0 / np.pi / 2
-muB = -9.284764e-24
-me = 9.109e-31  # The static mass of electron
+
 
 
 def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
@@ -58,16 +59,13 @@ def llconv_gen(B, B_perp, N, spin, gfactor, meff):
 
 
 def _e_integral(fun, ymin, y_list, args):
-    # print(y_list)
-    if y_list[1] > y_list[0]:
-        yint = y_list[1] - y_list[0]
-    else:
-        # print(y_list)
-        raise ValueError("ylist is not in ascending order")
+    if not isinstance(y_list,list):
+        raise ValueError("ylist is not a list")
     if not isinstance(args, tuple):
         raise ValueError("args must be a tuple")
     output = []
     pre_integral = 0
+    yint = abs(y_list[0]-y_list[1])
     for index, y in enumerate(y_list):
         if y > ymin + yint and index == 0:
             result = quad(fun, ymin, y, args=args)[0]
@@ -84,17 +82,14 @@ def _e_integral(fun, ymin, y_list, args):
 
 
 def _h_integral(fun, ymax, y_list, args):
-    if y_list[1] > y_list[0]:
-        yint = y_list[1] - y_list[0]
-    else:
-        raise ValueError("ylist is not in ascending order")
-    y_list_r = y_list
-    y_list_r.reverse()
+    if not isinstance(y_list,list):
+        raise ValueError("ylist is not a list")
     if not isinstance(args, tuple):
         raise ValueError("args must be a tuple")
     output = []
     pre_integral = 0
-    for index, y in enumerate(y_list_r):
+    yint = abs(y_list[0]-y_list[1])
+    for index, y in enumerate(sorted(y_list,reverse=True)):
         if y < ymax - yint and index == 0:
             result = quad(fun, y, ymax, args=args)[0]
         elif y < ymax - yint and index > 0:
@@ -106,6 +101,7 @@ def _h_integral(fun, ymax, y_list, args):
         result = result + pre_integral
         pre_integral = result
         output.append(result)
+    output.reverse()
     return output
 
 
@@ -128,7 +124,7 @@ def e_density_of_state(E, B, sigma, angle_in_deg, e_lls):
     return reduce(
         (lambda x, y: x + y),
         [
-            -lldegeneracy
+            lldegeneracy
             * np.exp(-0.5 * (E - e_ll) ** 2 / sigma ** 2)
             / sigma
             / (2 * np.pi) ** 0.5
@@ -167,32 +163,28 @@ def h_density_of_state(E, B, sigma, angle_in_deg, h_lls):
 
 def e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls):
     lowest_ll_eng = min(e_lls)
-    output = []
-    output.append(
-        _e_integral(
+    output = _e_integral(
             e_density_of_state,
             lowest_ll_eng - 3 * sigma,
             e_list,
             (B, sigma, angle_in_deg, e_lls),
         )
-    )
     return output
 
 
 def h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls):
     highest_ll_eng = max(h_lls)
-    output = []
-    output.append(
-        _h_integral(
+    output=_h_integral(
             h_density_of_state,
             highest_ll_eng + 3 * sigma,
             e_list,
             (B, sigma, angle_in_deg, h_lls),
         )
-    )
+    return output
 
 
 def add_list(a, b):
+
     if isinstance(a, list) and isinstance(b, list) and len(a) == len(b):
         output = []
         for aa, bb in zip(a, b):
@@ -202,3 +194,5 @@ def add_list(a, b):
         raise TypeError("Input must be a list")
     elif len(a) != len(b):
         raise ValueError("Two lists must be of the same length")
+
+
