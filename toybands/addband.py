@@ -8,7 +8,7 @@ from toybands.classes import *
 
 def addband():
     my_parser = argparse.ArgumentParser(
-        prog="addband", description="A band model to play with"
+        prog="addband", description="Add band to a system"
     )
 
     my_parser.add_argument(
@@ -61,10 +61,10 @@ def addband():
         type=int,
         action="store",
         help="spin to create a band (float)",
+        choices=[-1, 1],
     )
 
     args = my_parser.parse_args()
-    print(vars(args))
     newband = Band(
         density=args.density,
         is_cond=args.is_cond,
