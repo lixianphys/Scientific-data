@@ -39,46 +39,46 @@ class Band:
         if not isinstance(Nmax, int):
             raise TypeError(f"Nmax={Nmax} is not integer")
         if self.is_dirac:
-            return pd.DataFrame(
-                [
+            ll_dict = {}
+            for N in range(Nmax):
+                ll_dict.update(
                     {
-                        f"{N}": map(
-                            lambda x: self.Ebb
+                        f"#{N}": [
+                            self.Ebb
                             + lldirac_gen(
                                 x,
-                                x * np.cos(angle_in_deg),
+                                x * np.cos(angle_in_deg * np.pi / 180),
                                 N,
                                 self.is_cond,
                                 self.gfactor,
                                 self.M,
                                 self.vf,
-                            ),
-                            b_list,
-                        )
+                            )
+                            for x in b_list
+                        ]
                     }
-                    for N in range(Nmax)
-                ]
-            )
+                )
+            return pd.DataFrame.from_dict(ll_dict)
         else:
-            return pd.DataFrame(
-                [
+            ll_dict = {}
+            for N in range(Nmax):
+                ll_dict.update(
                     {
-                        f"{N}": map(
-                            lambda x: self.Ebb
+                        f"#{N}": [
+                            self.Ebb
                             + llconv_gen(
                                 x,
-                                x * np.cos(angle_in_deg),
+                                x * np.cos(angle_in_deg * np.pi / 180),
                                 N,
                                 self.spin,
                                 self.gfactor,
                                 self.meff,
-                            ),
-                            b_list,
-                        )
+                            )
+                            for x in b_list
+                        ]
                     }
-                    for N in range(Nmax)
-                ]
-            )
+                )
+            return pd.DataFrame.from_dict(ll_dict)
 
     def cal_dos_b(self, e_list, B, Nmax, angle_in_deg, sigma):
         if not isinstance(e_list, list):
@@ -89,7 +89,7 @@ class Band:
                     self.Ebb
                     + lldirac_gen(
                         B,
-                        B * np.cos(angle_in_deg),
+                        B * np.cos(angle_in_deg * np.pi / 180),
                         N,
                         self.is_cond,
                         self.gfactor,
@@ -104,7 +104,7 @@ class Band:
                     self.Ebb
                     + lldirac_gen(
                         B,
-                        B * np.cos(angle_in_deg),
+                        B * np.cos(angle_in_deg * np.pi / 180),
                         N,
                         self.is_cond,
                         self.gfactor,
@@ -119,7 +119,7 @@ class Band:
                     self.Ebb
                     + llconv_gen(
                         B,
-                        B * np.cos(angle_in_deg),
+                        B * np.cos(angle_in_deg * np.pi / 180),
                         N,
                         self.spin,
                         self.gfactor,
@@ -133,7 +133,7 @@ class Band:
                     self.Ebb
                     + llconv_gen(
                         B,
-                        B * np.cos(angle_in_deg),
+                        B * np.cos(angle_in_deg * np.pi / 180),
                         N,
                         self.spin,
                         self.gfactor,

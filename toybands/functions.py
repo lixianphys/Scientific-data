@@ -26,8 +26,6 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     Return:
     Energy
     """
-    if not isinstance(is_cond, bool):
-        raise ValueError(f"your input is_cond ={is_cond} is not boolen")
     if N < 0 or not isinstance(N, int):
         raise ValueError(f"your input N = {N} should be an integer no less than zero")
     if gfactor < 0:

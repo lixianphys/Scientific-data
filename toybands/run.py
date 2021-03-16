@@ -61,17 +61,23 @@ if __name__ == "__main__":
             )
             newsystem.add_band(newband)
         args = run()
-        enrange = np.linspace(
-            int(args.enrange[0]), int(args.enrange[1]), int(args.enrange[2])
+        enrange = list(
+            np.linspace(
+                int(args.enrange[0]), int(args.enrange[1]), int(args.enrange[2])
+            )
         )
-        bfrange = np.linspace(
-            int(args.bfrange[0]), int(args.bfrange[1]), int(args.bfrange[2])
+        bfrange = list(
+            np.linspace(
+                int(args.bfrange[0]), int(args.bfrange[1]), int(args.bfrange[2])
+            )
         )
-        fig = plt.figure(figsize=(18, 18))
-        ax = fig.add_subplot(111)
-        for band in newsystem.bands:
-            df = band.cal_energy(list(bfrange), 20, 0)
-            print(df)
-        # plt.savefig("test.pdf")
+        if args.enplot:
+            fig = plt.figure(figsize=(10, 10))
+            ax = fig.add_subplot(111)
+            for band in newsystem.bands:
+                band.print_band()
+                df = band.cal_energy(bfrange, 20, 0)
+                [ax.plot(bfrange, df[f"#{N}"]) for N in range(20)]
+            plt.savefig("test.pdf")
     else:
         print("no system exist")
