@@ -111,7 +111,7 @@ def llenergy_generator(Ets, Ebs, Evp, B, angle, meff, Nmax=30, vf=1e6, gfactor=2
     return llenergy_top_surface, llenergy_bottom_surface, llenergy_vps_up, llenergy_vps_down
 
 
-def cal_density_of_state(E, B, sigma, angle, llenergy_top_surface, llenergy_bottom_surface):
+def electron_density_of_state(E, B, sigma, angle, llenergy_top_surface, llenergy_bottom_surface):
     """ Calculate the density of state at a set of certain chemical potential and magnetic field for top/bottom surface states
     Arguments:
     E: position of chemical potential
