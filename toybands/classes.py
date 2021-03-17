@@ -19,9 +19,9 @@ class Band:
         self.is_cond = is_cond
         self.is_dirac = is_dirac
         self.gfactor = gfactor
-        self.M = M
+        self.M = M if M is not None else None
         self.vf = vf
-        self.meff = meff
+        self.meff = meff if meff is not None else None
         self.spin = spin
 
         if is_dirac and is_cond:
@@ -29,9 +29,9 @@ class Band:
         elif is_dirac and not is_cond:
             self.Ebb = hbar * self.vf * (4 * np.pi * self.density) ** 0.5
         elif not is_dirac and is_cond:
-            self.Ebb = -(hbar ** 2) * self.density * np.pi / (self.meff * me) / 2
+            self.Ebb = -(hbar ** 2) * self.density/ np.pi / self.meff/me / 2
         elif not is_dirac and not is_cond:
-            self.Ebb = (hbar ** 2) * self.density * np.pi / (self.meff * me) / 2
+            self.Ebb = (hbar ** 2) * self.density / np.pi / self.meff/me / 2
 
     def cal_energy(self, b_list, Nmax, angle_in_deg):
         if not isinstance(b_list, list):

@@ -33,7 +33,7 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     alpha = 1 if is_cond else -1
     return (
         alpha
-        * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B) ** 2 + M ** 2)
+        * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B) ** 2 + (M*e0) ** 2)
         ** 0.5
     )
 
@@ -49,9 +49,9 @@ def llconv_gen(B, B_perp, N, spin, gfactor, meff):
     Return:
     Energy
     """
-    if not spin in [1, -1]:
+    if not spin in [1.0, -1.0, 1, -1]:
         raise ValueError(f"your input spin ={spin} is neither 1 or -1")
-    return (N + 0.5) * hbar * e0 * B_perp / me / meff + spin * gfactor * muB * B / 2
+    return (N + 0.5) * hbar * e0 * B_perp / meff/me + spin * gfactor * muB * B / 2
 
 
 def _e_integral(fun, ymin, y_list, args):

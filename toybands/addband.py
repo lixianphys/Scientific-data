@@ -10,6 +10,7 @@ def addband():
     my_parser = argparse.ArgumentParser(
         prog="addband", description="Add band to a system"
     )
+    group = my_parser.add_mutually_exclusive_group(required=True)
 
     my_parser.add_argument(
         "density",
@@ -34,47 +35,47 @@ def addband():
         action="store",
         help="gfactor to create a band (float)",
     )
-    my_parser.add_argument(
-        "-M",
-        metavar="M",
+    group.add_argument(
+        "-dp",
+        "-diracpara",
         type=float,
-        action="store",
-        help="M to create a band (float,eV)",
+        nargs=2,
+        help="(M,vf) parameters to create a Dirac-like band (float:eV,float:m/s)",
     )
-    my_parser.add_argument(
-        "-vf",
-        metavar="vf",
-        type=float,
-        action="store",
-        help="M to create a band (float,m/s)",
-    )
-    my_parser.add_argument(
-        "-meff",
-        metavar="meff",
-        type=float,
-        action="store",
-        help="meff to create a band (float,me)",
-    )
-    my_parser.add_argument(
-        "-spin",
-        metavar="spin",
-        type=int,
-        action="store",
-        help="spin to create a band (float)",
-        choices=[-1, 1],
+    group.add_argument(
+        "-cp",
+        "-convpara",
+        type= float,
+        nargs = 2,
+        help="(meff,spin) parameters to create a conventional band (float:me,int:-/+1)",
     )
 
+
     args = my_parser.parse_args()
-    newband = Band(
-        density=args.density,
-        is_cond=args.is_cond,
-        is_dirac=args.is_dirac,
-        gfactor=args.gfactor,
-        M=args.M,
-        vf=args.vf,
-        meff=args.meff,
-        spin=args.spin,
-    )
+    print(vars(args))
+    if args.dp is None and args.cp is not None:
+        newband = Band(
+            density=args.density,
+            is_cond=args.is_cond,
+            is_dirac=args.is_dirac,
+            gfactor=args.gfactor,
+            M=None,
+            vf=None,
+            meff=args.cp[0] if isinstance(args.cp[0],(int, float, complex)) else None,
+            spin=args.cp[1] if isinstance(args.cp[1],(int, float, complex)) else None,
+        )
+    elif args.dp is not None and args.cp is None:
+        newband = Band(
+            density=args.density,
+            is_cond=args.is_cond,
+            is_dirac=args.is_dirac,
+            gfactor=args.gfactor,
+            M=args.dp[0]if isinstance(args.dp[0],(int, float, complex)) else None,
+            vf=args.dp[1] if isinstance(args.dp[1],(int, float, complex)) else None,
+            meff= None,
+            spin= None,
+        )
+        
     print("This band added")
     newband.print_band()
     return newband
@@ -83,6 +84,7 @@ def addband():
 if __name__ == "__main__":
     if os.path.isfile("system.json"):
         df = pd.read_json("system.json")
+        # rebuild the system from JSON file
         newsystem = System()
         for i in range(len(df)):
             dt = df.iloc[i].to_dict()

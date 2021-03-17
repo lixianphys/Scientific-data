@@ -5,6 +5,9 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as mplcm
 import matplotlib.colors as mplcolors
 
+from physconst import *
+from utils import flattenList, div
+
 # define the norm in plotting
 plt.rc('lines', lw=1, color='k')  # thicker black lines
 plt.rc('grid', c='0.5', ls='-', lw=0.5)  # solid gray grid lines
@@ -19,7 +22,7 @@ plt.rc('ytick.major', size=10, pad=7)
 plt.rc('ytick.minor', size=5, pad=7, visible=True)
 plt.rc("legend", fontsize=20)
 
-
+DEFAULT_PLOT_PATH = 'output/plots/'
 
 def make_n_colors(n,cmap,vstart,vend):
     if not isinstance(n,int):
@@ -38,7 +41,7 @@ def make_n_colors(n,cmap,vstart,vend):
     colors = [cmap(x) for x in colors_list]
     return colors
 
-def make_1d_E_B_plots(bfrange,y_databdl,colors,figsize=(10,10),filename=None,linewidth=2):
+def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsize=(10,10),filename=None,linewidth=2):
     if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
         raise TypeError(f'either x_databdl or y_databdl or colors is not list')
     if not len(y_databdl)==len(colors):
@@ -51,7 +54,11 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors,figsize=(10,10),filename=None,lin
     ax = fig.add_subplot(111)
     for y_data, color in zip(y_databdl,colors):
         for y in y_data:
-            ax.plot(bfrange,y,linewidth=linewidth,color=color)
+            ax.plot(bfrange,div(y,e0),linewidth=linewidth,color=color)
+    if mu_pos and len(mu_pos)==len(bfrange):
+        ax.plot(bfrange,div(mu_pos,e0),linewidth=linewidth,color='k')
+    if enrange is not None:
+        ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
     ax.set_xlabel('$B$ [T]')
     ax.set_ylabel('$E$ [eV]')
     plt.savefig('test.pdf')
