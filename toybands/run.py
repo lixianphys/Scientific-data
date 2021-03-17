@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 
 from toybands.functions import *
 from toybands.classes import *
+from toybands.plottools import make_n_colors, make_1d_E_B_plots
 
 
 def run():
@@ -37,6 +38,21 @@ def run():
         help="magnetic field range: start end numofpoints",
     )
 
+    my_parser.add_argument(
+        "-nmax",
+        action="store_const",
+        const=20,
+        help="number of Landau levels involved",
+    )
+
+    my_parser.add_argument(
+        "-angle",
+        action="store_const",
+        const=0,
+        help="angle in degree made with the sample plane norm by the external field",
+    )
+
+
     args = my_parser.parse_args()
     print(vars(args))
     return args
@@ -63,7 +79,7 @@ if __name__ == "__main__":
         args = run()
         enrange = list(
             np.linspace(
-                int(args.enrange[0]), int(args.enrange[1]), int(args.enrange[2])
+                int(args.enrange[0]*e0), int(args.enrange[1]*e0), int(args.enrange[2]*e0)
             )
         )
         bfrange = list(
@@ -72,12 +88,12 @@ if __name__ == "__main__":
             )
         )
         if args.enplot:
-            fig = plt.figure(figsize=(10, 10))
-            ax = fig.add_subplot(111)
-            for band in newsystem.bands:
-                band.print_band()
-                df = band.cal_energy(bfrange, 20, 0)
-                [ax.plot(bfrange, df[f"#{N}"]) for N in range(20)]
-            plt.savefig("test.pdf")
+            if args.nmax is not None and args.angle is not None:
+                y_databdl = [[[x/e0 for x in band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist()] for N in range(args.nmax)]  for band in newsystem.bands]
+                colors = make_n_colors(len(y_databdl),'jet',0.1,0.9)
+                make_1d_E_B_plots(bfrange,y_databdl,colors)
+            else:
+                sys.stderr.write('The argument -nmax and -angle is needed')
+                exit(1)
     else:
-        print("no system exist")
+        sys.stderr.write("no system (system.json) exist")
