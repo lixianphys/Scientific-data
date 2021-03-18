@@ -200,9 +200,8 @@ class System:
         if not isinstance(e_list, list):
             raise TypeError(f"{e_list} is not a list")
         elif not self.bands:
-            raise ValueError(f"No band added")
+            raise ValueError(f"No band added into the system")
         else:
-
             return reduce(
                 (lambda x, y: add_list(x, y)),
                 [
@@ -210,9 +209,7 @@ class System:
                     for band in self.bands
                 ],
             )
-
     def mu(self, e_list, B, Nmax, angle_in_deg, sigma):
-
         return np.interp(
             x=self.tot_density(),
             xp=self.dos_gen(e_list, B, Nmax, angle_in_deg, sigma),

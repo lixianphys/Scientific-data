@@ -467,30 +467,31 @@ class TBLLsimu():
         '''
         Plot the landau levels in density versus magnetic field from all bands
         '''
-        fig = plt.figure(figsize=(8, 8))
+        fig = plt.figure(figsize=(8, 7))
         ax = fig.add_subplot(111)
+        lw = 3
         if threeband:
             N_ts, N_bs, N_vpsup, N_vpsdown = self.get_ll_den(angle, Brange, Erange, Nmax, den_top, den_bot, den_vps,
                                                              threeband)
-            ax.axhline(y=(den_top + den_bot - den_vps) / 1e15, linewidth=2)
+            ax.axhline(y=(den_top + den_bot - den_vps) / 1e15, linewidth=lw)
             for n_ts in np.transpose(N_ts):
-                ax.plot(Brange, n_ts / 1e15, 'r-')
+                ax.plot(Brange, n_ts / 1e15, 'r-', linewidth=lw)
             for n_bs in np.transpose(N_bs):
-                ax.plot(Brange, n_bs / 1e15, 'b-')
+                ax.plot(Brange, n_bs / 1e15, 'b-', linewidth=lw)
             for n_vpsup in np.transpose(N_vpsup):
-                ax.plot(Brange, n_vpsup / 1e15, 'orange')
+                ax.plot(Brange, n_vpsup / 1e15, 'orange', linewidth=lw)
             for n_vpsdown in np.transpose(N_vpsdown):
-                ax.plot(Brange, n_vpsdown / 1e15, 'g-')
+                ax.plot(Brange, n_vpsdown / 1e15, 'g-', linewidth=lw)
             ax.set_ylim((den_top + den_bot - den_vps)/1e15-4,
                         (den_top + den_bot - den_vps)/1e15+4)
         else:
             N_ts, N_bs = self.get_ll_den(
                 angle, Brange, Erange, Nmax, den_top, den_bot, den_vps, threeband)
-            ax.axhline(y=(den_top + den_bot) / 1e15, linewidth=2)
+            ax.axhline(y=(den_top + den_bot) / 1e15, linewidth=lw)
             for n_ts in np.transpose(N_ts):
-                ax.plot(Brange, n_ts / 1e15, 'r-')
+                ax.plot(Brange, n_ts / 1e15, 'r-', linewidth=lw)
             for n_bs in np.transpose(N_bs):
-                ax.plot(Brange, n_bs / 1e15, 'b-')
+                ax.plot(Brange, n_bs / 1e15, 'b-', linewidth=lw)
             ax.set_ylim((den_top + den_bot)/1e15-4, (den_top + den_bot)/1e15+4)
         ax.set_xlabel('B (T)')
         ax.set_ylabel('Density ($10^{11}cm^{-2}$)')

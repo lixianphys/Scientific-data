@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.cm as mplcm
 import matplotlib.colors as mplcolors
-
+import pdb
 from physconst import *
 from utils import flattenList, div
 
@@ -22,7 +22,9 @@ plt.rc('ytick.major', size=10, pad=7)
 plt.rc('ytick.minor', size=5, pad=7, visible=True)
 plt.rc("legend", fontsize=20)
 
-DEFAULT_PLOT_PATH = 'output/plots/'
+DEFAULT_PATH = os.path.join(os.getcwd(),'output')
+ALLOW_FORMAT = ['pdf','png','jpeg','tiff']
+DEFAULT_FORMAT = 'pdf'
 
 def make_n_colors(n,cmap,vstart,vend):
     if not isinstance(n,int):
@@ -41,7 +43,7 @@ def make_n_colors(n,cmap,vstart,vend):
     colors = [cmap(x) for x in colors_list]
     return colors
 
-def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsize=(10,10),filename=None,linewidth=2):
+def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsize=(10,10),linewidth=2):
     if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
         raise TypeError(f'either x_databdl or y_databdl or colors is not list')
     if not len(y_databdl)==len(colors):
@@ -61,6 +63,43 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
         ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
     ax.set_xlabel('$B$ [T]')
     ax.set_ylabel('$E$ [eV]')
-    plt.savefig('test.pdf')
 
+def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,figsize=(10,10),linewidth=2):
+    if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
+        raise TypeError(f'either x_databdl or y_databdl or colors is not list')
+    if not len(y_databdl)==len(colors):
+        raise ValueError(f'y_databdl, colors are not of the same length')
+    if not any(isinstance(el, list) for el in y_databdl):
+        raise TypeError(f'y_databdl is not nested list')
+    if not isinstance(figsize,tuple):
+        raise TypeError(f'figsize should be a tuple like (10,10)')
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_subplot(111)
+    for y_data, color in zip(y_databdl,colors):
+        for y in y_data:
+            ax.plot(bfrange,y,linewidth=linewidth,color=color)
+    if tot_den is not None:
+        ax.axhline(y = tot_den,linewidth=linewidth,color='k')
+    if enrange is not None:
+        ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
+    ax.set_xlabel('$B$ [T]')
+    ax.set_ylabel('$n$ [1/m$^2$]')
+
+def super_save(filename=None,path=None):
+    if filename is None:
+        filename = '[auto]default'
+    if path is None:
+        path = DEFAULT_PATH
+    if not os.path.isdir(path):
+        os.mkdir(path)
+        sys.stdout.write(f'path created under {path}')
+    if len(filename.split('.'))>1:
+        fmt = filename.split('.')[-1]
+        if fmt in ALLOW_FORMAT:
+            plt.savefig(os.path.join(path,filename))
+        else:
+            sys.stderr.write(f'The format {fmt} is not supported')
+    else:
+        plt.savefig(os.path.join(path, filename+'.'+DEFAULT_FORMAT))
+        sys.stdout.write(f'By default, saved as a {DEFAULT_FORMAT} file')
 
