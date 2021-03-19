@@ -30,7 +30,6 @@ def addband():
     )
     my_parser.add_argument(
         "-gfactor",
-        metavar="gfactor",
         type=float,
         action="store",
         help="gfactor to create a band (float)",

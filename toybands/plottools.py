@@ -7,6 +7,7 @@ import matplotlib.colors as mplcolors
 import pdb
 from physconst import *
 from utils import flattenList, div
+from toybands.functions import extract_list
 
 # define the norm in plotting
 plt.rc('lines', lw=1, color='k')  # thicker black lines
@@ -21,6 +22,7 @@ plt.rc("ytick", direction='in', labelsize=20)
 plt.rc('ytick.major', size=10, pad=7)
 plt.rc('ytick.minor', size=5, pad=7, visible=True)
 plt.rc("legend", fontsize=20)
+plt.rcParams['figure.constrained_layout.use'] = True
 
 DEFAULT_PATH = os.path.join(os.getcwd(),'output')
 ALLOW_FORMAT = ['pdf','png','jpeg','tiff']
@@ -64,7 +66,7 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
     ax.set_xlabel('$B$ [T]')
     ax.set_ylabel('$E$ [eV]')
 
-def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,figsize=(10,10),linewidth=2):
+def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,figsize=(10,10),linewidth=2,ax=None,plotrange = None):
     if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
         raise TypeError(f'either x_databdl or y_databdl or colors is not list')
     if not len(y_databdl)==len(colors):
@@ -73,17 +75,29 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
         raise TypeError(f'y_databdl is not nested list')
     if not isinstance(figsize,tuple):
         raise TypeError(f'figsize should be a tuple like (10,10)')
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(111)
-    for y_data, color in zip(y_databdl,colors):
-        for y in y_data:
-            ax.plot(bfrange,y,linewidth=linewidth,color=color)
+    if ax is None:
+        fig = plt.figure(figsize=figsize)
+        ax = fig.add_subplot(111)
+    if plotrange is None:
+        for y_data, color in zip(y_databdl,colors):
+            for y in y_data:
+                ax.plot(bfrange,y,linewidth=linewidth,color=color)
+    else:
+        for y_data, color in zip(y_databdl,colors):
+            for y in y_data:
+                ax.scatter(extract_list(bfrange,[yy>plotrange[0] and yy<plotrange[1] for yy in y]),extract_list(y,[yy>plotrange[0] and yy<plotrange[1] for yy in y]), color=color)
     if tot_den is not None:
-        ax.axhline(y = tot_den,linewidth=linewidth,color='k')
+        ax.axhline(y = tot_den, linewidth=linewidth, color='k')
     if enrange is not None:
         ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
+
     ax.set_xlabel('$B$ [T]')
     ax.set_ylabel('$n$ [1/m$^2$]')
+
+def make_canvas(figsize=(10,10)):
+    fig = plt.figure(figsize=figsize)
+    ax = fig.add_subplot(111)
+    return ax
 
 def super_save(filename=None,path=None):
     if filename is None:
@@ -103,3 +117,13 @@ def super_save(filename=None,path=None):
         plt.savefig(os.path.join(path, filename+'.'+DEFAULT_FORMAT))
         sys.stdout.write(f'By default, saved as a {DEFAULT_FORMAT} file')
 
+
+def make_slices(den_list,numofsteps):
+    if not isinstance(den_list, list):
+        sys.stderr.write('Input is not list')
+    all_density  = []
+    for start,end in zip(den_list[::2],den_list[1::2]):
+        all_density.append(np.linspace(start,end,numofsteps).tolist())
+    all_density = np.array(all_density)
+    output = np.transpose(all_density)
+    return output

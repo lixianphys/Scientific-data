@@ -6,11 +6,17 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import pdb
+from tqdm import tqdm
 
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
-from toybands.plottools import make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, super_save
+from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, super_save, make_slices,make_canvas)
+
+def multi_floats(value):
+    values = value.split()
+    values = map(float, values)
+    return list(values)
 
 
 def run():
@@ -28,6 +34,26 @@ def run():
         "-denplot",
         action="store_true",
         help="plot the density versus bfield (yes/no)",
+    )
+
+    my_parser.add_argument(
+        "-simu",
+        action="store_true",
+        help="dynamically generate relationship between the density and the bfield at steps of input density (yes/no)",
+    )
+
+    my_parser.add_argument(
+        "--allden",
+        action="store",
+        type = multi_floats,
+        help="densities for each band: start1 end1 start2 end2 .... ",
+    )
+
+    my_parser.add_argument(
+        "-nos",
+        action="store",
+        type= int,
+        help="number of steps in the simulation ",
     )
 
     my_parser.add_argument(
@@ -129,5 +155,21 @@ if __name__ == "__main__":
             else:
                 sys.stderr.write('The arguments -nmax and -angle are needed')
 
+        if args.simu:
+            if args.nmax is not None and args.angle is not None and args.allden is not None and args.nos is not None:
+                den_slices = make_slices(args.allden,args.nos)
+                tot_den_list = [sum(den_slice) for den_slice in den_slices]
+                tot_den_int = abs(tot_den_list[0]-tot_den_list[1])
+                ax = make_canvas()
+                for den_slice in tqdm(den_slices):
+                    newsystem.set_all_density(den_slice)
+                    IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
+                    y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.bands]
+                    colors = make_n_colors(len(y_databdl),'jet',0.1,0.9)
+                    tot_den = newsystem.tot_density()
+                    make_1d_den_B_plots(bfrange,y_databdl,colors,tot_den,ax=ax,plotrange=[tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int])
+                super_save(args.fnm,args.dir)
+            else:
+                sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
     else:
         sys.stderr.write("no system (system.json) exist")

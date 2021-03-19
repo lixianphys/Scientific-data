@@ -38,7 +38,7 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     )
 
 
-def llconv_gen(B, B_perp, N, spin, gfactor, meff):
+def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     """Calculate the energy of Landau level in conventional dispersion with a Zeeman term
     Arguments:
     B: Total magnetic field
@@ -51,7 +51,8 @@ def llconv_gen(B, B_perp, N, spin, gfactor, meff):
     """
     if not spin in [1.0, -1.0, 1, -1]:
         raise ValueError(f"your input spin ={spin} is neither 1 or -1")
-    return (N + 0.5) * hbar * e0 * B_perp / meff/me + spin * gfactor * muB * B / 2
+    alpha = 1 if is_cond else -1
+    return alpha*(N + 0.5) * hbar * e0 * B_perp / meff/me + spin * gfactor * muB * B / 2
 
 
 def _e_integral(fun, ymin, y_list, args):
@@ -191,3 +192,12 @@ def add_list(a, b):
     elif len(a) != len(b):
         raise ValueError("Two lists must be of the same length")
 
+
+def extract_list(xlist,bool_list):
+    if not len(xlist) == len(bool_list):
+        sys.stderr.write('The list and bool_list must be of the same length')
+    output = []
+    for x,bool in zip(xlist,bool_list):
+        if bool:
+            output.append(x)
+    return output

@@ -70,6 +70,7 @@ class Band:
                                 x,
                                 x * np.cos(angle_in_deg * np.pi / 180),
                                 N,
+                                self.is_cond,
                                 self.spin,
                                 self.gfactor,
                                 self.meff,
@@ -121,6 +122,7 @@ class Band:
                         B,
                         B * np.cos(angle_in_deg * np.pi / 180),
                         N,
+                        self.is_cond,
                         self.spin,
                         self.gfactor,
                         self.meff,
@@ -135,6 +137,7 @@ class Band:
                         B,
                         B * np.cos(angle_in_deg * np.pi / 180),
                         N,
+                        self.is_cond,
                         self.spin,
                         self.gfactor,
                         self.meff,
@@ -174,6 +177,20 @@ class System:
             band_info.append(band_dict)
         return pd.DataFrame(band_info)
 
+    def set_all_density(self,den_list):
+        if not len(self.bands) == len(den_list):
+            sys.stderr.write(f'The number of bands {len(self.bands)} does not match up with the input densities {len(den_list)}')
+        for band,den in zip(self.bands,den_list):
+            band.density = abs(den)
+            if band.is_dirac and band.is_cond:
+                band.Ebb = -hbar * band.vf * (4 * np.pi * band.density) ** 0.5
+            elif band.is_dirac and not band.is_cond:
+                band.Ebb = hbar * band.vf * (4 * np.pi * band.density) ** 0.5
+            elif not band.is_dirac and band.is_cond:
+                band.Ebb = -(hbar ** 2) * band.density/ np.pi / band.meff/me / 2
+            elif not band.is_dirac and not band.is_cond:
+                band.Ebb = (hbar ** 2) * band.density / np.pi / band.meff/me / 2
+
     def add_band(self, band):
         if not isinstance(band, Band):
             raise TypeError(f"{band} is not Band object")
@@ -192,7 +209,13 @@ class System:
 
     def tot_density(self):
         if self.bands:
-            return reduce((lambda x, y: x + y), [band.density for band in self.bands])
+            bands_den = []
+            for band in self.bands:
+                if band.is_cond:
+                    bands_den.append(band.density)
+                else:
+                    bands_den.append(-band.density)
+            return sum(bands_den)
         else:
             return 0
 
@@ -209,6 +232,7 @@ class System:
                     for band in self.bands
                 ],
             )
+
     def mu(self, e_list, B, Nmax, angle_in_deg, sigma):
         return np.interp(
             x=self.tot_density(),
