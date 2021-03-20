@@ -271,8 +271,8 @@ class System:
             for n_band, y_data in enumerate(y_databdl):
                 for n_ll, y in enumerate(y_data):
                     bf_p,y_p = bfrange,y
+                    str_den = ' '.join(["{:e}".format(den) for den in _den])
                     if plotrange is not None:
-                        str_den = ' '.join(["{:e}".format(den) for den in _den])
                         bf_p = extract_list(bfrange,[yy>plotrange[0] and yy<plotrange[1] for yy in y])
                         y_p = extract_list(y,[yy>plotrange[0] and yy<plotrange[1] for yy in y])
                     df_toappend = pd.DataFrame(np.transpose(np.array([bf_p,y_p,[n_ll]*len(y_p),[n_band]*len(y_p),[str_den]*len(y_p)])),columns=columns)

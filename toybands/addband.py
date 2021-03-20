@@ -51,7 +51,6 @@ def addband():
 
 
     args = my_parser.parse_args()
-    print(vars(args))
     if args.dp is None and args.cp is not None:
         newband = Band(
             density=args.density,

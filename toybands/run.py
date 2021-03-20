@@ -105,6 +105,88 @@ def run():
     return args
 
 
+def enplot(args,newsystem,bfrange,enrange):
+    if args.nmax is not None and args.angle is not None:
+        y_databdl = [
+            [
+                band.cal_energy(bfrange, args.nmax, args.angle)[
+                    f"#{N}"
+                ].tolist()
+                for N in range(args.nmax)
+            ]
+            for band in newsystem.bands
+        ]
+        colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
+        mu_pos = [
+            newsystem.mu(
+                np.linspace(
+                    min(flattenList(y_databdl)),
+                    max(flattenList(y_databdl)),
+                    100,
+                ).tolist(),
+                B,
+                args.nmax,
+                args.angle,
+                sigma=abs(enrange[1] - enrange[0]),
+            )
+            for B in bfrange
+        ]
+        make_1d_E_B_plots(bfrange, y_databdl, colors, mu_pos)
+        newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'enplot')
+        super_save(args.fnm, args.dir)
+    else:
+        sys.stderr.write("The arguments -nmax and -angle are needed")
+
+def denplot(args,newsystem,bfrange,enrange):
+    if args.nmax is not None and args.angle is not None:
+        IDOS = [
+            newsystem.dos_gen(
+                enrange, B, args.nmax, args.angle, abs(enrange[1] - enrange[0])
+            )
+            for B in bfrange
+        ]
+        # bundle data from each Landau level originating from each band
+        y_databdl = [
+            [
+                [
+                    np.interp(x=x, xp=enrange, fp=IDOS[index])
+                    for index, x in enumerate(
+                        band.cal_energy(bfrange, args.nmax, args.angle)[
+                            f"#{N}"
+                        ].tolist()
+                    )
+                ]
+                for N in range(args.nmax)
+            ]
+            for band in newsystem.bands
+        ]
+        colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
+        tot_den = newsystem.tot_density()
+        make_1d_den_B_plots(bfrange, y_databdl, colors, tot_den)
+        newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'denplot')
+        super_save(args.fnm, args.dir)
+    else:
+        sys.stderr.write('The arguments -nmax and -angle are needed')
+
+def simu(args,newsystem,bfrange,enrange):
+    if args.nmax is not None and args.angle is not None and args.allden is not None and args.nos is not None:
+        den_slices = make_slices(args.allden,args.nos)
+        tot_den_list = [sum(den_slice) for den_slice in den_slices]
+        tot_den_int = abs(tot_den_list[0]-tot_den_list[1])
+        ax = make_canvas()
+        for den_slice in tqdm(den_slices):
+            newsystem.set_all_density(den_slice)
+            IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
+            y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.bands]
+            colors = make_n_colors(len(y_databdl),'jet',0.1,0.9)
+            tot_den = newsystem.tot_density()
+            plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
+            make_1d_den_B_plots(bfrange,y_databdl,colors,tot_den,ax=ax,plotrange=plotrange)
+            newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)
+        super_save(args.fnm,args.dir)
+    else:
+        sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
+
 if __name__ == "__main__":
     args = run()
     if os.path.isfile("system.json"):
@@ -132,84 +214,10 @@ if __name__ == "__main__":
             np.linspace(args.bfrange[0], args.bfrange[1], int(args.bfrange[2]))
         )
         if args.enplot:
-            if args.nmax is not None and args.angle is not None:
-                y_databdl = [
-                    [
-                        band.cal_energy(bfrange, args.nmax, args.angle)[
-                            f"#{N}"
-                        ].tolist()
-                        for N in range(args.nmax)
-                    ]
-                    for band in newsystem.bands
-                ]
-                colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
-                mu_pos = [
-                    newsystem.mu(
-                        np.linspace(
-                            min(flattenList(y_databdl)),
-                            max(flattenList(y_databdl)),
-                            100,
-                        ).tolist(),
-                        B,
-                        args.nmax,
-                        args.angle,
-                        sigma=abs(enrange[1] - enrange[0]),
-                    )
-                    for B in bfrange
-                ]
-                make_1d_E_B_plots(bfrange, y_databdl, colors, mu_pos)
-                newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'enplot')
-                super_save(args.fnm, args.dir)
-            else:
-                sys.stderr.write("The arguments -nmax and -angle are needed")
+            enplot(args,newsystem,bfrange,enrange)
         if args.denplot:
-            if args.nmax is not None and args.angle is not None:
-                IDOS = [
-                    newsystem.dos_gen(
-                        enrange, B, args.nmax, args.angle, abs(enrange[1] - enrange[0])
-                    )
-                    for B in bfrange
-                ]
-                # bundle data from each Landau level originating from each band
-                y_databdl = [
-                    [
-                        [
-                            np.interp(x=x, xp=enrange, fp=IDOS[index])
-                            for index, x in enumerate(
-                                band.cal_energy(bfrange, args.nmax, args.angle)[
-                                    f"#{N}"
-                                ].tolist()
-                            )
-                        ]
-                        for N in range(args.nmax)
-                    ]
-                    for band in newsystem.bands
-                ]
-                colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
-                tot_den = newsystem.tot_density()
-                make_1d_den_B_plots(bfrange, y_databdl, colors, tot_den)
-                newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'denplot')
-                super_save(args.fnm, args.dir)
-            else:
-                sys.stderr.write('The arguments -nmax and -angle are needed')
-
+            denplot(args,newsystem,bfrange,enrange)
         if args.simu:
-            if args.nmax is not None and args.angle is not None and args.allden is not None and args.nos is not None:
-                den_slices = make_slices(args.allden,args.nos)
-                tot_den_list = [sum(den_slice) for den_slice in den_slices]
-                tot_den_int = abs(tot_den_list[0]-tot_den_list[1])
-                ax = make_canvas()
-                for den_slice in tqdm(den_slices):
-                    newsystem.set_all_density(den_slice)
-                    IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
-                    y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.bands]
-                    colors = make_n_colors(len(y_databdl),'jet',0.1,0.9)
-                    tot_den = newsystem.tot_density()
-                    plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
-                    make_1d_den_B_plots(bfrange,y_databdl,colors,tot_den,ax=ax,plotrange=plotrange)
-                    newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)
-                super_save(args.fnm,args.dir)
-            else:
-                sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
+            simu(args,newsystem,bfrange,enrange)
     else:
         sys.stderr.write("no system (system.json) exist")
