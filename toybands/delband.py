@@ -3,6 +3,7 @@ import os
 import sys
 
 import pandas as pd
+from toybands.functions import pretty_print
 
 
 if __name__ == "__main__":
@@ -10,7 +11,7 @@ if __name__ == "__main__":
         df = pd.read_json("system.json")
         if not df.empty:
             print("Your current system:")
-            print(df)
+            pretty_print(df)
             index = input("which band to delete? input the index number: Or press 'e' to exit\n")
             if index == 'e':
                 sys.stderr.write('Exit...')
@@ -19,7 +20,7 @@ if __name__ == "__main__":
             df.drop([int(index)]).to_json("system.json")
             if not df.drop([int(index)]).empty:
                 print("Your current system:")
-                print(df.drop([int(index)]))
+                pretty_print(df.drop([int(index)]))
             else:
                 print('No bands in your system, please add more using addband.py')
         else:

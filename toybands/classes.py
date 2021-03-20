@@ -11,6 +11,7 @@ from functools import reduce
 
 from physconst import *
 from toybands.functions import *
+from toybands.config import *
 
 
 class Band:
@@ -239,3 +240,44 @@ class System:
             xp=self.dos_gen(e_list, B, Nmax, angle_in_deg, sigma),
             fp=e_list,
         )
+    def databdl_write_csv(self,filename,bfrange,y_databdl,indicator,plotrange=None):
+        if len(filename.split('.'))>1:
+            filename = filename.split('.')[-2]
+        path = os.path.join(DEFAULT_PATH,filename+'.csv')
+        if not any(isinstance(el, list) for el in y_databdl):
+            raise TypeError(f'y_databdl is not nested list')
+        if indicator == 'enplot':
+            columns = ['B','E','N','Band']
+        elif indicator == 'denplot':
+            columns = ['B','den','N','Band']
+        elif indicator == 'simu':
+            columns = ['B','den','N','Band','system']
+        else:
+            sys.stderr.write(f'Invalid indicator {indicator}, use enplot, denplot or simu instead')
+            exit()
+        df = pd.DataFrame(columns=columns)
+        if indicator in ['enplot','denplot']:
+            for n_band, y_data in enumerate(y_databdl):
+                for n_ll, y in enumerate(y_data):
+                    df_toappend = pd.DataFrame(np.transpose(np.array([bfrange,y,[n_ll]*len(y),[n_band]*len(y)])),columns=columns)
+                    df = df.append(df_toappend,ignore_index=True)
+            df.to_csv(path,mode='w',index=False)
+        elif indicator == 'simu':
+            if self.bands:
+                _den = list(map(lambda x:x.density,self.bands))
+            else:
+                sys.stderr.write('There is no band in this system')
+                exit()
+            for n_band, y_data in enumerate(y_databdl):
+                for n_ll, y in enumerate(y_data):
+                    bf_p,y_p = bfrange,y
+                    if plotrange is not None:
+                        str_den = ' '.join(["{:e}".format(den) for den in _den])
+                        bf_p = extract_list(bfrange,[yy>plotrange[0] and yy<plotrange[1] for yy in y])
+                        y_p = extract_list(y,[yy>plotrange[0] and yy<plotrange[1] for yy in y])
+                    df_toappend = pd.DataFrame(np.transpose(np.array([bf_p,y_p,[n_ll]*len(y_p),[n_band]*len(y_p),[str_den]*len(y_p)])),columns=columns)
+                    df = df.append(df_toappend,ignore_index=True)
+            if os.path.isfile(path):
+                df.to_csv(path,mode='a',index=False,header=False)
+            else:
+                df.to_csv(path,mode='a',index=False)

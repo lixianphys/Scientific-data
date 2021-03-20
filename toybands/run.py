@@ -11,21 +11,12 @@ from tqdm import tqdm
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
-<<<<<<< HEAD
-from toybands.plottools import (
-    make_n_colors,
-    make_1d_E_B_plots,
-    make_1d_den_B_plots,
-    super_save,
-)
-=======
 from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, super_save, make_slices,make_canvas)
 
 def multi_floats(value):
     values = value.split()
     values = map(float, values)
     return list(values)
->>>>>>> a31bf717585aa1d161b8045cc4a9b220553056e6
 
 
 def run():
@@ -167,6 +158,7 @@ if __name__ == "__main__":
                     for B in bfrange
                 ]
                 make_1d_E_B_plots(bfrange, y_databdl, colors, mu_pos)
+                newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'enplot')
                 super_save(args.fnm, args.dir)
             else:
                 sys.stderr.write("The arguments -nmax and -angle are needed")
@@ -178,6 +170,7 @@ if __name__ == "__main__":
                     )
                     for B in bfrange
                 ]
+                # bundle data from each Landau level originating from each band
                 y_databdl = [
                     [
                         [
@@ -195,6 +188,7 @@ if __name__ == "__main__":
                 colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
                 tot_den = newsystem.tot_density()
                 make_1d_den_B_plots(bfrange, y_databdl, colors, tot_den)
+                newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'denplot')
                 super_save(args.fnm, args.dir)
             else:
                 sys.stderr.write('The arguments -nmax and -angle are needed')
@@ -211,7 +205,9 @@ if __name__ == "__main__":
                     y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.bands]
                     colors = make_n_colors(len(y_databdl),'jet',0.1,0.9)
                     tot_den = newsystem.tot_density()
-                    make_1d_den_B_plots(bfrange,y_databdl,colors,tot_den,ax=ax,plotrange=[tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int])
+                    plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
+                    make_1d_den_B_plots(bfrange,y_databdl,colors,tot_den,ax=ax,plotrange=plotrange)
+                    newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)
                 super_save(args.fnm,args.dir)
             else:
                 sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')

@@ -18,7 +18,8 @@ def deprecated(func):
         return func(*args, **kwargs)
     return new_func
 
-def flattenList(nlist):
+def flattenList(nlist_input):
+    nlist = nlist_input
     if not isinstance(nlist,list):
         raise ValueError(f'this is not a list')
     try:

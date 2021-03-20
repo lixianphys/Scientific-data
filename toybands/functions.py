@@ -12,7 +12,7 @@ from functools import reduce
 from scipy.integrate import quad
 
 from physconst import *
-
+from toybands.config import *
 
 def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     """Calculate the energy of Landau level in Dirac dispersion with a Zeeman term
@@ -201,3 +201,34 @@ def extract_list(xlist,bool_list):
         if bool:
             output.append(x)
     return output
+
+
+def pretty_print(df_toprint):
+    
+    df = df_toprint 
+    if not isinstance(df,pd.DataFrame):
+        sys.stderr.write('Input is not a pandas.DataFrame object')
+    names = list(df.columns)
+    if 'density' in names:
+        l = [value/1e16 for value in df['density'].values.tolist()]
+        df_rp = pd.DataFrame(l,columns = ['density(1e16/m2)'])
+        df = df.assign(density=df_rp['density(1e16/m2)'])
+        df = df.rename(columns={'density':'density(1e16/m2)'}) 
+
+    if 'Ebb' in names:
+        l = [value/e0 for value in df['Ebb'].values.tolist()]
+        df_rp = pd.DataFrame(l,columns = ['Ebb(eV)'])
+        df = df.assign(Ebb=df_rp['Ebb(eV)'])
+        df = df.rename(columns={'Ebb':'Ebb(eV)'}) 
+
+    if 'vf' in names:
+        l = [value/1e6 for value in df['vf'].values.tolist()]
+        df_rp = pd.DataFrame(l,columns = ['vf(1e6m/s)'])
+        df = df.assign(vf=df_rp['vf(1e6 m/s)'])
+        df = df.rename(columns={'vf':'vf(1e6m/s)'})
+    
+    print(df)
+
+
+
+    

@@ -8,6 +8,7 @@ import pdb
 from physconst import *
 from utils import flattenList, div
 from toybands.functions import extract_list
+from toybands.config import *
 
 # define the norm in plotting
 plt.rc('lines', lw=1, color='k')  # thicker black lines
@@ -24,9 +25,7 @@ plt.rc('ytick.minor', size=5, pad=7, visible=True)
 plt.rc("legend", fontsize=20)
 plt.rcParams['figure.constrained_layout.use'] = True
 
-DEFAULT_PATH = os.path.join(os.getcwd(),'output')
-ALLOW_FORMAT = ['pdf','png','jpeg','tiff']
-DEFAULT_FORMAT = 'pdf'
+
 
 def make_n_colors(n,cmap,vstart,vend):
     if not isinstance(n,int):
