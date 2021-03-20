@@ -10,7 +10,12 @@ import pdb
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
-from toybands.plottools import make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, super_save
+from toybands.plottools import (
+    make_n_colors,
+    make_1d_E_B_plots,
+    make_1d_den_B_plots,
+    super_save,
+)
 
 
 def run():
@@ -63,18 +68,16 @@ def run():
         action="store",
         type=int,
         default=20,
-        help="number of Landau levels involved",
+        help="number of Landau levels involved (default=20)",
     )
 
     my_parser.add_argument(
         "-angle",
         action="store",
-        type = float,
+        type=float,
         default=0,
-        help="angle in degree made with the sample plane norm by the external field",
+        help="angle in degree made with the sample plane norm by the external field (default=0)",
     )
-
-
 
     args = my_parser.parse_args()
     print(vars(args))
@@ -101,33 +104,69 @@ if __name__ == "__main__":
             newsystem.add_band(newband)
         enrange = list(
             np.linspace(
-                args.enrange[0]*e0, args.enrange[1]*e0, int(args.enrange[2])
+                args.enrange[0] * e0, args.enrange[1] * e0, int(args.enrange[2])
             )
         )
         bfrange = list(
-            np.linspace(
-                args.bfrange[0], args.bfrange[1], int(args.bfrange[2])
-            )
+            np.linspace(args.bfrange[0], args.bfrange[1], int(args.bfrange[2]))
         )
         if args.enplot:
             if args.nmax is not None and args.angle is not None:
-                y_databdl = [[band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist() for N in range(args.nmax)]  for band in newsystem.bands]
-                colors = make_n_colors(len(y_databdl),'jet',0.1,0.9)
-                mu_pos = [newsystem.mu(np.linspace(min(flattenList(y_databdl)),max(flattenList(y_databdl)),100).tolist(), B, args.nmax, args.angle, sigma=abs(enrange[1]-enrange[0])) for B in bfrange]
-                make_1d_E_B_plots(bfrange,y_databdl,colors,mu_pos)
-                super_save(args.fnm,args.dir)
+                y_databdl = [
+                    [
+                        band.cal_energy(bfrange, args.nmax, args.angle)[
+                            f"#{N}"
+                        ].tolist()
+                        for N in range(args.nmax)
+                    ]
+                    for band in newsystem.bands
+                ]
+                colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
+                mu_pos = [
+                    newsystem.mu(
+                        np.linspace(
+                            min(flattenList(y_databdl)),
+                            max(flattenList(y_databdl)),
+                            100,
+                        ).tolist(),
+                        B,
+                        args.nmax,
+                        args.angle,
+                        sigma=abs(enrange[1] - enrange[0]),
+                    )
+                    for B in bfrange
+                ]
+                make_1d_E_B_plots(bfrange, y_databdl, colors, mu_pos)
+                super_save(args.fnm, args.dir)
             else:
-                sys.stderr.write('The arguments -nmax and -angle are needed')
+                sys.stderr.write("The arguments -nmax and -angle are needed")
         if args.denplot:
             if args.nmax is not None and args.angle is not None:
-                IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
-                y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.bands]
-                colors = make_n_colors(len(y_databdl),'jet',0.1,0.9)
+                IDOS = [
+                    newsystem.dos_gen(
+                        enrange, B, args.nmax, args.angle, abs(enrange[1] - enrange[0])
+                    )
+                    for B in bfrange
+                ]
+                y_databdl = [
+                    [
+                        [
+                            np.interp(x=x, xp=enrange, fp=IDOS[index])
+                            for index, x in enumerate(
+                                band.cal_energy(bfrange, args.nmax, args.angle)[
+                                    f"#{N}"
+                                ].tolist()
+                            )
+                        ]
+                        for N in range(args.nmax)
+                    ]
+                    for band in newsystem.bands
+                ]
+                colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
                 tot_den = newsystem.tot_density()
-                make_1d_den_B_plots(bfrange,y_databdl,colors,tot_den)
-                super_save(args.fnm,args.dir)
+                make_1d_den_B_plots(bfrange, y_databdl, colors, tot_den)
+                super_save(args.fnm, args.dir)
             else:
-                sys.stderr.write('The arguments -nmax and -angle are needed')
-
+                sys.stderr.write("The arguments -nmax and -angle are needed")
     else:
         sys.stderr.write("no system (system.json) exist")
