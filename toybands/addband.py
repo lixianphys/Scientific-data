@@ -101,11 +101,11 @@ if __name__ == "__main__":
         newsystem.add_band(inputband)
         df = newsystem.get_info()
         df.to_json(os.path.join(os.getcwd(), "system.json"))
-        print(df)
+        pretty_print(df)
     else:
         newsystem = System()
         inputband = addband()
         newsystem.add_band(inputband)
         df = newsystem.get_info()
         df.to_json(os.path.join(os.getcwd(), "system.json"))
-        print(df)
+        pretty_print(df)

@@ -1,6 +1,7 @@
 import os
 import sys
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.cm as mplcm
 import matplotlib.colors as mplcolors
@@ -93,6 +94,47 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
     ax.set_xlabel('$B$ [T]')
     ax.set_ylabel('$n$ [1/m$^2$]')
 
+def plot_from_csv(path,ax,cmap):
+    if not isinstance(path,str):
+        sys.stderr.write(f'the path {path} is not a string')
+    if not os.path.isfile(path):
+        sys.stderr.write(f'the file {path} does not exist')
+    if not path.endswith('.csv'):
+        sys.stderr.write(f'the file {path} is not a csv file')
+    try:
+        df = pd.read_csv(path)
+    except:
+        sys.stderr.write(f'Failed to read the csv file')
+
+    colors = make_n_colors(len(df.Band.unique()),cmap,0.1,0.9)
+    x,y,N = [],[],-1
+    if 'System([band density])' in df.columns:
+        ind, plottype = 'den','scatter'
+    elif 'den' in df.columns and not 'System([band density])' in df.columns:
+        ind,plottype = 'den','plot'
+    elif 'E' in df.columns:
+        ind,plottype = 'E','plot'
+    for i in range(len(df)):
+        if df.iloc[i].N != N:
+            N = df.iloc[i].N
+            if plottype == 'plot':
+                ax.plot(x, y, color=colors[int(df.iloc[i].Band)])
+            else:
+                ax.scatter(x, y, color=colors[int(df.iloc[i].Band)])
+            x,y = [],[]
+            x.append(df.iloc[i].B)
+            y.append(df.iloc[i][ind])
+        else:
+            x.append(df.iloc[i].B)
+            y.append(df.iloc[i][ind])
+        ax.set_xlabel('$B$ [T]')
+        if ind == 'den':
+            ax.set_ylabel('$n$ [1/m$^2$]')
+        else:
+            ax.set_ylabel('$E$ [eV]')
+    
+
+
 def make_canvas(figsize=(10,10)):
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)
@@ -126,3 +168,5 @@ def make_slices(den_list,numofsteps):
     all_density = np.array(all_density)
     output = np.transpose(all_density)
     return output
+
+
