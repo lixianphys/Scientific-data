@@ -251,7 +251,7 @@ class System:
         elif indicator == 'denplot':
             columns = ['B','den','N','Band']
         elif indicator == 'simu':
-            columns = ['B','den','N','Band','system']
+            columns = ['B','den','N','Band','System([band density])']
         else:
             sys.stderr.write(f'Invalid indicator {indicator}, use enplot, denplot or simu instead')
             exit()
