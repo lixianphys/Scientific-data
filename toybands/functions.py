@@ -224,7 +224,7 @@ def pretty_print(df_toprint):
     if 'vf' in names:
         l = [value/1e6 for value in df['vf'].values.tolist()]
         df_rp = pd.DataFrame(l,columns = ['vf(1e6m/s)'])
-        df = df.assign(vf=df_rp['vf(1e6 m/s)'])
+        df = df.assign(vf=df_rp['vf(1e6m/s)'])
         df = df.rename(columns={'vf':'vf(1e6m/s)'})
     
     print(df)
