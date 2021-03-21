@@ -6,6 +6,8 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as mplcm
 import matplotlib.colors as mplcolors
 import pdb
+from matplotlib.backends.backend_pdf import PdfPages
+
 from physconst import *
 from utils import flattenList, div
 from toybands.functions import extract_list
@@ -158,6 +160,21 @@ def super_save(filename=None,path=None):
         plt.savefig(os.path.join(path, filename+'.'+DEFAULT_FORMAT))
         sys.stdout.write(f'By default, saved as a {DEFAULT_FORMAT} file')
 
+def pdf_save(filename=None,path=None,end=True):
+    if filename is None:
+        filename = '[auto]default.pdf'
+    if path is None:
+        path = DEFAULT_PATH
+    if len(filename.split('.'))>1:
+        filename = filename.split('.')[-2]
+    filename = filename+'.pdf'
+    if not os.path.isdir(path):
+        os.mkdir(path)
+        sys.stdout.write(f'path created under {path}')
+    with PdfPages(os.path.join(path,filename)) as pdf:
+        pdf.savefig()
+        if end:
+            plt.close()
 
 def make_slices(den_list,numofsteps):
     if not isinstance(den_list, list):
