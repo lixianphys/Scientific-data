@@ -11,7 +11,7 @@ from tqdm import tqdm
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
-from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, super_save, make_slices,make_canvas)
+from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, super_save, make_slices,make_canvas,legend_maker)
 
 def multi_floats(value):
     values = value.split()
@@ -101,6 +101,7 @@ def run():
     )
 
     args = my_parser.parse_args()
+    print('Your inputs:')
     print(vars(args))
     return args
 
@@ -131,8 +132,9 @@ def enplot(args,newsystem,bfrange,enrange):
             )
             for B in bfrange
         ]
-        make_1d_E_B_plots(bfrange, y_databdl, colors, mu_pos)
+        ax = make_1d_E_B_plots(bfrange, y_databdl, colors, mu_pos)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'enplot')
+        legend_maker(newsystem,colors,ax=ax)
         super_save(args.fnm, args.dir)
     else:
         sys.stderr.write("The arguments -nmax and -angle are needed")

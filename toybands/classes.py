@@ -241,6 +241,8 @@ class System:
             fp=e_list,
         )
     def databdl_write_csv(self,filename,bfrange,y_databdl,indicator,plotrange=None):
+        if filename is None:
+            filename = '[auto]default'
         if len(filename.split('.'))>1:
             filename = filename.split('.')[-2]
         path = os.path.join(DEFAULT_PATH,filename+'.csv')
