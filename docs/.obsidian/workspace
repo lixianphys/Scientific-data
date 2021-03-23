@@ -1,0 +1,91 @@
+{
+  "main": {
+    "id": "b265a2a1a261b4d9",
+    "type": "split",
+    "children": [
+      {
+        "id": "968801e935580091",
+        "type": "leaf",
+        "active": true,
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "Documentation-toybands.md",
+            "mode": "source"
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "f589878869ea1a1c",
+    "type": "split",
+    "children": [
+      {
+        "id": "9add3bcc85d3e5c4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "d28482ac2f71cf42",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "05958999b8084047",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "a3a108cd51c41d44",
+    "type": "split",
+    "children": [
+      {
+        "id": "8cf28f97ecaa2049",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "8f30da9e45567e63",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Documentation-toybands.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "lastOpenFiles": [
+    "Untitled.md"
+  ]
+}
