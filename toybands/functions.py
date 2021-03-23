@@ -36,7 +36,7 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
         * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B) ** 2 + (M*e0) ** 2)
         ** 0.5
     )
-
+    ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017)
 
 def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     """Calculate the energy of Landau level in conventional dispersion with a Zeeman term
