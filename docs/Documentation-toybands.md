@@ -38,9 +38,11 @@ A system will be initiated at the same time its first band is created.
  - label the output figure and allow separate figures in a single pdf file for a batch input ***
  - Is it possible to abort the calculation until I continue it? I mean, keep the memory usage but free its CPU usage. It might be helpful when you just want your PC to handle other CPU-heavy tasks during a long calculation. *
  - plot the data from csv file directly from the CLI **
- - if the density of each band <0 that means it should not appear in the calculation, a shortcut to avoid change the system, or just disable **** 
+ - if the density of each band <0 that means it should not appear in the calculation, a shortcut to avoid change the system, or just disable
  - allow multiple stage input of densities in simu**
  - connect the same LL in simu **
  - store system information into the csv file
+
+- a = b actually a and b point to the same list. if you do a.pop(1), b will change as well.
 ### Time-wise you should know
 a mutiplication of - nmax, --enrange, --bfrange, -nos give you rough idea how long 

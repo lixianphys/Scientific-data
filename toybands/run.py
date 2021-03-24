@@ -182,8 +182,11 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
         tot_den_list = [sum(den_slice) for den_slice in den_slices]
         tot_den_int = abs(tot_den_list[0]-tot_den_list[1])
         ax = make_canvas()
-
+        if colors is None:
+            colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
         for den_slice in tqdm(den_slices):
+            # colors_p = color will only generate a new pointer to the same list
+            colors_p = [color for color in colors]
             newsystem.set_all_density(den_slice)
             tot_den = newsystem.tot_density()
             IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
@@ -194,11 +197,10 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
                 if den <= 0:
                     newsystem.get_band(idx).disable()
                     idx_disabled.append(idx)
-
+                    colors_p.pop(idx)
             y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.get_band('a')]
             plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
-            colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
-            make_1d_den_B_plots(bfrange,y_databdl,colors,ax=ax,plotrange=plotrange)
+            make_1d_den_B_plots(bfrange,y_databdl,colors_p,ax=ax,plotrange=plotrange)
             newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)
             # enable the disabled band again for next loop
             if idx_disabled:

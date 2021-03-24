@@ -14,6 +14,7 @@ from scipy.integrate import quad
 from physconst import *
 from toybands.config import *
 
+
 def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     """Calculate the energy of Landau level in Dirac dispersion with a Zeeman term
     Arguments:

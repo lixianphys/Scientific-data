@@ -29,7 +29,7 @@ plt.rc("legend", fontsize=20)
 plt.rcParams['figure.constrained_layout.use'] = True
 
 def legend_maker(system,colors,ax):
-    for ind, (band, color) in enumerate(zip(system.bands,colors)):
+    for ind, (band, color) in enumerate(zip(system.get_band('a'),colors)):
         bb = band.Ebb/e0
         ax.axhline(y=bb,color=color)
         if band.is_dirac and band.is_cond:

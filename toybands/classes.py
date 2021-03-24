@@ -31,9 +31,9 @@ class Band:
         elif is_dirac and not is_cond:
             self.Ebb = hbar * self.vf * (4 * np.pi * self.density) ** 0.5
         elif not is_dirac and is_cond:
-            self.Ebb = -(hbar ** 2) * self.density/ np.pi / self.meff/me / 2
+            self.Ebb = -(hbar ** 2) * self.density/ np.pi / self.meff/ me / 2
         elif not is_dirac and not is_cond:
-            self.Ebb = (hbar ** 2) * self.density / np.pi / self.meff/me / 2
+            self.Ebb = (hbar ** 2) * self.density / np.pi / self.meff/ me / 2
     def get(self, attr):
         if attr in ['density','is_cond','is_dirac','M','vf','meff','spin','Ebb']:
             return self.__dict__.get(attr)
@@ -351,7 +351,7 @@ class System:
         elif indicator == 'dos':
             columns = ['B','dos_at_mu','Band']
         else:
-            sys.stderr.write(f'Invalid indicator {indicator}, use enplot, denplot or simu instead')
+            sys.stderr.write(f'Invalid indicator {indicator}, use enplot, denplot, simu, dos instead')
         
         df = pd.DataFrame(columns=columns)
         if indicator in ['enplot','denplot']:
