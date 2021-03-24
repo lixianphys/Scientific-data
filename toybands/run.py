@@ -160,7 +160,7 @@ def denplot(args,newsystem,bfrange,enrange):
                 ]
                 for N in range(args.nmax)
             ]
-            for band in newsystem.bands
+            for band in newsystem.get_band('a')
         ]
         colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
         tot_den = newsystem.tot_density()

@@ -33,7 +33,25 @@ class Band:
             self.Ebb = -(hbar ** 2) * self.density/ np.pi / self.meff/me / 2
         elif not is_dirac and not is_cond:
             self.Ebb = (hbar ** 2) * self.density / np.pi / self.meff/me / 2
+    def get(self, attr):
+        if attr in ['density','is_cond','is_dirac','M','vf','meff','spin','Ebb']:
+            return self[attr]
+        else:
+            sys.stderr.write(f'{attr} is not an attribute for Band. Use density,is_cond,is_dirac,M,vf,meff,spin instead')
+    def set_den(self,value):
+        if not isinstance(value,(int,float)):
+            sys.stderr.write(f'value need to be a number')
 
+        if self.is_dirac and self.is_cond:
+            self.Ebb = -hbar * self.vf * (4 * np.pi * self.density) ** 0.5
+        elif self.is_dirac and not self.is_cond:
+            self.Ebb = hbar * self.vf * (4 * np.pi * self.density) ** 0.5
+        elif not self.is_dirac and self.is_cond:
+            self.Ebb = -(hbar ** 2) * self.density/ np.pi / self.meff/me / 2
+        elif not self.is_dirac and not self.is_cond:
+            self.Ebb = (hbar ** 2) * self.density / np.pi / self.meff/me / 2
+        return None
+            
     def cal_energy(self, b_list, Nmax, angle_in_deg):
         if not isinstance(b_list, list):
             raise TypeError(f"b_list = {b_list} is not list")
@@ -182,15 +200,21 @@ class System:
         if not len(self.bands) == len(den_list):
             sys.stderr.write(f'The number of bands {len(self.bands)} does not match up with the input densities {len(den_list)}')
         for band,den in zip(self.bands,den_list):
-            band.density = abs(den)
-            if band.is_dirac and band.is_cond:
-                band.Ebb = -hbar * band.vf * (4 * np.pi * band.density) ** 0.5
-            elif band.is_dirac and not band.is_cond:
-                band.Ebb = hbar * band.vf * (4 * np.pi * band.density) ** 0.5
-            elif not band.is_dirac and band.is_cond:
-                band.Ebb = -(hbar ** 2) * band.density/ np.pi / band.meff/me / 2
-            elif not band.is_dirac and not band.is_cond:
-                band.Ebb = (hbar ** 2) * band.density / np.pi / band.meff/me / 2
+            band.set_den(abs(den))
+    
+    def get_band(self,band):
+        if len(self.bands) == 0:
+            sys.stdout.write('No bands in this system')
+            return None
+        if band == 'a':
+            return self.bands
+        elif isinstance(band,int):
+            if band < len(self.bands) and band >= 0:
+                return self.bands[band]
+            else:
+                sys.stderr.write(f'#{band} band does not exist. You only have {len(self.bands)} bands')
+        else:
+            sys.stderr.write(f'Invalid {band} use integer as index or a to choose all') 
 
     def add_band(self, band):
         if not isinstance(band, Band):
@@ -210,13 +234,13 @@ class System:
 
     def tot_density(self):
         if self.bands:
-            bands_den = []
+            tot_den = 0
             for band in self.bands:
-                if band.is_cond:
-                    bands_den.append(band.density)
+                if band.get('is_cond'):
+                    tot_den+=band.get('density')
                 else:
-                    bands_den.append(-band.density)
-            return sum(bands_den)
+                    tot_den-=band.get('density')
+            return tot_den
         else:
             return 0
 
