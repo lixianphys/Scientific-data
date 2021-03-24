@@ -24,6 +24,7 @@ class Band:
         self.vf = vf
         self.meff = meff if meff is not None else None
         self.spin = spin
+        self.active = True
 
         if is_dirac and is_cond:
             self.Ebb = -hbar * self.vf * (4 * np.pi * self.density) ** 0.5
@@ -33,6 +34,31 @@ class Band:
             self.Ebb = -(hbar ** 2) * self.density/ np.pi / self.meff/me / 2
         elif not is_dirac and not is_cond:
             self.Ebb = (hbar ** 2) * self.density / np.pi / self.meff/me / 2
+    def get(self, attr):
+        if attr in ['density','is_cond','is_dirac','M','vf','meff','spin','Ebb']:
+            return self.__dict__.get(attr)
+        else:
+            sys.stderr.write(f'{attr} is not an attribute for Band. Use density,is_cond,is_dirac,M,vf,meff,spin instead')
+    def set_den(self,value):
+        if not isinstance(value,(int,float)):
+            sys.stderr.write(f'value need to be a number')
+        self.density = value
+        if self.is_dirac and self.is_cond:
+            self.Ebb = -hbar * self.vf * (4 * np.pi * value) ** 0.5
+        elif self.is_dirac and not self.is_cond:
+            self.Ebb = hbar * self.vf * (4 * np.pi * value) ** 0.5
+        elif not self.is_dirac and self.is_cond:
+            self.Ebb = -(hbar ** 2) * value/ np.pi / self.meff/me / 2
+        elif not self.is_dirac and not self.is_cond:
+            self.Ebb = (hbar ** 2) * value / np.pi / self.meff/me / 2
+        return None
+
+    def disable(self):
+        self.active = False 
+    def enable(self):
+        self.active = True
+    def status(self):
+        return self.active
 
     def cal_energy(self, b_list, Nmax, angle_in_deg):
         if not isinstance(b_list, list):
@@ -82,7 +108,7 @@ class Band:
                 )
             return pd.DataFrame.from_dict(ll_dict)
 
-    def cal_dos_b(self, e_list, B, Nmax, angle_in_deg, sigma):
+    def cal_idos_b(self, e_list, B, Nmax, angle_in_deg, sigma):
         if not isinstance(e_list, list):
             raise ValueError(f"e_list = {e_list} is not a list")
         else:
@@ -147,6 +173,68 @@ class Band:
                 ]
                 return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls)
 
+    def cal_dos(self, E, B, Nmax, angle_in_deg, sigma):
+        if self.is_dirac and self.is_cond:
+            e_lls = [
+                self.Ebb
+                + lldirac_gen(
+                    B,
+                    B * np.cos(angle_in_deg * np.pi / 180),
+                    N,
+                    self.is_cond,
+                    self.gfactor,
+                    self.M,
+                    self.vf,
+                )
+                for N in range(Nmax)
+            ]
+            return e_density_of_state(E, B, sigma, angle_in_deg, e_lls)
+        elif self.is_dirac and not self.is_cond:
+            h_lls = [
+                self.Ebb
+                + lldirac_gen(
+                    B,
+                    B * np.cos(angle_in_deg * np.pi / 180),
+                    N,
+                    self.is_cond,
+                    self.gfactor,
+                    self.M,
+                    self.vf,
+                )
+                for N in range(Nmax)
+            ]
+            return h_density_of_state(E, B, sigma, angle_in_deg, h_lls)
+        elif not self.is_dirac and self.is_cond:
+            e_lls = [
+                self.Ebb
+                + llconv_gen(
+                    B,
+                    B * np.cos(angle_in_deg * np.pi / 180),
+                    N,
+                    self.is_cond,
+                    self.spin,
+                    self.gfactor,
+                    self.meff,
+                )
+                for N in range(Nmax)
+            ]
+            return e_density_of_state(E, B, sigma, angle_in_deg, e_lls)
+        elif not self.is_dirac and not self.is_cond:
+            h_lls = [
+                self.Ebb
+                + llconv_gen(
+                    B,
+                    B * np.cos(angle_in_deg * np.pi / 180),
+                    N,
+                    self.is_cond,
+                    self.spin,
+                    self.gfactor,
+                    self.meff,
+                )
+                for N in range(Nmax)
+            ]
+            return h_density_of_state(E, B, sigma, angle_in_deg, h_lls)
+
     def print_band(self):
         band_dict = self.__dict__
         print("---------------------------")
@@ -169,7 +257,7 @@ class System:
                 else:
                     raise ValueError(f"{arg} is not an instance of Band")
         else:
-            warnings.warn(f"Initialization of an empty System")
+            warnings.warn(f"Initialization of an empty System\n")
 
     def get_info(self):
         band_info = []
@@ -182,15 +270,21 @@ class System:
         if not len(self.bands) == len(den_list):
             sys.stderr.write(f'The number of bands {len(self.bands)} does not match up with the input densities {len(den_list)}')
         for band,den in zip(self.bands,den_list):
-            band.density = abs(den)
-            if band.is_dirac and band.is_cond:
-                band.Ebb = -hbar * band.vf * (4 * np.pi * band.density) ** 0.5
-            elif band.is_dirac and not band.is_cond:
-                band.Ebb = hbar * band.vf * (4 * np.pi * band.density) ** 0.5
-            elif not band.is_dirac and band.is_cond:
-                band.Ebb = -(hbar ** 2) * band.density/ np.pi / band.meff/me / 2
-            elif not band.is_dirac and not band.is_cond:
-                band.Ebb = (hbar ** 2) * band.density / np.pi / band.meff/me / 2
+            band.set_den(abs(den))
+    
+    def get_band(self,band):
+        if len(self.bands) == 0:
+            sys.stdout.write('No bands in this system')
+            return None
+        if band == 'a':
+            return [band for band in self.bands if band.status()]
+        elif isinstance(band,int):
+            if band < len(self.bands) and band >= 0:
+                return self.bands[band]
+            else:
+                sys.stderr.write(f'#{band} band does not exist. You only have {len(self.bands)} bands')
+        else:
+            sys.stderr.write(f'Invalid {band} use integer as index or a to choose all') 
 
     def add_band(self, band):
         if not isinstance(band, Band):
@@ -210,13 +304,13 @@ class System:
 
     def tot_density(self):
         if self.bands:
-            bands_den = []
+            tot_den = 0
             for band in self.bands:
-                if band.is_cond:
-                    bands_den.append(band.density)
+                if band.get('is_cond'):
+                    tot_den+=band.get('density')
                 else:
-                    bands_den.append(-band.density)
-            return sum(bands_den)
+                    tot_den-=band.get('density')
+            return tot_den
         else:
             return 0
 
@@ -229,7 +323,7 @@ class System:
             return reduce(
                 (lambda x, y: add_list(x, y)),
                 [
-                    band.cal_dos_b(e_list, B, Nmax, angle_in_deg, sigma)
+                    band.cal_idos_b(e_list, B, Nmax, angle_in_deg, sigma)
                     for band in self.bands
                 ],
             )
@@ -241,6 +335,8 @@ class System:
             fp=e_list,
         )
     def databdl_write_csv(self,filename,bfrange,y_databdl,indicator,plotrange=None):
+        if filename is None:
+            filename = '[auto]default'
         if len(filename.split('.'))>1:
             filename = filename.split('.')[-2]
         path = os.path.join(DEFAULT_PATH,filename+'.csv')
@@ -252,9 +348,11 @@ class System:
             columns = ['B','den','N','Band']
         elif indicator == 'simu':
             columns = ['B','den','N','Band','System([band density])']
+        elif indicator == 'dos':
+            columns = ['B','dos_at_mu','Band']
         else:
             sys.stderr.write(f'Invalid indicator {indicator}, use enplot, denplot or simu instead')
-            exit()
+        
         df = pd.DataFrame(columns=columns)
         if indicator in ['enplot','denplot']:
             for n_band, y_data in enumerate(y_databdl):
@@ -281,3 +379,10 @@ class System:
                 df.to_csv(path,mode='a',index=False,header=False)
             else:
                 df.to_csv(path,mode='a',index=False)
+        elif indicator == 'dos':
+            df = pd.DataFrame(columns=columns)
+            for n_band, y in enumerate(y_databdl):
+                df_toappend = pd.DataFrame(np.transpose(np.array([bfrange,y,[n_band]*len(y)])),columns=columns)
+                df = df.append(df_toappend,ignore_index=True)
+            df.to_csv(path, mode='w', index=False)
+

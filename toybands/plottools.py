@@ -10,7 +10,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 from physconst import *
 from utils import flattenList, div
-from toybands.functions import extract_list
+from toybands.functions import extract_list,add_list
 from toybands.config import *
 
 # define the norm in plotting
@@ -28,7 +28,18 @@ plt.rc('ytick.minor', size=5, pad=7, visible=True)
 plt.rc("legend", fontsize=20)
 plt.rcParams['figure.constrained_layout.use'] = True
 
-
+def legend_maker(system,colors,ax):
+    for ind, (band, color) in enumerate(zip(system.bands,colors)):
+        bb = band.Ebb/e0
+        ax.axhline(y=bb,color=color)
+        if band.is_dirac and band.is_cond:
+            ax.text(0,bb,f'Dirac,Cond{[ind]}')
+        elif not band.is_dirac and band.is_cond:
+            ax.text(0,bb,f'nDirac,Cond{[ind]}')
+        elif band.is_dirac and not band.is_cond:
+            ax.text(0,bb,f'Dirac,Val{[ind]}')
+        else:
+            ax.text(0,bb,f'nDirac,Val{[ind]}')
 
 def make_n_colors(n,cmap,vstart,vend):
     if not isinstance(n,int):
@@ -47,7 +58,8 @@ def make_n_colors(n,cmap,vstart,vend):
     colors = [cmap(x) for x in colors_list]
     return colors
 
-def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsize=(10,10),linewidth=2):
+
+def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW,ax=None,plotrange = None,label_on_line=True):
     if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
         raise TypeError(f'either x_databdl or y_databdl or colors is not list')
     if not len(y_databdl)==len(colors):
@@ -65,10 +77,16 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
         ax.plot(bfrange,div(mu_pos,e0),linewidth=linewidth,color='k')
     if enrange is not None:
         ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
+
     ax.set_xlabel('$B$ [T]')
     ax.set_ylabel('$E$ [eV]')
 
-def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,figsize=(10,10),linewidth=2,ax=None,plotrange = None):
+    return ax
+
+
+
+
+def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,label_on_line=True):
     if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
         raise TypeError(f'either x_databdl or y_databdl or colors is not list')
     if not len(y_databdl)==len(colors):
@@ -81,8 +99,8 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111)
     if plotrange is None:
-        for y_data, color in zip(y_databdl,colors):
-            for y in y_data:
+        for id_out, (y_data, color) in enumerate(zip(y_databdl,colors)):
+            for id_inn, y in enumerate(y_data):
                 ax.plot(bfrange,y,linewidth=linewidth,color=color)
     else:
         for y_data, color in zip(y_databdl,colors):
@@ -92,9 +110,28 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
         ax.axhline(y = tot_den, linewidth=linewidth, color='k')
     if enrange is not None:
         ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
-
+    
     ax.set_xlabel('$B$ [T]')
     ax.set_ylabel('$n$ [1/m$^2$]')
+
+    return ax
+
+def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,label_on_line=True):
+    if ax is None:
+        fig = plt.figure(figsize=figsize)
+        ax = fig.add_subplot(111)
+    y_tot = [0]*len(bfrange)
+    for y_data, color in zip(y_databdl,colors):
+        ax.plot(bfrange,y_data,color=color)
+        y_tot = add_list(y_tot,y_data)
+    ax.plot(bfrange,y_tot,linestyle='--',color='k')
+    ax.set_xlabel('$B$ [T]')
+    ax.set_ylabel('DOS [a.u.]')
+    return ax
+
+
+
+
 
 def plot_from_csv(path,ax,cmap):
     if not isinstance(path,str):
@@ -135,7 +172,9 @@ def plot_from_csv(path,ax,cmap):
         else:
             ax.set_ylabel('$E$ [eV]')
     
-def make_canvas(figsize=(10,10)):
+
+
+def make_canvas(figsize=DEFAULT_FIGURE_SIZE):
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)
     return ax

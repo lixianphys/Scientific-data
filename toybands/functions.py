@@ -17,14 +17,14 @@ from toybands.config import *
 def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     """Calculate the energy of Landau level in Dirac dispersion with a Zeeman term
     Arguments:
-    B: Total magnetic field
-    B_perp: The perpendicular component of B
+    B: Total magnetic field (IU,Tesla)
+    B_perp: The perpendicular component of B (IU,Tesla)
     N: Landau index
     is_cond: True for conduction and False for valence band
     gfactor: g-factor
-    vf: Fermi-velocity
+    vf: Fermi-velocity (m/s)
     Return:
-    Energy
+    Energy (IU)
     """
     if N < 0 or not isinstance(N, int):
         raise ValueError(f"your input N = {N} should be an integer no less than zero")
@@ -36,18 +36,18 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
         * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B) ** 2 + (M*e0) ** 2)
         ** 0.5
     )
-
+    ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017)
 
 def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     """Calculate the energy of Landau level in conventional dispersion with a Zeeman term
     Arguments:
-    B: Total magnetic field
-    B_perp: The perpendicular component of B
-    s: spin indicator
-    meff: effective mass in units of the rest mass of electron me
+    B: Total magnetic field (IU,Tesla)
+    B_perp: The perpendicular component of B (IU,Tesla)
+    s: spin indicator 
+    meff: effective mass in units of the rest mass of electron (me)
     gfactor: g-factor
     Return:
-    Energy
+    Energy (IU)
     """
     if not spin in [1.0, -1.0, 1, -1]:
         raise ValueError(f"your input spin ={spin} is neither 1 or -1")
@@ -62,7 +62,10 @@ def _e_integral(fun, ymin, y_list, args):
         raise ValueError("args must be a tuple")
     output = []
     pre_integral = 0
-    yint = abs(y_list[0] - y_list[1])
+    try:
+        yint = abs(y_list[0] - y_list[1])
+    except:
+        yint = 0
     for index, y in enumerate(y_list):
         if y > ymin + yint and index == 0:
             result = quad(fun, ymin, y, args=args)[0]
@@ -85,7 +88,10 @@ def _h_integral(fun, ymax, y_list, args):
         raise ValueError("args must be a tuple")
     output = []
     pre_integral = 0
-    yint = abs(y_list[0] - y_list[1])
+    try:
+        yint = abs(y_list[0] - y_list[1])
+    except:
+        yint = 0
     for index, y in enumerate(sorted(y_list, reverse=True)):
         if y < ymax - yint and index == 0:
             result = quad(fun, y, ymax, args=args)[0]
@@ -109,10 +115,10 @@ def e_density_of_state(E, B, sigma, angle_in_deg, e_lls):
     B: total magnetic field
     sigma: broadening of Landau level by assuming a Gaussian-shape distribution around the central energy
     angle: the angle of magnetic field with the normal of sample plane
-    llenergy_top_surface: energy of Landau levels from top surface state
+    llenergy_top_surface: energy of Landau levels from top surface state ()
     llenergy_bottom_surface: energy of Landau levels from bottom surface state
     Return:
-    Density of state from all the bands at (E,B)
+    Density of state from all the bands at (E,B) 
     """
     # degeneracy of Landau levels at a certain field
     lldegeneracy = B * np.cos(angle_in_deg * np.pi / 180) * e0 / h0
@@ -230,5 +236,21 @@ def pretty_print(df_toprint):
     print(df)
 
 
-
+def system_stamp_csv(csvfilename,jsfilename=None):
     
+    if jsfilename == None:
+        jsfilename = os.path.join(os.getcwd(),'system.json')
+    try:
+        df = pd.read_json(jsfilename)
+    except:
+        sys.stderr.write('Failed to load JSON file for your system\n')
+    try:
+        if len(csvfilename.split('.'))==1:
+            path = os.path.join(DEFAULT_PATH,csvfilename+'_sysinfo'+'.csv')
+        else:
+            path =os.path.join(DEFAULT_PATH,csvfilename.split('.')[-2]+'_sysinfo'+'.csv')
+        df.to_csv(path,mode='w')
+    except:
+        sys.stderr.write('Failed to stamp your sysinfo into csv file\n')
+
+
