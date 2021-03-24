@@ -11,7 +11,7 @@ from tqdm import tqdm
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
-from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, super_save, make_slices,make_canvas,legend_maker)
+from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, super_save, make_slices,make_canvas,legend_maker)
 
 def multi_floats(value):
     values = value.split()
@@ -23,24 +23,27 @@ def run():
     my_parser = argparse.ArgumentParser(
         prog="run", description="A band model to play with"
     )
+    plot_group = my_parser.add_mutually_exclusive_group(required=True)
 
-    my_parser.add_argument(
+    plot_group.add_argument(
         "-enplot",
         action="store_true",
         help="plot the energy versus bfield (yes/no)",
     )
 
-    my_parser.add_argument(
+    plot_group.add_argument(
         "-denplot",
         action="store_true",
         help="plot the density versus bfield (yes/no)",
     )
 
-    my_parser.add_argument(
+    plot_group.add_argument(
         "-simu",
         action="store_true",
         help="dynamically generate relationship between the density and the bfield at steps of input density (yes/no)",
     )
+
+    plot_group.add_argument("-dos",action="store_true",help="plot dos versus bfield (yes/no)")
 
     my_parser.add_argument(
         "--allden",
@@ -106,7 +109,7 @@ def run():
     return args
 
 
-def enplot(args,newsystem,bfrange,enrange):
+def enplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
         y_databdl = [
             [
@@ -115,9 +118,10 @@ def enplot(args,newsystem,bfrange,enrange):
                 ].tolist()
                 for N in range(args.nmax)
             ]
-            for band in newsystem.bands
+            for band in newsystem.get_band('a')
         ]
-        colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
+        if colors is None:
+            colors = make_n_colors(len(newsystem.get_band('a')), "jet", 0.1, 0.9)
         mu_pos = [
             newsystem.mu(
                 np.linspace(
@@ -139,7 +143,7 @@ def enplot(args,newsystem,bfrange,enrange):
     else:
         sys.stderr.write("The arguments -nmax and -angle are needed")
 
-def denplot(args,newsystem,bfrange,enrange):
+def denplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
         IDOS = [
             newsystem.dos_gen(
@@ -162,7 +166,8 @@ def denplot(args,newsystem,bfrange,enrange):
             ]
             for band in newsystem.get_band('a')
         ]
-        colors = make_n_colors(len(y_databdl), "jet", 0.1, 0.9)
+        if colors is None:
+            colors = make_n_colors(len(newsystem.get_band('a')), "jet", 0.1, 0.9)
         tot_den = newsystem.tot_density()
         make_1d_den_B_plots(bfrange, y_databdl, colors, tot_den)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'denplot')
@@ -170,24 +175,41 @@ def denplot(args,newsystem,bfrange,enrange):
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed')
 
-def simu(args,newsystem,bfrange,enrange):
+def simu(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None and args.allden is not None and args.nos is not None:
         den_slices = make_slices(args.allden,args.nos)
         tot_den_list = [sum(den_slice) for den_slice in den_slices]
         tot_den_int = abs(tot_den_list[0]-tot_den_list[1])
         ax = make_canvas()
+        if colors is None:
+            colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
         for den_slice in tqdm(den_slices):
             newsystem.set_all_density(den_slice)
-            IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
-            y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.bands]
-            colors = make_n_colors(len(y_databdl),'jet',0.1,0.9)
             tot_den = newsystem.tot_density()
+            IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
+            y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.get_band('a')]
             plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
-            make_1d_den_B_plots(bfrange,y_databdl,colors,tot_den,ax=ax,plotrange=plotrange)
+            make_1d_den_B_plots(bfrange,y_databdl,colors,ax=ax,plotrange=plotrange)
             newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)
         super_save(args.fnm,args.dir)
     else:
         sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
+
+
+def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
+    if args.nmax is not None and args.angle is not None:
+        if colors is None:
+            colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
+        mus = [newsystem.mu(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
+        y_databdl = [[band.cal_dos(mu_at_B, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B,mu_at_B in zip(bfrange,mus)] for band in newsystem.get_band('a')]
+        make_1d_dos_B_plot(bfrange,y_databdl,colors)
+        newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dos')
+        super_save(args.fnm,args.dir)
+    else:
+        sys.stderr.write('The arguments -nmax and -angle are needed')
+
+
+
 
 if __name__ == "__main__":
     args = run()
@@ -221,5 +243,7 @@ if __name__ == "__main__":
             denplot(args,newsystem,bfrange,enrange)
         if args.simu:
             simu(args,newsystem,bfrange,enrange)
+        if args.dos:
+            dos_at_mu(args,newsystem,bfrange,enrange)
     else:
         sys.stderr.write("no system (system.json) exist")

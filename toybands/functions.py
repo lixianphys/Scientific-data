@@ -62,7 +62,10 @@ def _e_integral(fun, ymin, y_list, args):
         raise ValueError("args must be a tuple")
     output = []
     pre_integral = 0
-    yint = abs(y_list[0] - y_list[1])
+    try:
+        yint = abs(y_list[0] - y_list[1])
+    except:
+        yint = 0
     for index, y in enumerate(y_list):
         if y > ymin + yint and index == 0:
             result = quad(fun, ymin, y, args=args)[0]
@@ -85,7 +88,10 @@ def _h_integral(fun, ymax, y_list, args):
         raise ValueError("args must be a tuple")
     output = []
     pre_integral = 0
-    yint = abs(y_list[0] - y_list[1])
+    try:
+        yint = abs(y_list[0] - y_list[1])
+    except:
+        yint = 0
     for index, y in enumerate(sorted(y_list, reverse=True)):
         if y < ymax - yint and index == 0:
             result = quad(fun, y, ymax, args=args)[0]
