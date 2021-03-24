@@ -11,7 +11,7 @@ from tqdm import tqdm
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
-from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, super_save, make_slices,make_canvas,legend_maker)
+from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, super_save, make_slices,make_canvas)
 
 def multi_floats(value):
     values = value.split()

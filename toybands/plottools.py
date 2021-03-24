@@ -28,18 +28,18 @@ plt.rc('ytick.minor', size=5, pad=7, visible=True)
 plt.rc("legend", fontsize=20)
 plt.rcParams['figure.constrained_layout.use'] = True
 
-def legend_maker(system,colors,ax):
-    for ind, (band, color) in enumerate(zip(system.get_band('a'),colors)):
-        bb = band.Ebb/e0
-        ax.axhline(y=bb,color=color)
-        if band.is_dirac and band.is_cond:
-            ax.text(0,bb,f'Dirac,Cond{[ind]}')
-        elif not band.is_dirac and band.is_cond:
-            ax.text(0,bb,f'nDirac,Cond{[ind]}')
-        elif band.is_dirac and not band.is_cond:
-            ax.text(0,bb,f'Dirac,Val{[ind]}')
-        else:
-            ax.text(0,bb,f'nDirac,Val{[ind]}')
+# def legend_maker(system,colors,ax):
+#     for ind, (band, color) in enumerate(zip(system.get_band('a'),colors)):
+#         bb = band.Ebb/e0
+#         ax.axhline(y=bb,color=color)
+#         if band.is_dirac and band.is_cond:
+#             ax.text(0,bb,f'Dirac,Cond{[ind]}')
+#         elif not band.is_dirac and band.is_cond:
+#             ax.text(0,bb,f'nDirac,Cond{[ind]}')
+#         elif band.is_dirac and not band.is_cond:
+#             ax.text(0,bb,f'Dirac,Val{[ind]}')
+#         else:
+#             ax.text(0,bb,f'nDirac,Val{[ind]}')
 
 def make_n_colors(n,cmap,vstart,vend):
     if not isinstance(n,int):
