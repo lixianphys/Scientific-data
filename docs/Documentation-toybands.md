@@ -35,7 +35,7 @@ Peek into the system you created
  This can be done by `python toybands/delband.py`. It will prompt a dialogue `which band to delete? Input the index number: Or press 'e' to exit`. Type the number in front of all the parameters within a row for that band you want to delete. Or quit by typing `e`. 
  
  ##### module `run`
- `python toybands/addband.py [-option][parameters]`
+ `python toybands/run.py [-option][parameters]`
  - `-enplot`: optional, plot the energy versus bfield (yes/no)
  - `-denplot`: optional, plot the density versus bfield (yes/no)
  - `-simu`: optional, dynamically generate relationship between the density and the bfield at steps of input density (yes/no)
