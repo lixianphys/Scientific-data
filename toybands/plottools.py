@@ -135,8 +135,6 @@ def plot_from_csv(path,ax,cmap):
         else:
             ax.set_ylabel('$E$ [eV]')
     
-
-
 def make_canvas(figsize=(10,10)):
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)
