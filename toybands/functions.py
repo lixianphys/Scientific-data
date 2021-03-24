@@ -236,5 +236,21 @@ def pretty_print(df_toprint):
     print(df)
 
 
-
+def system_stamp_csv(csvfilename,jsfilename=None):
     
+    if jsfilename == None:
+        jsfilename = os.path.join(os.getcwd(),'system.json')
+    try:
+        df = pd.read_json(jsfilename)
+    except:
+        sys.stderr.write('Failed to load JSON file for your system\n')
+    try:
+        if len(csvfilename.split('.'))==1:
+            path = os.path.join(DEFAULT_PATH,csvfilename+'_sysinfo'+'.csv')
+        else:
+            path =os.path.join(DEFAULT_PATH,csvfilename.split('.')[-2]+'_sysinfo'+'.csv')
+        df.to_csv(path,mode='w')
+    except:
+        sys.stderr.write('Failed to stamp your sysinfo into csv file\n')
+
+

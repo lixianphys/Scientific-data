@@ -138,8 +138,8 @@ def enplot(args,newsystem,bfrange,enrange,colors = None):
         ]
         ax = make_1d_E_B_plots(bfrange, y_databdl, colors, mu_pos)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'enplot')
-        legend_maker(newsystem,colors,ax=ax)
         super_save(args.fnm, args.dir)
+        system_stamp_csv(args.fnm)
     else:
         sys.stderr.write("The arguments -nmax and -angle are needed")
 
@@ -171,6 +171,7 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
         tot_den = newsystem.tot_density()
         make_1d_den_B_plots(bfrange, y_databdl, colors, tot_den)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'denplot')
+        system_stamp_csv(args.fnm)
         super_save(args.fnm, args.dir)
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed')
@@ -181,16 +182,29 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
         tot_den_list = [sum(den_slice) for den_slice in den_slices]
         tot_den_int = abs(tot_den_list[0]-tot_den_list[1])
         ax = make_canvas()
-        if colors is None:
-            colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
+
         for den_slice in tqdm(den_slices):
             newsystem.set_all_density(den_slice)
             tot_den = newsystem.tot_density()
             IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
+            # disable the band with zero density
+            idx_disabled = []
+            # if any band has a density <=0 then disable it
+            for idx,den in enumerate(den_slice):
+                if den <= 0:
+                    newsystem.get_band(idx).disable()
+                    idx_disabled.append(idx)
+
             y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.get_band('a')]
             plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
+            colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
             make_1d_den_B_plots(bfrange,y_databdl,colors,ax=ax,plotrange=plotrange)
             newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)
+            # enable the disabled band again for next loop
+            if idx_disabled:
+                for idx in idx_disabled:
+                    newsystem.get_band(idx).enable()
+        system_stamp_csv(args.fnm)    
         super_save(args.fnm,args.dir)
     else:
         sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
@@ -204,6 +218,7 @@ def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
         y_databdl = [[band.cal_dos(mu_at_B, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B,mu_at_B in zip(bfrange,mus)] for band in newsystem.get_band('a')]
         make_1d_dos_B_plot(bfrange,y_databdl,colors)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dos')
+        system_stamp_csv(args.fnm)
         super_save(args.fnm,args.dir)
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed')

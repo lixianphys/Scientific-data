@@ -24,6 +24,7 @@ class Band:
         self.vf = vf
         self.meff = meff if meff is not None else None
         self.spin = spin
+        self.active = True
 
         if is_dirac and is_cond:
             self.Ebb = -hbar * self.vf * (4 * np.pi * self.density) ** 0.5
@@ -51,7 +52,14 @@ class Band:
         elif not self.is_dirac and not self.is_cond:
             self.Ebb = (hbar ** 2) * value / np.pi / self.meff/me / 2
         return None
-            
+
+    def disable(self):
+        self.active = False 
+    def enable(self):
+        self.active = True
+    def status(self):
+        return self.active
+
     def cal_energy(self, b_list, Nmax, angle_in_deg):
         if not isinstance(b_list, list):
             raise TypeError(f"b_list = {b_list} is not list")
@@ -249,7 +257,7 @@ class System:
                 else:
                     raise ValueError(f"{arg} is not an instance of Band")
         else:
-            warnings.warn(f"Initialization of an empty System")
+            warnings.warn(f"Initialization of an empty System\n")
 
     def get_info(self):
         band_info = []
@@ -269,7 +277,7 @@ class System:
             sys.stdout.write('No bands in this system')
             return None
         if band == 'a':
-            return self.bands
+            return [band for band in self.bands if band.status()]
         elif isinstance(band,int):
             if band < len(self.bands) and band >= 0:
                 return self.bands[band]
@@ -376,5 +384,5 @@ class System:
             for n_band, y in enumerate(y_databdl):
                 df_toappend = pd.DataFrame(np.transpose(np.array([bfrange,y,[n_band]*len(y)])),columns=columns)
                 df = df.append(df_toappend,ignore_index=True)
-            df.to_csv(path,mode='w',index=False)
+            df.to_csv(path, mode='w', index=False)
 
