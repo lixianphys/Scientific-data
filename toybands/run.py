@@ -184,11 +184,13 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
         sys.stderr.write('The arguments -nmax and -angle are needed')
 
 def simu(args,newsystem,bfrange,enrange,colors = None):
-    if args.nmax is not None and args.angle is not None and args.nos is not None:
-        if args.allden is not None:
+    if args.nmax is not None and args.angle is not None:
+        if args.allden is not None and args.nos is not None:
             den_slices = make_slices(args.allden,args.nos)
         elif args.loadden is not None:
             den_slices = read_den_from_csv(args.loadden)
+        else:
+            sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
         tot_den_list = [sum(den_slice) for den_slice in den_slices]
         tot_den_int = abs(tot_den_list[0]-tot_den_list[1])
         ax = make_canvas()
@@ -219,7 +221,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
         system_stamp_csv(args.fnm)    
         super_save(args.fnm,args.dir)
     else:
-        sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
+        sys.stderr.write('The arguments -nmax and -angle are needed')
 
 
 def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):

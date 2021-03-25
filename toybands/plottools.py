@@ -148,9 +148,10 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
         x,y,N,iBand = [],[],df.iloc[0].N,df.iloc[0].Band
     else:
         x,y,iBand = [],[],df.iloc[0].Band
+    
     if 'System([band density])' in df.columns:
         ind, plottype = 'den','scatter'
-    elif 'den' in df.columns and not 'System([band density])' in df.columns:
+    elif 'den' in df.columns:
         ind,plottype = 'den','plot'
     elif 'E' in df.columns:
         ind,plottype = 'E','plot'
@@ -158,6 +159,8 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
         ind,plottype = 'dos_at_mu','plot'
     else:
         sys.stderr.write('This file is not readable by toybands')
+
+    
     for i in range(len(df)):
         if 'N' in df.columns:
             if df.iloc[i].N != N:
@@ -167,11 +170,11 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
                         line, = ax.plot(x, div(y,e0), color=colors[int(iBand)],linewidth=DEFAULT_LW)
                     else:
                         line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
-                 
                 else:
                     ax.scatter(x, y, color=colors[int(iBand)])
-                if df.iloc[i].Band != iBand and plottype == 'plot':
-                    line.set_label(f'Band{int(iBand)}')
+                if df.iloc[i].Band != iBand:
+                    if plottype == 'plot':
+                        line.set_label(f'Band{int(iBand)}')
                     iBand = df.iloc[i].Band
                 x,y = [],[]
                 x.append(df.iloc[i].B)
@@ -190,9 +193,12 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
             else:
                 x.append(df.iloc[i].B)
                 y.append(df.iloc[i][ind])
-    # plot the cached last curve           
-    line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
-    line.set_label(f'Band{int(iBand)}')
+    # plot the cached last curve
+    if 'System([band density])' in df.columns:
+        ax.scatter(x, y, color=colors[int(iBand)]) 
+    else:        
+        line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
+        line.set_label(f'Band{int(iBand)}')
 
     ax.set_xlabel('$B$ [T]')
     if ind == 'den':
@@ -201,7 +207,7 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
         ax.set_ylabel('$E$ [eV]')
     elif ind == 'dos_at_mu':
         ax.set_ylabel('DOS [1/m$^2$]')
-    if legend:
+    if legend and not 'System([band density])' in df.columns:
         ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
     super_save(filename=path.split('/')[-1].split('.')[-2]+'-replot')
 

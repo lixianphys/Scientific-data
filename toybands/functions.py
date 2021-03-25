@@ -256,15 +256,15 @@ def system_stamp_csv(csvfilename,jsfilename=None):
 
 
 def read_den_from_csv(csvfilename):
-    if os.path.isfile(csvfilename):
+    if os.path.isfile(csvfilename) and csvfilename.endswith('.csv'):
         df = pd.read_csv(csvfilename,header=None)
     else:
-        sys.stderr.write(f'The file {csvfilename} does not exist.')
+        sys.stderr.write(f'The file {csvfilename} does not exist or not .csv file')
         exit()
     output = []
     columns = df.columns
     for column in columns:
-        output.append(df[column].tolist())
+        output.append([10000*den for den in df[column].tolist()])
     output = np.array(output)
     output = np.transpose(output)
     return output
