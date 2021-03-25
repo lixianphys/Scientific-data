@@ -60,8 +60,8 @@ Peek into the system you created
  ### Features in the future
  - plot the DOS mapping onto (n,B) for a set of given densities [***]
  - Input customized E-B relationship [*]
- - label the output figure and allow separate figures in a single pdf file for a batch input [***]
+ - label the output figure and allow separate figures in a single pdf file for a batch input [****]
  - Is it possible to abort the calculation until I continue it? I mean, keep the memory usage but free its CPU usage. It might be helpful when you just want your PC to handle other CPU-heavy tasks during a long calculation. [*]
  - plot the data from csv file directly from the CLI [**]
- - allow multiple stage input of densities in simu[**]
+ - allow multiple stage input of densities in simu[****]
  - connect the same LL in simu [**]

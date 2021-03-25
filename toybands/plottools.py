@@ -28,18 +28,6 @@ plt.rc('ytick.minor', size=5, pad=7, visible=True)
 plt.rc("legend", fontsize=20)
 plt.rcParams['figure.constrained_layout.use'] = True
 
-# def legend_maker(system,colors,ax):
-#     for ind, (band, color) in enumerate(zip(system.get_band('a'),colors)):
-#         bb = band.Ebb/e0
-#         ax.axhline(y=bb,color=color)
-#         if band.is_dirac and band.is_cond:
-#             ax.text(0,bb,f'Dirac,Cond{[ind]}')
-#         elif not band.is_dirac and band.is_cond:
-#             ax.text(0,bb,f'nDirac,Cond{[ind]}')
-#         elif band.is_dirac and not band.is_cond:
-#             ax.text(0,bb,f'Dirac,Val{[ind]}')
-#         else:
-#             ax.text(0,bb,f'nDirac,Val{[ind]}')
 
 def make_n_colors(n,cmap,vstart,vend):
     if not isinstance(n,int):
@@ -59,7 +47,7 @@ def make_n_colors(n,cmap,vstart,vend):
     return colors
 
 
-def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW,ax=None,plotrange = None,label_on_line=True):
+def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW,ax=None,plotrange = None,legend=True):
     if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
         raise TypeError(f'either x_databdl or y_databdl or colors is not list')
     if not len(y_databdl)==len(colors):
@@ -70,9 +58,12 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
         raise TypeError(f'figsize should be a tuple like (10,10)')
     fig = plt.figure(figsize=figsize)
     ax = fig.add_subplot(111)
-    for y_data, color in zip(y_databdl,colors):
+    for n_band, (y_data, color) in enumerate(zip(y_databdl,colors)):
         for y in y_data:
-            ax.plot(bfrange,div(y,e0),linewidth=linewidth,color=color)
+            line, = ax.plot(bfrange,div(y,e0),linewidth=linewidth,color=color)
+        line.set_label(f'Band{n_band}')
+    if legend:
+        ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
     if mu_pos and len(mu_pos)==len(bfrange):
         ax.plot(bfrange,div(mu_pos,e0),linewidth=linewidth,color='k')
     if enrange is not None:
@@ -86,7 +77,7 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
 
 
 
-def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,label_on_line=True):
+def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,legend=True):
     if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
         raise TypeError(f'either x_databdl or y_databdl or colors is not list')
     if not len(y_databdl)==len(colors):
@@ -99,13 +90,16 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111)
     if plotrange is None:
-        for id_out, (y_data, color) in enumerate(zip(y_databdl,colors)):
-            for id_inn, y in enumerate(y_data):
-                ax.plot(bfrange,y,linewidth=linewidth,color=color)
+        for n_band, (y_data, color) in enumerate(zip(y_databdl,colors)):
+            for n_ll, y in enumerate(y_data):
+                line, = ax.plot(bfrange,y,linewidth=linewidth,color=color)
+            line.set_label(f'Band{n_band}')
     else:
         for y_data, color in zip(y_databdl,colors):
             for y in y_data:
                 ax.scatter(extract_list(bfrange,[yy>plotrange[0] and yy<plotrange[1] for yy in y]),extract_list(y,[yy>plotrange[0] and yy<plotrange[1] for yy in y]), color=color)
+    if legend:
+        ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
     if tot_den is not None:
         ax.axhline(y = tot_den, linewidth=linewidth, color='k')
     if enrange is not None:
@@ -116,14 +110,17 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
 
     return ax
 
-def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,label_on_line=True):
+def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,legend=True):
     if ax is None:
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111)
     y_tot = [0]*len(bfrange)
-    for y_data, color in zip(y_databdl,colors):
-        ax.plot(bfrange,y_data,color=color)
+    for n_band, (y_data, color) in enumerate(zip(y_databdl,colors)):
+        line, = ax.plot(bfrange,y_data,color=color)
+        line.set_label(f'Band{n_band}')
         y_tot = add_list(y_tot,y_data)
+    if legend:
+        ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
     ax.plot(bfrange,y_tot,linestyle='--',color='k')
     ax.set_xlabel('$B$ [T]')
     ax.set_ylabel('DOS [a.u.]')
@@ -133,7 +130,7 @@ def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,line
 
 
 
-def plot_from_csv(path,ax,cmap):
+def plot_from_csv(path,ax=None,cmap=None,legend=True):
     if not isinstance(path,str):
         sys.stderr.write(f'the path {path} is not a string')
     if not os.path.isfile(path):
@@ -144,34 +141,67 @@ def plot_from_csv(path,ax,cmap):
         df = pd.read_csv(path)
     except:
         sys.stderr.write(f'Failed to read the csv file')
-
+    if cmap is None:
+        cmap = 'jet'
     colors = make_n_colors(len(df.Band.unique()),cmap,0.1,0.9)
-    x,y,N = [],[],-1
+    if ax is None:
+        ax = make_canvas()
+    if 'N' in df.columns:
+        x,y,N,iBand = [],[],df.iloc[0].N,df.iloc[0].Band
+    else:
+        x,y,iBand = [],[],df.iloc[0].Band
     if 'System([band density])' in df.columns:
         ind, plottype = 'den','scatter'
     elif 'den' in df.columns and not 'System([band density])' in df.columns:
         ind,plottype = 'den','plot'
     elif 'E' in df.columns:
         ind,plottype = 'E','plot'
+    elif 'dos_at_mu' in df.columns:
+        ind,plottype = 'dos_at_mu','plot'
+    else:
+        sys.stderr.write('This file is not readable by toybands')
     for i in range(len(df)):
-        if df.iloc[i].N != N:
-            N = df.iloc[i].N
-            if plottype == 'plot':
-                ax.plot(x, y, color=colors[int(df.iloc[i].Band)])
+        if 'N' in df.columns:
+            if df.iloc[i].N != N:
+                N = df.iloc[i].N
+                if plottype == 'plot':
+                    line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
+                else:
+                    ax.scatter(x, y, color=colors[int(iBand)])
+                if df.iloc[i].Band != iBand and plottype == 'plot':
+                    line.set_label(f'Band{int(iBand)}')
+                    iBand = df.iloc[i].Band
+                x,y = [],[]
+                x.append(df.iloc[i].B)
+                y.append(df.iloc[i][ind])
             else:
-                ax.scatter(x, y, color=colors[int(df.iloc[i].Band)])
-            x,y = [],[]
-            x.append(df.iloc[i].B)
-            y.append(df.iloc[i][ind])
+                x.append(df.iloc[i].B)
+                y.append(df.iloc[i][ind])
         else:
-            x.append(df.iloc[i].B)
-            y.append(df.iloc[i][ind])
-        ax.set_xlabel('$B$ [T]')
-        if ind == 'den':
-            ax.set_ylabel('$n$ [1/m$^2$]')
-        else:
-            ax.set_ylabel('$E$ [eV]')
-    
+            if df.iloc[i].Band != iBand:
+                line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
+                line.set_label(f'Band{int(iBand)}')
+                iBand = df.iloc[i].Band
+                x,y = [],[]
+                x.append(df.iloc[i].B)
+                y.append(df.iloc[i][ind])
+            else:
+                x.append(df.iloc[i].B)
+                y.append(df.iloc[i][ind])
+    # plot the cached last curve           
+    line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
+    line.set_label(f'Band{int(iBand)}')
+
+    ax.set_xlabel('$B$ [T]')
+    if ind == 'den':
+        ax.set_ylabel('$n$ [1/m$^2$]')
+    elif ind == 'E':
+        ax.set_ylabel('$E$ [eV]')
+    elif ind == 'dos_at_mu':
+        ax.set_ylabel('DOS [1/m$^2$]')
+    if legend:
+        ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
+    super_save(filename=path.split('/')[-1].split('.')[-2]+'-replot')
 
 
 def make_canvas(figsize=DEFAULT_FIGURE_SIZE):
