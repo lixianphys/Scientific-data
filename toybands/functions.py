@@ -255,3 +255,17 @@ def system_stamp_csv(csvfilename,jsfilename=None):
         sys.stderr.write('Failed to stamp your sysinfo into csv file\n')
 
 
+def read_den_from_csv(csvfilename):
+    if os.path.isfile(csvfilename):
+        df = pd.read_csv(csvfilename,header=None)
+    else:
+        sys.stderr.write(f'The file {csvfilename} does not exist.')
+        exit()
+    output = []
+    columns = df.columns
+    for column in columns:
+        output.append(df[column].tolist())
+    output = np.array(output)
+    output = np.transpose(output)
+    return output
+

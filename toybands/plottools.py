@@ -128,8 +128,6 @@ def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,line
 
 
 
-
-
 def plot_from_csv(path,ax=None,cmap=None,legend=True):
     if not isinstance(path,str):
         sys.stderr.write(f'the path {path} is not a string')
@@ -165,7 +163,11 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
             if df.iloc[i].N != N:
                 N = df.iloc[i].N
                 if plottype == 'plot':
-                    line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
+                    if ind == 'E':
+                        line, = ax.plot(x, div(y,e0), color=colors[int(iBand)],linewidth=DEFAULT_LW)
+                    else:
+                        line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
+                 
                 else:
                     ax.scatter(x, y, color=colors[int(iBand)])
                 if df.iloc[i].Band != iBand and plottype == 'plot':

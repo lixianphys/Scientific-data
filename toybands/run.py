@@ -24,7 +24,7 @@ def run():
         prog="run", description="A band model to play with"
     )
     plot_group = my_parser.add_mutually_exclusive_group(required=True)
-
+    den_group = my_parser.add_mutually_exclusive_group(required=False)
     plot_group.add_argument(
         "-enplot",
         action="store_true",
@@ -45,11 +45,18 @@ def run():
 
     plot_group.add_argument("-dos",action="store_true",help="plot dos versus bfield (yes/no)")
 
-    my_parser.add_argument(
+    den_group.add_argument(
         "--allden",
         action="store",
         type = multi_floats,
         help="densities for each band: start1 end1 start2 end2 .... ",
+    )
+
+    den_group.add_argument(
+        "-loadden",
+        action="store",
+        type = str,
+        help="file to load the densities",
     )
 
     my_parser.add_argument(
@@ -177,8 +184,11 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
         sys.stderr.write('The arguments -nmax and -angle are needed')
 
 def simu(args,newsystem,bfrange,enrange,colors = None):
-    if args.nmax is not None and args.angle is not None and args.allden is not None and args.nos is not None:
-        den_slices = make_slices(args.allden,args.nos)
+    if args.nmax is not None and args.angle is not None and args.nos is not None:
+        if args.allden is not None:
+            den_slices = make_slices(args.allden,args.nos)
+        elif args.loadden is not None:
+            den_slices = read_den_from_csv(args.loadden)
         tot_den_list = [sum(den_slice) for den_slice in den_slices]
         tot_den_int = abs(tot_den_list[0]-tot_den_list[1])
         ax = make_canvas()
@@ -200,7 +210,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
                     colors_p.pop(idx)
             y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.get_band('a')]
             plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
-            make_1d_den_B_plots(bfrange,y_databdl,colors_p,ax=ax,plotrange=plotrange)
+            make_1d_den_B_plots(bfrange,y_databdl,colors_p,ax=ax,plotrange=plotrange,legend=False)
             newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)
             # enable the disabled band again for next loop
             if idx_disabled:

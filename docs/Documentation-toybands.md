@@ -48,7 +48,7 @@ Peek into the system you created
  - `--bfrange`: optional, magnetic field range: start end numofpoints
  - `-nmax`: optional, number of Landau levels involved (default=20)
  - `-angle`: optional, angle in degree made with the sample plane norm by the external field (default=0)
- 
+ ### Usage
  - Plot the E-B relationship for the configured system
  `python toybands/run.py [-enplot] [-dir DIR] [-fnm FNM] [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum] [-nmax NMAX] [-angle ANGLE]` If no `-dir` and `-fnm` is specified, the output figure will be stored in `./output/[auto]default.pdf`  
  - Plot the n-B relationship for the configured system
@@ -57,11 +57,12 @@ Peek into the system you created
  `python toybands/run.py [-simu] [--allden "NS1 NE1 NS2 NE2 ..."] [-nos NOS] [-dir DIR] [-fnm FNM] [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum] [-nmax NMAX] [-angle ANGLE]`
  - plot the DOS-B relationship for the configured system
  `python toybands/run.py [-dos] [-fnm FNM] [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum]`
+ -  allow input from .csv file for the densities
+ -  
  ### Features in the future
  - plot the DOS mapping onto (n,B) for a set of given densities [***]
  - Input customized E-B relationship [*]
- - label the output figure and allow separate figures in a single pdf file for a batch input [****]
+ - allow separate figures in a single pdf file for a batch input [*]
  - Is it possible to abort the calculation until I continue it? I mean, keep the memory usage but free its CPU usage. It might be helpful when you just want your PC to handle other CPU-heavy tasks during a long calculation. [*]
  - plot the data from csv file directly from the CLI [**]
- - allow multiple stage input of densities in simu[****]
  - connect the same LL in simu [**]
