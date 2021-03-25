@@ -13,8 +13,6 @@ def plotcsv():
     type=str,
     help="path of csv file to plot"
     )
-
-
     args = my_parser.parse_args()
     plot_from_csv(args.f)
 
