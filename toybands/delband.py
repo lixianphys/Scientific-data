@@ -19,12 +19,11 @@ if __name__ == "__main__":
             print("Deleted No.", index, "band")
             df.drop([int(index)]).to_json("system.json")
             if not df.drop([int(index)]).empty:
-                print("Your current system:")
+                print("Now, your system:")
                 pretty_print(df.drop([int(index)]))
-            else:
-                print('No bands in your system, please add more using addband.py')
         else:
             print('No bands in your system, please add more using addband.py')
     else:
         sys.stderr.write("No system exist")
         exit()
+# once delete a band not at the bottom (end of the df), then the end of the df is NAN in density/Ebb
