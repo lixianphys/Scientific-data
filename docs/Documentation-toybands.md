@@ -58,8 +58,9 @@ Peek into the system you created
  - plot the DOS-B relationship for the configured system
  `python toybands/run.py [-dos] [-fnm FNM] [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum]`
  -  allow input from .csv file for the densities
- -  
+ 
  ### Features in the future
+ 
  - plot the DOS mapping onto (n,B) for a set of given densities [***]
  - Input customized E-B relationship [*]
  - allow separate figures in a single pdf file for a batch input [*]

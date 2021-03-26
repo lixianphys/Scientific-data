@@ -30,11 +30,11 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     if N < 0 or not isinstance(N, int):
         raise ValueError(f"your input N = {N} should be an integer no less than zero")
     if gfactor < 0:
-        raise ValueError(f"your input gfactor = {gfactor}<0")
+        raise ValueError(f"your input gfactor = {gfactor} <0")
     alpha = 1 if is_cond else -1
     return (
         alpha
-        * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B) ** 2 + (M*e0) ** 2)
+        * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B/2) ** 2 + (M*e0) ** 2)
         ** 0.5
     )
     ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017)

@@ -12,9 +12,13 @@ if __name__ == "__main__":
         if not df.empty:
             print("Your current system:")
             pretty_print(df)
-            index = input("which band to delete? input the index number: Or press 'e' to exit\n")
+            index = input("which band to delete? input the index number: Or press 'e' to exit, 'all' to clear up\n")
             if index == 'e':
                 sys.stderr.write('Exit...')
+                exit()
+            elif index == 'all':
+                df.drop(df.index).to_json("system.json")
+                print('No bands in your system, please add more using addband.py')
                 exit()
             print("Deleted No.", index, "band")
             df.drop([int(index)]).to_json("system.json")

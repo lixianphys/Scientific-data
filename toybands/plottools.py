@@ -260,5 +260,3 @@ def make_slices(den_list,numofsteps):
     all_density = np.array(all_density)
     output = np.transpose(all_density)
     return output
-
-

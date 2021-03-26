@@ -27,9 +27,9 @@ class Band:
         self.active = True
 
         if is_dirac and is_cond:
-            self.Ebb = -hbar * self.vf * (4 * np.pi * self.density) ** 0.5
+            self.Ebb = -hbar * self.vf * (2 * np.pi * self.density) ** 0.5
         elif is_dirac and not is_cond:
-            self.Ebb = hbar * self.vf * (4 * np.pi * self.density) ** 0.5
+            self.Ebb = hbar * self.vf * (2 * np.pi * self.density) ** 0.5
         elif not is_dirac and is_cond:
             self.Ebb = -(hbar ** 2) * self.density/ np.pi / self.meff/ me / 2
         elif not is_dirac and not is_cond:
@@ -44,9 +44,9 @@ class Band:
             sys.stderr.write(f'value need to be a number')
         self.density = value
         if self.is_dirac and self.is_cond:
-            self.Ebb = -hbar * self.vf * (4 * np.pi * value) ** 0.5
+            self.Ebb = -hbar * self.vf * (2 * np.pi * value) ** 0.5
         elif self.is_dirac and not self.is_cond:
-            self.Ebb = hbar * self.vf * (4 * np.pi * value) ** 0.5
+            self.Ebb = hbar * self.vf * (2 * np.pi * value) ** 0.5
         elif not self.is_dirac and self.is_cond:
             self.Ebb = -(hbar ** 2) * value/ np.pi / self.meff/me / 2
         elif not self.is_dirac and not self.is_cond:
