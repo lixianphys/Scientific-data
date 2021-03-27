@@ -56,8 +56,8 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
         raise TypeError(f'y_databdl is not nested list')
     if not isinstance(figsize,tuple):
         raise TypeError(f'figsize should be a tuple like (10,10)')
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(111)
+    if ax is None:
+        ax = make_canvas(figsize=figsize)
     for n_band, (y_data, color) in enumerate(zip(y_databdl,colors)):
         for y in y_data:
             line, = ax.plot(bfrange,div(y,e0),linewidth=linewidth,color=color)
@@ -87,8 +87,7 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
     if not isinstance(figsize,tuple):
         raise TypeError(f'figsize should be a tuple like (10,10)')
     if ax is None:
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111)
+        ax = make_canvas(figsize=figsize)
     if plotrange is None:
         for n_band, (y_data, color) in enumerate(zip(y_databdl,colors)):
             for n_ll, y in enumerate(y_data):
@@ -112,8 +111,7 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
 
 def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,legend=True):
     if ax is None:
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111)
+        ax = make_canvas(figsize=figsize)
     y_tot = [0]*len(bfrange)
     for n_band, (y_data, color) in enumerate(zip(y_databdl,colors)):
         line, = ax.plot(bfrange,y_data,color=color)
@@ -209,6 +207,7 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
         ax.set_ylabel('DOS [1/m$^2$]')
     if legend and not 'System([band density])' in df.columns:
         ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
+    
     super_save(filename=path.split('/')[-1].split('.')[-2]+'-replot')
 
 

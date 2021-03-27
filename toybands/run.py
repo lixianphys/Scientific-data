@@ -123,7 +123,7 @@ def enplot(args,newsystem,bfrange,enrange,colors = None):
                 band.cal_energy(bfrange, args.nmax, args.angle)[
                     f"#{N}"
                 ].tolist()
-                for N in range(args.nmax)
+                for N in range(args.nmax if band.get('is_dirac') else 2*args.nmax)
             ]
             for band in newsystem.get_band('a')
         ]
@@ -154,8 +154,7 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
         IDOS = [
             newsystem.dos_gen(
-                enrange, B, args.nmax, args.angle, abs(enrange[1] - enrange[0])
-            )
+                enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')])
             for B in bfrange
         ]
         # bundle data from each Landau level originating from each band
@@ -169,7 +168,7 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
                         ].tolist()
                     )
                 ]
-                for N in range(args.nmax)
+                for N in range(args.nmax if band.get('is_dirac') else 2*args.nmax)
             ]
             for band in newsystem.get_band('a')
         ]
@@ -192,7 +191,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
         else:
             sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
         tot_den_list = [sum(den_slice) for den_slice in den_slices]
-        tot_den_int = abs(tot_den_list[0]-tot_den_list[1])
+        tot_den_int = np.mean([abs(tot_den_list[i]-tot_den_list[i+1]) for i in range(len(tot_den_list)-1)])
         ax = make_canvas()
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
@@ -201,7 +200,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
             colors_p = [color for color in colors]
             newsystem.set_all_density(den_slice)
             tot_den = newsystem.tot_density()
-            IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
+            IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')]) for B in bfrange]
             # disable the band with zero density
             idx_disabled = []
             # if any band has a density <=0 then disable it
@@ -210,7 +209,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
                     newsystem.get_band(idx).disable()
                     idx_disabled.append(idx)
                     colors_p.pop(idx)
-            y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.get_band('a')]
+            y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax if band.get('is_dirac') else 2*args.nmax)] for band in newsystem.get_band('a')]
             plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
             make_1d_den_B_plots(bfrange,y_databdl,colors_p,ax=ax,plotrange=plotrange,legend=False)
             newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)
@@ -228,16 +227,14 @@ def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
     if args.nmax is not None and args.angle is not None:
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
-        mus = [newsystem.mu(enrange, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B in bfrange]
-        y_databdl = [[band.cal_dos(mu_at_B, B, args.nmax, args.angle, abs(enrange[1]-enrange[0])) for B,mu_at_B in zip(bfrange,mus)] for band in newsystem.get_band('a')]
+        mus = [newsystem.mu(enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')]) for B in bfrange]
+        y_databdl = [[band.cal_dos(mu_at_B, B, args.nmax, args.angle, SIGMA_COND if band.get('is_cond') else SIGMA_VAL) for B,mu_at_B in zip(bfrange,mus)] for band in newsystem.get_band('a')]
         make_1d_dos_B_plot(bfrange,y_databdl,colors)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dos')
         system_stamp_csv(args.fnm)
         super_save(args.fnm,args.dir)
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed')
-
-
 
 
 if __name__ == "__main__":

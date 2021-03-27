@@ -23,6 +23,7 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     N: Landau index
     is_cond: True for conduction and False for valence band
     gfactor: g-factor
+    M: mass term
     vf: Fermi-velocity (m/s)
     Return:
     Energy (IU)
@@ -34,7 +35,7 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     alpha = 1 if is_cond else -1
     return (
         alpha
-        * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B/2) ** 2 + (M*e0) ** 2)
+        * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B) ** 2 + (M*e0) ** 2)
         ** 0.5
     )
     ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017)
@@ -44,9 +45,10 @@ def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     Arguments:
     B: Total magnetic field (IU,Tesla)
     B_perp: The perpendicular component of B (IU,Tesla)
-    s: spin indicator 
+    is_cond: Conduction band (True) or valence band (False)
+    spin: spin indicator
+    gfactor: g-factor 
     meff: effective mass in units of the rest mass of electron (me)
-    gfactor: g-factor
     Return:
     Energy (IU)
     """
@@ -55,6 +57,16 @@ def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     alpha = 1 if is_cond else -1
     return alpha*(N + 0.5) * hbar * e0 * B_perp / meff/me + spin * gfactor * muB * B / 2
 
+def den2en(density,is_dirac,is_cond,vf,meff):
+        if is_dirac and is_cond:
+            return -hbar * vf * (4 * np.pi * density) ** 0.5
+        elif is_dirac and not is_cond:
+            return hbar * vf * (4 * np.pi * density) ** 0.5
+        elif not is_dirac and is_cond:
+            return -(hbar ** 2) * density/ np.pi / meff/ me / 2
+        elif not is_dirac and not is_cond:
+            return (hbar ** 2) * density / np.pi / meff/ me / 2
+
 
 def _e_integral(fun, ymin, y_list, args):
     if not isinstance(y_list, list):
@@ -62,7 +74,7 @@ def _e_integral(fun, ymin, y_list, args):
     if not isinstance(args, tuple):
         raise ValueError("args must be a tuple")
     output = []
-    pre_integral = 0
+    prev_result = 0
     try:
         yint = abs(y_list[0] - y_list[1])
     except:
@@ -76,8 +88,8 @@ def _e_integral(fun, ymin, y_list, args):
             result = 0
         else:
             result = quad(fun, ymin, y, args=args)[0]
-        result = result + pre_integral
-        pre_integral = result
+        result = result + prev_result
+        prev_result = result
         output.append(result)
     return output
 
@@ -88,7 +100,7 @@ def _h_integral(fun, ymax, y_list, args):
     if not isinstance(args, tuple):
         raise ValueError("args must be a tuple")
     output = []
-    pre_integral = 0
+    prev_result = 0
     try:
         yint = abs(y_list[0] - y_list[1])
     except:
@@ -102,30 +114,30 @@ def _h_integral(fun, ymax, y_list, args):
             result = 0
         else:
             result = quad(fun, y, ymax, args=args)[0]
-        result = result + pre_integral
-        pre_integral = result
+        result = result + prev_result
+        prev_result = result
         output.append(result)
     output.reverse()
     return output
 
 
-def e_density_of_state(E, B, sigma, angle_in_deg, e_lls):
+def e_density_of_state(E, B, sigma, angle_in_deg, e_lls, compensate_on=False):
     """Calculate the density of state at a set of certain chemical potential and magnetic field for top/bottom surface states
     Arguments:
     E: position of chemical potential
     B: total magnetic field
     sigma: broadening of Landau level by assuming a Gaussian-shape distribution around the central energy
-    angle: the angle of magnetic field with the normal of sample plane
-    llenergy_top_surface: energy of Landau levels from top surface state ()
-    llenergy_bottom_surface: energy of Landau levels from bottom surface state
+    angle_in_deg: the angle of magnetic field with the normal of sample plane
+    e_lls: energy of Landau levels from electron side
     Return:
     Density of state from all the bands at (E,B) 
     """
     # degeneracy of Landau levels at a certain field
     lldegeneracy = B * np.cos(angle_in_deg * np.pi / 180) * e0 / h0
-
+    compensate = 0.5 * lldegeneracy * np.exp(-0.5 * (E - min(e_lls)) ** 2 / sigma ** 2) / sigma / (
+            2 * np.pi) ** 0.5
     # both top and bottom surfaces right at the chemical potential
-    return reduce(
+    output = reduce(
         (lambda x, y: x + y),
         [
             lldegeneracy
@@ -135,25 +147,26 @@ def e_density_of_state(E, B, sigma, angle_in_deg, e_lls):
             for e_ll in e_lls
         ],
     )
+    return output-compensate if compensate else output 
 
 
-def h_density_of_state(E, B, sigma, angle_in_deg, h_lls):
+def h_density_of_state(E, B, sigma, angle_in_deg, h_lls, compensate_on=False):
     """Calculate the density of state at a set of certain chemical potential and magnetic field for top/bottom surface states
     Arguments:
     E: position of chemical potential
     B: total magnetic field
     sigma: broadening of Landau level by assuming a Gaussian-shape distribution around the central energy
-    angle: the angle of magnetic field with the normal of sample plane
-    llenergy_top_surface: energy of Landau levels from top surface state
-    llenergy_bottom_surface: energy of Landau levels from bottom surface state
+    angle_in_deg: the angle of magnetic field with the normal of sample plane
+    h_lls: energy of Landau levels from hole side
     Return:
     Density of state from all the bands at (E,B)
     """
     # degeneracy of Landau levels at a certain field
     lldegeneracy = B * np.cos(angle_in_deg * np.pi / 180) * e0 / h0
-
+    compensate = 0.5 * lldegeneracy * np.exp(-0.5 * (E - min(h_lls)) ** 2 / sigma ** 2) / sigma / (
+            2 * np.pi) ** 0.5
     # both top and bottom surfaces right at the chemical potential
-    return reduce(
+    output = reduce(
         (lambda x, y: x + y),
         [
             -lldegeneracy
@@ -163,26 +176,27 @@ def h_density_of_state(E, B, sigma, angle_in_deg, h_lls):
             for h_ll in h_lls
         ],
     )
+    return output-compensate if compensate_on else output
 
 
-def e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls):
+def e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls, compensate_on=False):
     lowest_ll_eng = min(e_lls)
     output = _e_integral(
         e_density_of_state,
         lowest_ll_eng - 3 * sigma,
         e_list,
-        (B, sigma, angle_in_deg, e_lls),
+        (B, sigma, angle_in_deg, e_lls,compensate_on),
     )
     return output
 
 
-def h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls):
+def h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls, compensate_on=False):
     highest_ll_eng = max(h_lls)
     output = _h_integral(
         h_density_of_state,
         highest_ll_eng + 3 * sigma,
         e_list,
-        (B, sigma, angle_in_deg, h_lls),
+        (B, sigma, angle_in_deg, h_lls,compensate_on),
     )
     return output
 
@@ -254,8 +268,7 @@ def read_den_from_csv(csvfilename):
         sys.stderr.write(f'The file {csvfilename} does not exist or not .csv file')
         exit()
     output = []
-    columns = df.columns
-    for column in columns:
+    for column in df.columns:
         output.append([10000*den for den in df[column].tolist()])
     output = np.array(output)
     output = np.transpose(output)
