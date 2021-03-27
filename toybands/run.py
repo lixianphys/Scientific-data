@@ -139,7 +139,7 @@ def enplot(args,newsystem,bfrange,enrange,colors = None):
                 B,
                 args.nmax,
                 args.angle,
-                sigma=abs(enrange[1] - enrange[0]),
+                [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')],
             )
             for B in bfrange
         ]

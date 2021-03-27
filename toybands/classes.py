@@ -36,14 +36,7 @@ class Band:
         if not isinstance(value,(int,float)):
             sys.stderr.write(f'value need to be a number')
         self.density = value
-        if self.is_dirac and self.is_cond:
-            self.Ebb = -hbar * self.vf * (4 * np.pi * value) ** 0.5
-        elif self.is_dirac and not self.is_cond:
-            self.Ebb = hbar * self.vf * (4 * np.pi * value) ** 0.5
-        elif not self.is_dirac and self.is_cond:
-            self.Ebb = -(hbar ** 2) * value/ np.pi / self.meff/me / 2
-        elif not self.is_dirac and not self.is_cond:
-            self.Ebb = (hbar ** 2) * value / np.pi / self.meff/me / 2
+        self.Ebb = den2en(self.density,self.is_dirac,self.is_cond,self.vf,self.meff)
         return None
 
     def disable(self):
