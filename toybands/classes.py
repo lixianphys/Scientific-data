@@ -15,7 +15,7 @@ from toybands.config import *
 
 
 class Band:
-    def __init__(self, density, is_cond, is_dirac, gfactor, M, vf, meff, spin):
+    def __init__(self, density, is_cond, is_dirac, gfactor, M, vf, meff, spin):        
         self.density = abs(density)
         self.is_cond = is_cond
         self.is_dirac = is_dirac
