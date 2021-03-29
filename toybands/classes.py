@@ -20,20 +20,13 @@ class Band:
         self.is_cond = is_cond
         self.is_dirac = is_dirac
         self.gfactor = gfactor
-        self.M = M if M is not None else None
+        self.M = M
         self.vf = vf
-        self.meff = meff if meff is not None else None
+        self.meff = meff
         self.spin = spin
         self.active = True
-
-        if is_dirac and is_cond:
-            self.Ebb = -hbar * self.vf * (4 * np.pi * self.density) ** 0.5
-        elif is_dirac and not is_cond:
-            self.Ebb = hbar * self.vf * (4 * np.pi * self.density) ** 0.5
-        elif not is_dirac and is_cond:
-            self.Ebb = -(hbar ** 2) * self.density/ np.pi / self.meff/ me / 2
-        elif not is_dirac and not is_cond:
-            self.Ebb = (hbar ** 2) * self.density / np.pi / self.meff/ me / 2
+        self.Ebb = den2en(abs(density),is_dirac,is_cond,vf,meff)
+   
     def get(self, attr):
         if attr in ['density','is_cond','is_dirac','M','vf','meff','spin','Ebb']:
             return self.__dict__.get(attr)
@@ -43,14 +36,7 @@ class Band:
         if not isinstance(value,(int,float)):
             sys.stderr.write(f'value need to be a number')
         self.density = value
-        if self.is_dirac and self.is_cond:
-            self.Ebb = -hbar * self.vf * (4 * np.pi * value) ** 0.5
-        elif self.is_dirac and not self.is_cond:
-            self.Ebb = hbar * self.vf * (4 * np.pi * value) ** 0.5
-        elif not self.is_dirac and self.is_cond:
-            self.Ebb = -(hbar ** 2) * value/ np.pi / self.meff/me / 2
-        elif not self.is_dirac and not self.is_cond:
-            self.Ebb = (hbar ** 2) * value / np.pi / self.meff/me / 2
+        self.Ebb = den2en(self.density,self.is_dirac,self.is_cond,self.vf,self.meff)
         return None
 
     def disable(self):
@@ -88,6 +74,7 @@ class Band:
             return pd.DataFrame.from_dict(ll_dict)
         else:
             ll_dict = {}
+            # spin-degenerate band with spin-up and spin-down branch
             for N in range(Nmax):
                 ll_dict.update(
                     {
@@ -98,7 +85,23 @@ class Band:
                                 x * np.cos(angle_in_deg * np.pi / 180),
                                 N,
                                 self.is_cond,
-                                self.spin,
+                                1,
+                                self.gfactor,
+                                self.meff, 
+                            )
+                            for x in b_list
+                        ]
+                    })
+                ll_dict.update(
+                    {
+                        f"#{Nmax+N}": [
+                            self.Ebb
+                            + llconv_gen(
+                                x,
+                                x * np.cos(angle_in_deg * np.pi / 180),
+                                N,
+                                self.is_cond,
+                                -1,
                                 self.gfactor,
                                 self.meff,
                             )
@@ -111,67 +114,66 @@ class Band:
     def cal_idos_b(self, e_list, B, Nmax, angle_in_deg, sigma):
         if not isinstance(e_list, list):
             raise ValueError(f"e_list = {e_list} is not a list")
-        else:
-            if self.is_dirac and self.is_cond:
-                e_lls = [
-                    self.Ebb
-                    + lldirac_gen(
-                        B,
-                        B * np.cos(angle_in_deg * np.pi / 180),
-                        N,
-                        self.is_cond,
-                        self.gfactor,
-                        self.M,
-                        self.vf,
-                    )
-                    for N in range(Nmax)
-                ]
-                return e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls)
-            elif self.is_dirac and not self.is_cond:
-                h_lls = [
-                    self.Ebb
-                    + lldirac_gen(
-                        B,
-                        B * np.cos(angle_in_deg * np.pi / 180),
-                        N,
-                        self.is_cond,
-                        self.gfactor,
-                        self.M,
-                        self.vf,
-                    )
-                    for N in range(Nmax)
-                ]
-                return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls)
-            elif not self.is_dirac and self.is_cond:
-                e_lls = [
-                    self.Ebb
-                    + llconv_gen(
-                        B,
-                        B * np.cos(angle_in_deg * np.pi / 180),
-                        N,
-                        self.is_cond,
-                        self.spin,
-                        self.gfactor,
-                        self.meff,
-                    )
-                    for N in range(Nmax)
-                ]
-                return e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls)
-            elif not self.is_dirac and not self.is_cond:
-                h_lls = [
-                    self.Ebb
-                    + llconv_gen(
-                        B,
-                        B * np.cos(angle_in_deg * np.pi / 180),
-                        N,
-                        self.is_cond,
-                        self.spin,
-                        self.gfactor,
-                        self.meff,
-                    )
-                    for N in range(Nmax)
-                ]
-                return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls)
+        if self.is_dirac and self.is_cond:
+            e_lls = [
+                self.Ebb
+                + lldirac_gen(
+                    B,
+                    B * np.cos(angle_in_deg * np.pi / 180),
+                    N,
+                    self.is_cond,
+                    self.gfactor,
+                    self.M,
+                    self.vf,
+                )
+                for N in range(Nmax)
+            ]
+            return e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls,compensate_on=True)
+        elif self.is_dirac and not self.is_cond:
+            h_lls = [
+                self.Ebb
+                + lldirac_gen(
+                    B,
+                    B * np.cos(angle_in_deg * np.pi / 180),
+                    N,
+                    self.is_cond,
+                    self.gfactor,
+                    self.M,
+                    self.vf,
+                )
+                for N in range(Nmax)
+            ]
+            return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls,compensate_on=True)
+        elif not self.is_dirac and self.is_cond:
+            e_lls = [
+                self.Ebb
+                + llconv_gen(
+                    B,
+                    B * np.cos(angle_in_deg * np.pi / 180),
+                    N,
+                    self.is_cond,
+                    spin,
+                    self.gfactor,
+                    self.meff,
+                )
+                for N in range(Nmax) for spin in [-1,1]
+            ]
+            return e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls,compensate_on=False)
+        elif not self.is_dirac and not self.is_cond:
+            h_lls = [
+                self.Ebb
+                + llconv_gen(
+                    B,
+                    B * np.cos(angle_in_deg * np.pi / 180),
+                    N,
+                    self.is_cond,
+                    spin,
+                    self.gfactor,
+                    self.meff,
+                )
+                for N in range(Nmax) for spin in [-1,1]
+            ]
+            return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls,compensate_on=False)
 
     def cal_dos(self, E, B, Nmax, angle_in_deg, sigma):
         if self.is_dirac and self.is_cond:
@@ -188,7 +190,7 @@ class Band:
                 )
                 for N in range(Nmax)
             ]
-            return e_density_of_state(E, B, sigma, angle_in_deg, e_lls)
+            return e_density_of_state(E, B, sigma, angle_in_deg, e_lls,compensate_on=True)
         elif self.is_dirac and not self.is_cond:
             h_lls = [
                 self.Ebb
@@ -203,7 +205,7 @@ class Band:
                 )
                 for N in range(Nmax)
             ]
-            return h_density_of_state(E, B, sigma, angle_in_deg, h_lls)
+            return h_density_of_state(E, B, sigma, angle_in_deg, h_lls,compensate_on=True)
         elif not self.is_dirac and self.is_cond:
             e_lls = [
                 self.Ebb
@@ -212,13 +214,13 @@ class Band:
                     B * np.cos(angle_in_deg * np.pi / 180),
                     N,
                     self.is_cond,
-                    self.spin,
+                    spin,
                     self.gfactor,
                     self.meff,
                 )
-                for N in range(Nmax)
+                for N in range(Nmax)for spin in [-1,1]
             ]
-            return e_density_of_state(E, B, sigma, angle_in_deg, e_lls)
+            return e_density_of_state(E, B, sigma, angle_in_deg, e_lls,compensate_on=False)
         elif not self.is_dirac and not self.is_cond:
             h_lls = [
                 self.Ebb
@@ -227,13 +229,13 @@ class Band:
                     B * np.cos(angle_in_deg * np.pi / 180),
                     N,
                     self.is_cond,
-                    self.spin,
+                    spin,
                     self.gfactor,
                     self.meff,
                 )
-                for N in range(Nmax)
+                for N in range(Nmax) for spin in [-1,1]
             ]
-            return h_density_of_state(E, B, sigma, angle_in_deg, h_lls)
+            return h_density_of_state(E, B, sigma, angle_in_deg, h_lls,compensate_on=False)
 
     def print_band(self):
         band_dict = self.__dict__
@@ -314,7 +316,7 @@ class System:
         else:
             return 0
 
-    def dos_gen(self, e_list, B, Nmax, angle_in_deg, sigma):
+    def dos_gen(self, e_list, B, Nmax, angle_in_deg, sigma_list):
         if not isinstance(e_list, list):
             raise TypeError(f"{e_list} is not a list")
         elif not self.bands:
@@ -323,15 +325,15 @@ class System:
             return reduce(
                 (lambda x, y: add_list(x, y)),
                 [
-                    band.cal_idos_b(e_list, B, Nmax, angle_in_deg, sigma)
-                    for band in self.bands
+                    band.cal_idos_b(e_list, B, Nmax, angle_in_deg, sigma_list[idx])
+                    for idx,band in enumerate(self.bands)
                 ],
             )
 
-    def mu(self, e_list, B, Nmax, angle_in_deg, sigma):
+    def mu(self, e_list, B, Nmax, angle_in_deg, sigma_list):
         return np.interp(
             x=self.tot_density(),
-            xp=self.dos_gen(e_list, B, Nmax, angle_in_deg, sigma),
+            xp=self.dos_gen(e_list, B, Nmax, angle_in_deg, sigma_list),
             fp=e_list,
         )
     def databdl_write_csv(self,filename,bfrange,y_databdl,indicator,plotrange=None):

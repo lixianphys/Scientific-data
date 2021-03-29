@@ -56,8 +56,8 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
         raise TypeError(f'y_databdl is not nested list')
     if not isinstance(figsize,tuple):
         raise TypeError(f'figsize should be a tuple like (10,10)')
-    fig = plt.figure(figsize=figsize)
-    ax = fig.add_subplot(111)
+    if ax is None:
+        ax = make_canvas(figsize=figsize)
     for n_band, (y_data, color) in enumerate(zip(y_databdl,colors)):
         for y in y_data:
             line, = ax.plot(bfrange,div(y,e0),linewidth=linewidth,color=color)
@@ -69,8 +69,8 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
     if enrange is not None:
         ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
 
-    ax.set_xlabel('$B$ [T]')
-    ax.set_ylabel('$E$ [eV]')
+    ax.set_xlabel(DEFAULT_XLABEL)
+    ax.set_ylabel(DEFAULT_EBPLOT_YLABEL)
 
     return ax
 
@@ -87,8 +87,7 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
     if not isinstance(figsize,tuple):
         raise TypeError(f'figsize should be a tuple like (10,10)')
     if ax is None:
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111)
+        ax = make_canvas(figsize=figsize)
     if plotrange is None:
         for n_band, (y_data, color) in enumerate(zip(y_databdl,colors)):
             for n_ll, y in enumerate(y_data):
@@ -105,15 +104,14 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
     if enrange is not None:
         ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
     
-    ax.set_xlabel('$B$ [T]')
-    ax.set_ylabel('$n$ [1/m$^2$]')
+    ax.set_xlabel(DEFAULT_NBPLOT_XLABEL)
+    ax.set_ylabel(DEFAULT_NBPLOT_YLABEL)
 
     return ax
 
 def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,legend=True):
     if ax is None:
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111)
+        ax = make_canvas(figsize=figsize)
     y_tot = [0]*len(bfrange)
     for n_band, (y_data, color) in enumerate(zip(y_databdl,colors)):
         line, = ax.plot(bfrange,y_data,color=color)
@@ -122,8 +120,9 @@ def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,line
     if legend:
         ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
     ax.plot(bfrange,y_tot,linestyle='--',color='k')
-    ax.set_xlabel('$B$ [T]')
-    ax.set_ylabel('DOS [a.u.]')
+    ax.set_xlabel(DEFAULT_XLABEL)
+    ax.set_ylabel(DEFAULT_DOSBPLOT_YLABEL)
+
     return ax
 
 
@@ -200,15 +199,16 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
         line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
         line.set_label(f'Band{int(iBand)}')
 
-    ax.set_xlabel('$B$ [T]')
+    ax.set_xlabel(DEFAULT_XLABEL)
     if ind == 'den':
-        ax.set_ylabel('$n$ [1/m$^2$]')
+        ax.set_ylabel(DEFAULT_NBPLOT_YLABEL)
     elif ind == 'E':
-        ax.set_ylabel('$E$ [eV]')
+        ax.set_ylabel(DEFAULT_EBPLOT_YLABEL)
     elif ind == 'dos_at_mu':
-        ax.set_ylabel('DOS [1/m$^2$]')
+        ax.set_ylabel(DEFAULT_DOSBPLOT_YLABEL)
     if legend and not 'System([band density])' in df.columns:
         ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
+    
     super_save(filename=path.split('/')[-1].split('.')[-2]+'-replot')
 
 
@@ -260,5 +260,3 @@ def make_slices(den_list,numofsteps):
     all_density = np.array(all_density)
     output = np.transpose(all_density)
     return output
-
-
