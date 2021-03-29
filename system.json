@@ -1,1 +1,1 @@
-{"density":{},"is_cond":{},"is_dirac":{},"gfactor":{},"M":{},"vf":{},"meff":{},"spin":{},"active":{},"Ebb":{}}
+{"density":{"0":1000000000000000.0,"1":1000000000000000.0},"is_cond":{"0":false,"1":false},"is_dirac":{"0":false,"1":false},"gfactor":{"0":6.0,"1":6.0},"M":{"0":null,"1":null},"vf":{"0":null,"1":null},"meff":{"0":0.2,"1":0.2},"spin":{"0":1.0,"1":1.0},"active":{"0":true,"1":true},"Ebb":{"0":9.715647647e-24,"1":9.715647647e-24}}

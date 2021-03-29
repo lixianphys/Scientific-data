@@ -57,7 +57,7 @@ def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     alpha = 1 if is_cond else -1
     return alpha*(N + 0.5) * hbar * e0 * B_perp / meff/ me + spin * gfactor * muB * B / 2
 
-def _den2en(density,is_dirac,is_cond,vf,meff):
+def den2en(density,is_dirac,is_cond,vf,meff):
         if is_dirac and is_cond:
             return -hbar * vf * (4 * np.pi * density) ** 0.5
         elif is_dirac and not is_cond:
@@ -129,6 +129,7 @@ def e_density_of_state(E, B, sigma, angle_in_deg, e_lls, compensate_on=False):
     sigma: broadening of Landau level by assuming a Gaussian-shape distribution around the central energy
     angle_in_deg: the angle of magnetic field with the normal of sample plane
     e_lls: energy of Landau levels from electron side
+    compensate_on: if taking into account Dirac-like 1/2 filling factor
     Return:
     Density of state from all the bands at (E,B) 
     """
@@ -158,6 +159,7 @@ def h_density_of_state(E, B, sigma, angle_in_deg, h_lls, compensate_on=False):
     sigma: broadening of Landau level by assuming a Gaussian-shape distribution around the central energy
     angle_in_deg: the angle of magnetic field with the normal of sample plane
     h_lls: energy of Landau levels from hole side
+    compensate_on: if taking into account Dirac-like 1/2 filling factor
     Return:
     Density of state from all the bands at (E,B)
     """
