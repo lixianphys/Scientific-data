@@ -25,7 +25,7 @@ class Band:
         self.meff = meff
         self.spin = spin
         self.active = True
-        self.Ebb = den2en(abs(density),is_dirac,is_cond,vf,meff)
+        self.Ebb = _den2en(abs(density),is_dirac,is_cond,vf,meff)
    
     def get(self, attr):
         if attr in ['density','is_cond','is_dirac','M','vf','meff','spin','Ebb']:
@@ -36,7 +36,7 @@ class Band:
         if not isinstance(value,(int,float)):
             sys.stderr.write(f'value need to be a number')
         self.density = value
-        self.Ebb = den2en(self.density,self.is_dirac,self.is_cond,self.vf,self.meff)
+        self.Ebb = _den2en(self.density,self.is_dirac,self.is_cond,self.vf,self.meff)
         return None
 
     def disable(self):

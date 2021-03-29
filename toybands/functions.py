@@ -55,9 +55,9 @@ def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     if not spin in [1.0, -1.0, 1, -1]:
         raise ValueError(f"your input spin ={spin} is neither 1 or -1")
     alpha = 1 if is_cond else -1
-    return alpha*(N + 0.5) * hbar * e0 * B_perp / meff/me + spin * gfactor * muB * B / 2
+    return alpha*(N + 0.5) * hbar * e0 * B_perp / meff/ me + spin * gfactor * muB * B / 2
 
-def den2en(density,is_dirac,is_cond,vf,meff):
+def _den2en(density,is_dirac,is_cond,vf,meff):
         if is_dirac and is_cond:
             return -hbar * vf * (4 * np.pi * density) ** 0.5
         elif is_dirac and not is_cond:
@@ -68,7 +68,7 @@ def den2en(density,is_dirac,is_cond,vf,meff):
             return (hbar ** 2) * density / np.pi / meff/ me / 2
 
 
-def _e_integral(fun, ymin, y_list, args):
+def _e_integral(func, ymin, y_list, args):
     if not isinstance(y_list, list):
         raise ValueError("ylist is not a list")
     if not isinstance(args, tuple):
@@ -81,20 +81,20 @@ def _e_integral(fun, ymin, y_list, args):
         yint = 0
     for index, y in enumerate(y_list):
         if y > ymin + yint and index == 0:
-            result = quad(fun, ymin, y, args=args)[0]
+            result = quad(func, ymin, y, args=args)[0]
         elif y > ymin + yint and index > 0:
-            result = quad(fun, y - yint, y, args=args)[0]
+            result = quad(func, y - yint, y, args=args)[0]
         elif y <= ymin:
             result = 0
         else:
-            result = quad(fun, ymin, y, args=args)[0]
+            result = quad(func, ymin, y, args=args)[0]
         result = result + prev_result
         prev_result = result
         output.append(result)
     return output
 
 
-def _h_integral(fun, ymax, y_list, args):
+def _h_integral(func, ymax, y_list, args):
     if not isinstance(y_list, list):
         raise ValueError("ylist is not a list")
     if not isinstance(args, tuple):
@@ -107,13 +107,13 @@ def _h_integral(fun, ymax, y_list, args):
         yint = 0
     for index, y in enumerate(sorted(y_list, reverse=True)):
         if y < ymax - yint and index == 0:
-            result = quad(fun, y, ymax, args=args)[0]
+            result = quad(func, y, ymax, args=args)[0]
         elif y < ymax - yint and index > 0:
-            result = quad(fun, y, y + yint, args=args)[0]
+            result = quad(func, y, y + yint, args=args)[0]
         elif y >= ymax:
             result = 0
         else:
-            result = quad(fun, y, ymax, args=args)[0]
+            result = quad(func, y, ymax, args=args)[0]
         result = result + prev_result
         prev_result = result
         output.append(result)

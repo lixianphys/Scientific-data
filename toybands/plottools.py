@@ -69,8 +69,8 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
     if enrange is not None:
         ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
 
-    ax.set_xlabel('$B$ [T]')
-    ax.set_ylabel('$E$ [eV]')
+    ax.set_xlabel(DEFAULT_XLABEL)
+    ax.set_ylabel(DEFAULT_EBPLOT_YLABEL)
 
     return ax
 
@@ -104,8 +104,8 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
     if enrange is not None:
         ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
     
-    ax.set_xlabel('$B$ [T]')
-    ax.set_ylabel('$n$ [1/m$^2$]')
+    ax.set_xlabel(DEFAULT_NBPLOT_XLABEL)
+    ax.set_ylabel(DEFAULT_NBPLOT_YLABEL)
 
     return ax
 
@@ -120,8 +120,9 @@ def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,line
     if legend:
         ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
     ax.plot(bfrange,y_tot,linestyle='--',color='k')
-    ax.set_xlabel('$B$ [T]')
-    ax.set_ylabel('DOS [a.u.]')
+    ax.set_xlabel(DEFAULT_XLABEL)
+    ax.set_ylabel(DEFAULT_DOSBPLOT_YLABEL)
+
     return ax
 
 
@@ -198,13 +199,13 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
         line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
         line.set_label(f'Band{int(iBand)}')
 
-    ax.set_xlabel('$B$ [T]')
+    ax.set_xlabel(DEFAULT_XLABEL)
     if ind == 'den':
-        ax.set_ylabel('$n$ [1/m$^2$]')
+        ax.set_ylabel(DEFAULT_NBPLOT_YLABEL)
     elif ind == 'E':
-        ax.set_ylabel('$E$ [eV]')
+        ax.set_ylabel(DEFAULT_EBPLOT_YLABEL)
     elif ind == 'dos_at_mu':
-        ax.set_ylabel('DOS [1/m$^2$]')
+        ax.set_ylabel(DEFAULT_DOSBPLOT_YLABEL)
     if legend and not 'System([band density])' in df.columns:
         ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
     
