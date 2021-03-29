@@ -104,7 +104,7 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
     if enrange is not None:
         ax.set_ylim(min(enrange)/e0,max(enrange)/e0)
     
-    ax.set_xlabel(DEFAULT_NBPLOT_XLABEL)
+    ax.set_xlabel(DEFAULT_XLABEL)
     ax.set_ylabel(DEFAULT_NBPLOT_YLABEL)
 
     return ax
@@ -125,7 +125,8 @@ def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,line
 
     return ax
 
-
+def make_2d_dos_map():
+    pass
 
 def plot_from_csv(path,ax=None,cmap=None,legend=True):
     if not isinstance(path,str):
