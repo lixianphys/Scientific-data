@@ -63,9 +63,9 @@ def den2en(density,is_dirac,is_cond,vf,meff):
         elif is_dirac and not is_cond:
             return hbar * vf * (4 * np.pi * density) ** 0.5
         elif not is_dirac and is_cond:
-            return -(hbar ** 2) * density/ np.pi / meff/ me / 2
+            return -(hbar ** 2) * density/ np.pi / meff/ me
         elif not is_dirac and not is_cond:
-            return (hbar ** 2) * density / np.pi / meff/ me / 2
+            return (hbar ** 2) * density / np.pi / meff/ me
 
 
 def _e_integral(func, ymin, y_list, args):
