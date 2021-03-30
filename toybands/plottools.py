@@ -10,7 +10,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 from physconst import *
 from utils import flattenList, div
-from toybands.functions import extract_list,add_list
+from toybands.functions import extract_list,add_list, extents
 from toybands.config import *
 
 # define the norm in plotting
@@ -125,8 +125,19 @@ def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,line
 
     return ax
 
-def make_2d_dos_map():
-    pass
+def make_2d_dos_map(bfrange,y_tot,y_databdl,cmap,figsize=DEFAULT_FIGURE_SIZE,ax=None,legend=False):
+    if ax is None:
+        ax = make_canvas(figsize=figsize)
+    y_array = np.array(y_databdl)
+    # make extents define the bottom as the last row
+    if y_tot[0]>y_tot[-1]:
+        y_tot.reverse()
+    ax.imshow(y_array**(1/3), aspect='auto', interpolation='none', extent=(extents(bfrange) + extents(y_tot)), origin = 'upper')
+    ax.set_xlabel(DEFAULT_XLABEL)
+    ax.set_ylabel(DEFAULT_DOSMAP_YLABEL)
+    ax.set_ylim(min(y_tot),max(y_tot))
+    
+    return ax
 
 def plot_from_csv(path,ax=None,cmap=None,legend=True):
     if not isinstance(path,str):

@@ -59,10 +59,9 @@ Peek into the system you created
  `python toybands/run.py [-dos] [-fnm FNM] [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum]`
  -  allow input from .csv file for the densities
  -  plot the data from csv file directly from the CLI
+ -  plot the DOS mapping onto (n,B) for a set of given densities
  
  ### Features in the future
- 
- - plot the DOS mapping onto (n,B) for a set of given densities [***]
  - Input customized E-B relationship [*]
  - allow separate figures in a single pdf file for a batch input [*]
  - Is it possible to abort the calculation until I continue it? I mean, keep the memory usage but free its CPU usage. It might be helpful when you just want your PC to handle other CPU-heavy tasks during a long calculation. [*]

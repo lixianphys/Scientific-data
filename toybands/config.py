@@ -12,6 +12,7 @@ DEFAULT_LEGEND_LOC = 'best'
 DEFAULT_XLABEL = '$B$ [T]'
 DEFAULT_EBPLOT_YLABEL = '$E [eV]$'
 DEFAULT_NBPLOT_YLABEL = '$n$ [1/m$^2$]'
+DEFAULT_DOSMAP_YLABEL = '$n$ [1/m$^2$]'
 DEFAULT_DOSBPLOT_YLABEL = 'DOS [a.u.]'
 # model settings
 SIGMA_COND = 1e-3*e0

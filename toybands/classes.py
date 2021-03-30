@@ -269,9 +269,10 @@ class System:
         return pd.DataFrame(band_info)
 
     def set_all_density(self,den_list):
-        if not len(self.bands) == len(den_list):
-            sys.stderr.write(f'The number of bands {len(self.bands)} does not match up with the input densities {len(den_list)}')
-        for band,den in zip(self.bands,den_list):
+        if not len(self.get_band('a')) == len(den_list):
+            num_active_band = len(self.get_band('a'))
+            sys.stderr.write(f'The number of active bands {num_active_band} does not match up with the input densities {len(den_list)}')
+        for band,den in zip(self.get_band('a'),den_list):
             band.set_den(abs(den))
     
     def get_band(self,band):
@@ -305,9 +306,9 @@ class System:
             self.bands.remove(band)
 
     def tot_density(self):
-        if self.bands:
+        if self.get_band('a'):
             tot_den = 0
-            for band in self.bands:
+            for band in self.get_band('a'):
                 if band.get('is_cond'):
                     tot_den+=band.get('density')
                 else:
@@ -319,14 +320,14 @@ class System:
     def dos_gen(self, e_list, B, Nmax, angle_in_deg, sigma_list):
         if not isinstance(e_list, list):
             raise TypeError(f"{e_list} is not a list")
-        elif not self.bands:
-            raise ValueError(f"No band added into the system")
+        elif not self.get_band('a'):
+            raise ValueError(f"No active band found in the system")
         else:
             return reduce(
                 (lambda x, y: add_list(x, y)),
                 [
                     band.cal_idos_b(e_list, B, Nmax, angle_in_deg, sigma_list[idx])
-                    for idx,band in enumerate(self.bands)
+                    for idx,band in enumerate(self.get_band('a'))
                 ],
             )
 
@@ -339,7 +340,7 @@ class System:
     def databdl_write_csv(self,filename,bfrange,y_databdl,indicator,plotrange=None):
         if filename is None:
             filename = '[auto]default'
-        if len(filename.split('.'))>1:
+        elif len(filename.split('.'))>1:
             filename = filename.split('.')[-2]
         path = os.path.join(DEFAULT_PATH,filename+'.csv')
         if not any(isinstance(el, list) for el in y_databdl):
@@ -352,10 +353,13 @@ class System:
             columns = ['B','den','N','Band','System([band density])']
         elif indicator == 'dos':
             columns = ['B','dos_at_mu','Band']
+        elif indicator == 'dosm':
+            columns = ['B','dos_at_mu','System([band density])']
         else:
-            sys.stderr.write(f'Invalid indicator {indicator}, use enplot, denplot, simu, dos instead')
+            raise ValueError(f'Invalid indicator {indicator}, use enplot, denplot, simu, dos, dosm instead')
         
         df = pd.DataFrame(columns=columns)
+        
         if indicator in ['enplot','denplot']:
             for n_band, y_data in enumerate(y_databdl):
                 for n_ll, y in enumerate(y_data):
@@ -363,15 +367,15 @@ class System:
                     df = df.append(df_toappend,ignore_index=True)
             df.to_csv(path,mode='w',index=False)
         elif indicator == 'simu':
-            if self.bands:
-                _den = list(map(lambda x:x.density,self.bands))
+            if self.get_band('a'):
+                _den = list(map(lambda x:x.density,self.get_band('a')))
             else:
-                sys.stderr.write('There is no band in this system')
+                sys.stderr.write('There is no active band in this system')
                 exit()
+            str_den = ' '.join(["{:e}".format(den) for den in _den])
             for n_band, y_data in enumerate(y_databdl):
                 for n_ll, y in enumerate(y_data):
                     bf_p,y_p = bfrange,y
-                    str_den = ' '.join(["{:e}".format(den) for den in _den])
                     if plotrange is not None:
                         bf_p = extract_list(bfrange,[yy>plotrange[0] and yy<plotrange[1] for yy in y])
                         y_p = extract_list(y,[yy>plotrange[0] and yy<plotrange[1] for yy in y])
@@ -382,9 +386,55 @@ class System:
             else:
                 df.to_csv(path,mode='a',index=False)
         elif indicator == 'dos':
-            df = pd.DataFrame(columns=columns)
             for n_band, y in enumerate(y_databdl):
                 df_toappend = pd.DataFrame(np.transpose(np.array([bfrange,y,[n_band]*len(y)])),columns=columns)
                 df = df.append(df_toappend,ignore_index=True)
             df.to_csv(path, mode='w', index=False)
-
+        elif indicator == 'dosm':
+            if self.get_band('a'):
+                _den = list(map(lambda x:x.density,self.get_band('a')))
+            else:
+                sys.stderr.write('There is no active band in this system')
+                exit()
+            str_den = ' '.join(["{:e}".format(den) for den in _den])
+            for n_slice,y in enumerate(y_databdl):
+                df_toappend = pd.DataFrame(np.transpose(np.array([bfrange,y,[str_den]*len(y)])),columns=columns)
+                df = df.append(df_toappend,ignore_index=True)
+            if os.path.isfile(path):
+                df.to_csv(path,mode='a', index=False, header=False)
+            else:
+                df.to_csv(path,mode='a',index=False)
+    
+    def ydata_gen(self, nmax, angle_in_deg, bfrange, indicator):
+        if indicator == 'enplot':
+            return [
+            [
+                band.cal_energy(bfrange, nmax, angle_in_deg)[
+                    f"#{N}"
+                ].tolist()
+                for N in range(nmax if band.get('is_dirac') else 2*nmax)
+            ]
+            for band in self.get_band('a')]
+        elif indicator == 'denplot':
+            IDOS = [
+            self.dos_gen(
+                enrange, B, nmax, angle_in_deg, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in self.get_band('a')])
+            for B in bfrange]
+            return [
+            [
+                [
+                    np.interp(x=x, xp=enrange, fp=IDOS[index])
+                    for index, x in enumerate(
+                        band.cal_energy(bfrange, nmax, angle_in_deg)[
+                            f"#{N}"
+                        ].tolist()
+                    )
+                ]
+                for N in range(nmax if band.get('is_dirac') else 2*nmax)
+            ]
+            for band in self.get_band('a')]
+        elif indicator == 'dos':
+            mus = [self.mu(enrange, B, nmax, angle_in_deg, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in self.get_band('a')]) for B in bfrange]
+            return [[band.cal_dos(mu_at_B, B, nmax, angle_in_deg, SIGMA_COND if band.get('is_cond') else SIGMA_VAL) for B, mu_at_B in zip(bfrange,mus)] for band in self.get_band('a')]
+        else:
+            raise ValueError(f'Invalid indicator {indicator}, use enplot, denplot, dos instead')

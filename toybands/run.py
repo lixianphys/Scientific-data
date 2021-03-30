@@ -11,7 +11,7 @@ from tqdm import tqdm
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
-from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, super_save, make_slices,make_canvas)
+from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, make_2d_dos_map, super_save, make_slices,make_canvas)
 
 def multi_floats(value):
     values = value.split()
@@ -44,6 +44,7 @@ def run():
     )
 
     plot_group.add_argument("-dos",action="store_true",help="plot dos versus bfield (yes/no)")
+    plot_group.add_argument("-dosm",action="store_true",help="map dos at different (B,n) (yes/no)")
 
     den_group.add_argument(
         "--allden",
@@ -118,15 +119,7 @@ def run():
 
 def enplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
-        y_databdl = [
-            [
-                band.cal_energy(bfrange, args.nmax, args.angle)[
-                    f"#{N}"
-                ].tolist()
-                for N in range(args.nmax if band.get('is_dirac') else 2*args.nmax)
-            ]
-            for band in newsystem.get_band('a')
-        ]
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange, 'enplot')
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')), "jet", 0.1, 0.9)
         mu_pos = [
@@ -152,26 +145,9 @@ def enplot(args,newsystem,bfrange,enrange,colors = None):
 
 def denplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
-        IDOS = [
-            newsystem.dos_gen(
-                enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')])
-            for B in bfrange
-        ]
+
         # bundle data from each Landau level originating from each band
-        y_databdl = [
-            [
-                [
-                    np.interp(x=x, xp=enrange, fp=IDOS[index])
-                    for index, x in enumerate(
-                        band.cal_energy(bfrange, args.nmax, args.angle)[
-                            f"#{N}"
-                        ].tolist()
-                    )
-                ]
-                for N in range(args.nmax if band.get('is_dirac') else 2*args.nmax)
-            ]
-            for band in newsystem.get_band('a')
-        ]
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange, 'denplot')
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')), "jet", 0.1, 0.9)
         tot_den = newsystem.tot_density()
@@ -227,8 +203,7 @@ def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
     if args.nmax is not None and args.angle is not None:
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
-        mus = [newsystem.mu(enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')]) for B in bfrange]
-        y_databdl = [[band.cal_dos(mu_at_B, B, args.nmax, args.angle, SIGMA_COND if band.get('is_cond') else SIGMA_VAL) for B,mu_at_B in zip(bfrange,mus)] for band in newsystem.get_band('a')]
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange, 'dos')
         make_1d_dos_B_plot(bfrange,y_databdl,colors)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dos')
         system_stamp_csv(args.fnm)
@@ -236,6 +211,46 @@ def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed')
 
+def dos_map(args,newsystem,bfrange,enrange,cmap=None):
+    if args.nmax is not None and args.angle is not None:
+        if cmap is None:
+            cmap = 'jet'
+        if args.allden is not None and args.nos is not None:
+            den_slices = make_slices(args.allden,args.nos)
+        elif args.loadden is not None:
+            den_slices = read_den_from_csv(args.loadden)
+        else:
+            sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
+        ax = make_canvas()
+        # data storage
+        y_databdl = []
+        y_tot = []
+        for den_slice in tqdm(den_slices):
+            newsystem.set_all_density(den_slice)
+            tot_den = newsystem.tot_density()
+            y_tot.append(tot_den)
+            # disable the band with zero density or below
+            idx_disabled = []
+            # if any band has a density <=0 then disable it
+            for idx,den in enumerate(den_slice):
+                if den <= 0:
+                    newsystem.get_band(idx).disable()
+                    idx_disabled.append(idx)
+            # calculate the chemical potential for the new system        
+            mus = [newsystem.mu(enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')]) for B in bfrange]
+            # calculate the dos for each band at each chemical potential along the B field axis
+            to_append =  [sum([(1 if band.get('is_cond') else -1)*band.cal_dos(mu_at_B, B, args.nmax, args.angle, SIGMA_COND if band.get('is_cond') else SIGMA_VAL) for band in newsystem.get_band('a')]) for B,mu_at_B in zip(bfrange,mus)]
+            y_databdl.append(to_append)
+            newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dosm')
+            # enable the disabled band again for next loop
+            if idx_disabled:
+                for idx in idx_disabled:
+                    newsystem.get_band(idx).enable()
+        make_2d_dos_map(bfrange,y_tot,y_databdl,cmap,ax=ax)
+        system_stamp_csv(args.fnm)
+        super_save(args.fnm,args.dir)
+    else:
+        sys.stderr.write('The arguments -nmax and -angle are needed')
 
 if __name__ == "__main__":
     args = run()
@@ -271,5 +286,7 @@ if __name__ == "__main__":
             simu(args,newsystem,bfrange,enrange)
         if args.dos:
             dos_at_mu(args,newsystem,bfrange,enrange)
+        if args.dosm:
+            dos_map(args,newsystem,bfrange,enrange)
     else:
         sys.stderr.write("no system (system.json) exist")

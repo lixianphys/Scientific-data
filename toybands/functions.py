@@ -178,7 +178,7 @@ def h_density_of_state(E, B, sigma, angle_in_deg, h_lls, compensate_on=False):
             for h_ll in h_lls
         ],
     )
-    return output-compensate if compensate_on else output
+    return output+compensate if compensate_on else output
 
 
 def e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls, compensate_on=False):
@@ -276,3 +276,12 @@ def read_den_from_csv(csvfilename):
     output = np.transpose(output)
     return output
 
+def extents(f):
+    '''
+    Calculate the extent parameter for mapping-like plots:
+    extent=[horizontal_min,horizontal_max,vertical_min,vertical_max]
+    :param f: list type x-vector or y-vector
+    :return:
+    '''
+    delta = f[1] - f[0]
+    return [f[0] - delta/2, f[-1] + delta/2]
