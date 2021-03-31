@@ -119,16 +119,12 @@ def run():
 
 def enplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
-        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange, 'enplot')
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'enplot')
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')), "jet", 0.1, 0.9)
         mu_pos = [
             newsystem.mu(
-                np.linspace(
-                    min(flattenList(y_databdl)),
-                    max(flattenList(y_databdl)),
-                    100,
-                ).tolist(),
+                enrange,
                 B,
                 args.nmax,
                 args.angle,
@@ -141,13 +137,13 @@ def enplot(args,newsystem,bfrange,enrange,colors = None):
         super_save(args.fnm, args.dir)
         system_stamp_csv(args.fnm)
     else:
-        sys.stderr.write("The arguments -nmax and -angle are needed")
+        sys.stderr.write("The arguments -nmax and -angle are needed\n")
 
 def denplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
 
         # bundle data from each Landau level originating from each band
-        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange, 'denplot')
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle,bfrange, enrange, 'denplot')
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')), "jet", 0.1, 0.9)
         tot_den = newsystem.tot_density()
@@ -156,7 +152,7 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
         system_stamp_csv(args.fnm)
         super_save(args.fnm, args.dir)
     else:
-        sys.stderr.write('The arguments -nmax and -angle are needed')
+        sys.stderr.write('The arguments -nmax and -angle are needed\n')
 
 def simu(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
@@ -165,7 +161,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
         elif args.loadden is not None:
             den_slices = read_den_from_csv(args.loadden)
         else:
-            sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
+            sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed\n')
         tot_den_list = [sum(den_slice) for den_slice in den_slices]
         tot_den_int = np.mean([abs(tot_den_list[i]-tot_den_list[i+1]) for i in range(len(tot_den_list)-1)])
         ax = make_canvas()
@@ -196,20 +192,20 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
         system_stamp_csv(args.fnm)    
         super_save(args.fnm,args.dir)
     else:
-        sys.stderr.write('The arguments -nmax and -angle are needed')
+        sys.stderr.write('The arguments -nmax and -angle are needed\n')
 
 
 def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
     if args.nmax is not None and args.angle is not None:
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
-        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange, 'dos')
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'dos')
         make_1d_dos_B_plot(bfrange,y_databdl,colors)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dos')
         system_stamp_csv(args.fnm)
         super_save(args.fnm,args.dir)
     else:
-        sys.stderr.write('The arguments -nmax and -angle are needed')
+        sys.stderr.write('The arguments -nmax and -angle are needed\n')
 
 def dos_map(args,newsystem,bfrange,enrange,cmap=None):
     if args.nmax is not None and args.angle is not None:
@@ -220,7 +216,7 @@ def dos_map(args,newsystem,bfrange,enrange,cmap=None):
         elif args.loadden is not None:
             den_slices = read_den_from_csv(args.loadden)
         else:
-            sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed')
+            sys.stderr.write('The arguments -nmax and -angle and -allden and -nos are needed\n')
         ax = make_canvas()
         # data storage
         y_databdl = []
@@ -250,7 +246,7 @@ def dos_map(args,newsystem,bfrange,enrange,cmap=None):
         system_stamp_csv(args.fnm)
         super_save(args.fnm,args.dir)
     else:
-        sys.stderr.write('The arguments -nmax and -angle are needed')
+        sys.stderr.write('The arguments -nmax and -angle are needed\n')
 
 if __name__ == "__main__":
     args = run()
@@ -289,4 +285,4 @@ if __name__ == "__main__":
         if args.dosm:
             dos_map(args,newsystem,bfrange,enrange)
     else:
-        sys.stderr.write("no system (system.json) exist")
+        sys.stderr.write("no system (system.json) exist\n")

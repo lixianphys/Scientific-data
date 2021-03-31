@@ -31,10 +31,10 @@ class Band:
         if attr in ['density','is_cond','is_dirac','M','vf','meff','spin','Ebb']:
             return self.__dict__.get(attr)
         else:
-            sys.stderr.write(f'{attr} is not an attribute for Band. Use density,is_cond,is_dirac,M,vf,meff,spin instead')
+            sys.stderr.write(f'{attr} is not an attribute for Band. Use density,is_cond,is_dirac,M,vf,meff,spin instead\n')
     def set_den(self,value):
         if not isinstance(value,(int,float)):
-            sys.stderr.write(f'value need to be a number')
+            sys.stderr.write(f'value need to be a number\n')
         self.density = value
         self.Ebb = den2en(self.density,self.is_dirac,self.is_cond,self.vf,self.meff)
         return None
@@ -269,10 +269,10 @@ class System:
         return pd.DataFrame(band_info)
 
     def set_all_density(self,den_list):
-        if not len(self.get_band('a')) == len(den_list):
-            num_active_band = len(self.get_band('a'))
-            sys.stderr.write(f'The number of active bands {num_active_band} does not match up with the input densities {len(den_list)}')
-        for band,den in zip(self.get_band('a'),den_list):
+        if not len(self.bands) == len(den_list):
+            num_active_band = len(self.bands)
+            sys.stderr.write(f'The number of active bands {num_active_band} does not match up with the input densities {len(den_list)}\n')
+        for band,den in zip(self.bands,den_list):
             band.set_den(abs(den))
     
     def get_band(self,band):
@@ -285,9 +285,9 @@ class System:
             if band < len(self.bands) and band >= 0:
                 return self.bands[band]
             else:
-                sys.stderr.write(f'#{band} band does not exist. You only have {len(self.bands)} bands')
+                sys.stderr.write(f'#{band} band does not exist. You only have {len(self.bands)} bands\n')
         else:
-            sys.stderr.write(f'Invalid {band} use integer as index or a to choose all') 
+            sys.stderr.write(f'Invalid {band} use integer as index or a to choose all\n') 
 
     def add_band(self, band):
         if not isinstance(band, Band):
@@ -370,7 +370,7 @@ class System:
             if self.get_band('a'):
                 _den = list(map(lambda x:x.density,self.get_band('a')))
             else:
-                sys.stderr.write('There is no active band in this system')
+                sys.stderr.write('There is no active band in this system\n')
                 exit()
             str_den = ' '.join(["{:e}".format(den) for den in _den])
             for n_band, y_data in enumerate(y_databdl):
@@ -394,7 +394,7 @@ class System:
             if self.get_band('a'):
                 _den = list(map(lambda x:x.density,self.get_band('a')))
             else:
-                sys.stderr.write('There is no active band in this system')
+                sys.stderr.write('There is no active band in this system\n')
                 exit()
             str_den = ' '.join(["{:e}".format(den) for den in _den])
             for n_slice,y in enumerate(y_databdl):
@@ -405,7 +405,7 @@ class System:
             else:
                 df.to_csv(path,mode='a',index=False)
     
-    def ydata_gen(self, nmax, angle_in_deg, bfrange, indicator):
+    def ydata_gen(self, nmax, angle_in_deg, bfrange, enrange, indicator):
         if indicator == 'enplot':
             return [
             [
@@ -437,4 +437,4 @@ class System:
             mus = [self.mu(enrange, B, nmax, angle_in_deg, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in self.get_band('a')]) for B in bfrange]
             return [[band.cal_dos(mu_at_B, B, nmax, angle_in_deg, SIGMA_COND if band.get('is_cond') else SIGMA_VAL) for B, mu_at_B in zip(bfrange,mus)] for band in self.get_band('a')]
         else:
-            raise ValueError(f'Invalid indicator {indicator}, use enplot, denplot, dos instead')
+            raise ValueError(f'Invalid indicator {indicator}, use enplot, denplot, dos instead\n')
