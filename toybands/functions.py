@@ -245,8 +245,8 @@ def pretty_print(df):
 
 
 
-def system_stamp_csv(csvfilename,jsfilename=None):
-    
+def system_stamp_csv(args,jsfilename=None):
+    csvfilename = args.fnm
     if jsfilename == None:
         jsfilename = os.path.join(os.getcwd(),'system.json')
     try:

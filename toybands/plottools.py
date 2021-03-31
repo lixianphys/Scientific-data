@@ -71,7 +71,6 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
 
     ax.set_xlabel(DEFAULT_XLABEL)
     ax.set_ylabel(DEFAULT_EBPLOT_YLABEL)
-
     return ax
 
 
@@ -106,7 +105,6 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
     
     ax.set_xlabel(DEFAULT_XLABEL)
     ax.set_ylabel(DEFAULT_NBPLOT_YLABEL)
-
     return ax
 
 def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,legend=True):
@@ -122,7 +120,6 @@ def make_1d_dos_B_plot(bfrange,y_databdl,colors,figsize=DEFAULT_FIGURE_SIZE,line
     ax.plot(bfrange,y_tot,linestyle='--',color='k')
     ax.set_xlabel(DEFAULT_XLABEL)
     ax.set_ylabel(DEFAULT_DOSBPLOT_YLABEL)
-
     return ax
 
 def make_2d_dos_map(bfrange,y_tot,y_databdl,cmap,figsize=DEFAULT_FIGURE_SIZE,ax=None,legend=False):
@@ -132,7 +129,7 @@ def make_2d_dos_map(bfrange,y_tot,y_databdl,cmap,figsize=DEFAULT_FIGURE_SIZE,ax=
     # make extents define the bottom as the last row
     if y_tot[0]>y_tot[-1]:
         y_tot.reverse()
-    ax.imshow(y_array**(1/3), aspect='auto', interpolation='none', extent=(extents(bfrange) + extents(y_tot)), origin = 'upper')
+    ax.imshow(y_array, aspect='auto', interpolation='none', extent=(extents(bfrange) + extents(y_tot)), origin = 'upper')
     ax.set_xlabel(DEFAULT_XLABEL)
     ax.set_ylabel(DEFAULT_DOSMAP_YLABEL)
     ax.set_ylim(min(y_tot),max(y_tot))

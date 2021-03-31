@@ -343,8 +343,7 @@ class System:
         elif len(filename.split('.'))>1:
             filename = filename.split('.')[-2]
         path = os.path.join(DEFAULT_PATH,filename+'.csv')
-        if not any(isinstance(el, list) for el in y_databdl):
-            raise TypeError(f'y_databdl is not nested list')
+
         if indicator == 'enplot':
             columns = ['B','E','N','Band']
         elif indicator == 'denplot':
@@ -385,11 +384,13 @@ class System:
                 df.to_csv(path,mode='a',index=False,header=False)
             else:
                 df.to_csv(path,mode='a',index=False)
+
         elif indicator == 'dos':
             for n_band, y in enumerate(y_databdl):
                 df_toappend = pd.DataFrame(np.transpose(np.array([bfrange,y,[n_band]*len(y)])),columns=columns)
                 df = df.append(df_toappend,ignore_index=True)
             df.to_csv(path, mode='w', index=False)
+
         elif indicator == 'dosm':
             if self.get_band('a'):
                 _den = list(map(lambda x:x.density,self.get_band('a')))
@@ -397,9 +398,9 @@ class System:
                 sys.stderr.write('There is no active band in this system\n')
                 exit()
             str_den = ' '.join(["{:e}".format(den) for den in _den])
-            for n_slice,y in enumerate(y_databdl):
-                df_toappend = pd.DataFrame(np.transpose(np.array([bfrange,y,[str_den]*len(y)])),columns=columns)
-                df = df.append(df_toappend,ignore_index=True)
+
+            df_toappend = pd.DataFrame(np.transpose(np.array([bfrange,y_databdl,[str_den]*len(y_databdl)])),columns=columns)
+            df = df.append(df_toappend,ignore_index=True)
             if os.path.isfile(path):
                 df.to_csv(path,mode='a', index=False, header=False)
             else:

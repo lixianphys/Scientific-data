@@ -135,7 +135,7 @@ def enplot(args,newsystem,bfrange,enrange,colors = None):
         ax = make_1d_E_B_plots(bfrange, y_databdl, colors, mu_pos)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'enplot')
         super_save(args.fnm, args.dir)
-        system_stamp_csv(args.fnm)
+        system_stamp_csv(args)
     else:
         sys.stderr.write("The arguments -nmax and -angle are needed\n")
 
@@ -149,7 +149,7 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
         tot_den = newsystem.tot_density()
         make_1d_den_B_plots(bfrange, y_databdl, colors, tot_den)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'denplot')
-        system_stamp_csv(args.fnm)
+        system_stamp_csv(args)
         super_save(args.fnm, args.dir)
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed\n')
@@ -183,13 +183,13 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
                     colors_p.pop(idx)
             y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax if band.get('is_dirac') else 2*args.nmax)] for band in newsystem.get_band('a')]
             plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
-            make_1d_den_B_plots(bfrange,y_databdl,colors_p,ax=ax,plotrange=plotrange,legend=False)
+            ax = make_1d_den_B_plots(bfrange,y_databdl,colors_p,ax=ax,plotrange=plotrange,legend=False)
             newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)
             # enable the disabled band again for next loop
             if idx_disabled:
                 for idx in idx_disabled:
                     newsystem.get_band(idx).enable()
-        system_stamp_csv(args.fnm)    
+        system_stamp_csv(args)    
         super_save(args.fnm,args.dir)
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed\n')
@@ -202,7 +202,7 @@ def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
         y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'dos')
         make_1d_dos_B_plot(bfrange,y_databdl,colors)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dos')
-        system_stamp_csv(args.fnm)
+        system_stamp_csv(args)
         super_save(args.fnm,args.dir)
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed\n')
@@ -237,13 +237,13 @@ def dos_map(args,newsystem,bfrange,enrange,cmap=None):
             # calculate the dos for each band at each chemical potential along the B field axis
             to_append =  [sum([(1 if band.get('is_cond') else -1)*band.cal_dos(mu_at_B, B, args.nmax, args.angle, SIGMA_COND if band.get('is_cond') else SIGMA_VAL) for band in newsystem.get_band('a')]) for B,mu_at_B in zip(bfrange,mus)]
             y_databdl.append(to_append)
-            newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dosm')
+            newsystem.databdl_write_csv(args.fnm,bfrange,to_append,'dosm')
             # enable the disabled band again for next loop
             if idx_disabled:
                 for idx in idx_disabled:
                     newsystem.get_band(idx).enable()
         make_2d_dos_map(bfrange,y_tot,y_databdl,cmap,ax=ax)
-        system_stamp_csv(args.fnm)
+        system_stamp_csv(args)
         super_save(args.fnm,args.dir)
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed\n')
