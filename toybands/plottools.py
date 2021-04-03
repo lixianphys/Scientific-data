@@ -13,21 +13,6 @@ from utils import flattenList, div
 from toybands.functions import extract_list,add_list, extents
 from toybands.config import *
 
-# define the norm in plotting
-plt.rc('lines', lw=1, color='k')  # thicker black lines
-plt.rc('grid', c='0.5', ls='-', lw=0.5)  # solid gray grid lines
-plt.rc('savefig', dpi=600)  # higher res outputs
-plt.rc("font", size=20, family='arial', weight='light')
-plt.rc("axes", labelsize=20, titlesize=20, linewidth=1)
-plt.rc("xtick", direction='in', labelsize=20)
-plt.rc('xtick.major', size=10, pad=7)
-plt.rc('xtick.minor', size=5, pad=7, visible=True)
-plt.rc("ytick", direction='in', labelsize=20)
-plt.rc('ytick.major', size=10, pad=7)
-plt.rc('ytick.minor', size=5, pad=7, visible=True)
-plt.rc("legend", fontsize=20)
-plt.rcParams['figure.constrained_layout.use'] = True
-
 
 def make_n_colors(n,cmap,vstart,vend):
     if not isinstance(n,int):

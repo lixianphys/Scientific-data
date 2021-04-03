@@ -285,3 +285,12 @@ def extents(f):
     '''
     delta = f[1] - f[0]
     return [f[0] - delta/2, f[-1] + delta/2]
+
+def ElementTree_pretty(elem):
+    from xml.etree import ElementTree
+    from xml.dom import minidom
+    """Return a pretty-printed XML string for the Element.
+    """
+    rough_string = ElementTree.tostring(elem, 'utf-8')
+    reparsed = minidom.parseString(rough_string)
+    return reparsed.toprettyxml(indent="  ")

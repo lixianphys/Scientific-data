@@ -1,13 +1,13 @@
 import argparse
 import os
 import sys
-
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import pdb
+import xml.etree.ElementTree as ET
 from tqdm import tqdm
-
+from datetime import datetime
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
@@ -112,7 +112,7 @@ def run():
     )
 
     args = my_parser.parse_args()
-    print('Your inputs:')
+    print('Your inputs:\n')
     print(vars(args))
     return args
 
@@ -248,24 +248,49 @@ def dos_map(args,newsystem,bfrange,enrange,cmap=None):
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed\n')
 
+def loadsys(df):
+    load_system = System()
+    for i in range(len(df)):
+        dt = df.iloc[i].to_dict()
+        load_band = Band(
+            density=dt["density"],
+            is_cond=dt["is_cond"],
+            is_dirac=dt["is_dirac"],
+            gfactor=dt["gfactor"],
+            meff=dt["meff"],
+            spin=dt["spin"],
+            M=dt["M"],
+            vf=dt["vf"],
+        )
+        load_system.add_band(load_band)
+    return load_system
+
+def output_xml(args):
+    now = datetime.now()
+    data = ET.Element('data')
+    time = ET.SubElement(data,'time')
+    items = ET.SubElement(data,'args')
+    time_ymd = ET.SubElement(time,'ymd')
+    time_ymd.set('name','yyyy/mm/dd')
+    time_ymd.text = str(now.strftime("%Y/%m/%d"))
+    time_hms = ET.SubElement(time,'hms')
+    time_hms.set('name','hh/mm/ss')
+    time_hms.text = str(now.strftime("%H:%M:%S"))
+    for key,arg in vars(args).items():
+        item = ET.SubElement(items,'arg')
+        item.set('name',str(key))
+        item.text = str(arg)
+    if args.fnm:
+        myfile = open(os.path.join('output',args.fnm+'_args.xml'),'w')
+    else:
+        myfile = open(os.path.join('output','argsauto.xml'),'w')
+    myfile.write(ElementTree_pretty(data))
+
 if __name__ == "__main__":
     args = run()
     if os.path.isfile("system.json"):
         df = pd.read_json("system.json")
-        newsystem = System()
-        for i in range(len(df)):
-            dt = df.iloc[i].to_dict()
-            newband = Band(
-                density=dt["density"],
-                is_cond=dt["is_cond"],
-                is_dirac=dt["is_dirac"],
-                gfactor=dt["gfactor"],
-                meff=dt["meff"],
-                spin=dt["spin"],
-                M=dt["M"],
-                vf=dt["vf"],
-            )
-            newsystem.add_band(newband)
+        newsystem = loadsys(df)
         enrange = list(
             np.linspace(
                 args.enrange[0] * e0, args.enrange[1] * e0, int(args.enrange[2])
@@ -284,5 +309,6 @@ if __name__ == "__main__":
             dos_at_mu(args,newsystem,bfrange,enrange)
         if args.dosm:
             dos_map(args,newsystem,bfrange,enrange)
+        output_xml(args)
     else:
         sys.stderr.write("no system (system.json) exist\n")
