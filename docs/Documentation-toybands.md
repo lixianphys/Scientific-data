@@ -66,4 +66,3 @@ Peek into the system you created
  - allow separate figures in a single pdf file for a batch input [*]
  - Is it possible to abort the calculation until I continue it? I mean, keep the memory usage but free its CPU usage. It might be helpful when you just want your PC to handle other CPU-heavy tasks during a long calculation. [*]
  - connect the same LL in simu [**] realize via the output .csv to plot lines with the same band, N at once.
- - check plot_from_csv in simu plotting

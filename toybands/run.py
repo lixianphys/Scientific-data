@@ -12,7 +12,7 @@ from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
 from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, make_2d_dos_map, super_save, make_slices,make_canvas)
-
+from toybands.config import SIGMA_COND, SIGMA_VAL
 def multi_floats(value):
     values = value.split()
     values = map(float, values)
@@ -268,14 +268,24 @@ def loadsys(df):
 def output_xml(args):
     now = datetime.now()
     data = ET.Element('data')
+
     time = ET.SubElement(data,'time')
-    items = ET.SubElement(data,'args')
     time_ymd = ET.SubElement(time,'ymd')
     time_ymd.set('name','yyyy/mm/dd')
     time_ymd.text = str(now.strftime("%Y/%m/%d"))
     time_hms = ET.SubElement(time,'hms')
     time_hms.set('name','hh/mm/ss')
     time_hms.text = str(now.strftime("%H:%M:%S"))
+
+    configs = ET.SubElement(data,'configs')
+    sig_cond = ET.SubElement(configs,'sigma_cond')
+    sig_val = ET.SubElement(configs,'sigma_val')
+    sig_cond.set('name','SIGMA_COND')
+    sig_val.set('name','SIGMA_VAL')
+    sig_cond.text = str(SIGMA_COND)
+    sig_val.text = str(SIGMA_VAL)
+    
+    items = ET.SubElement(data,'args')
     for key,arg in vars(args).items():
         item = ET.SubElement(items,'arg')
         item.set('name',str(key))

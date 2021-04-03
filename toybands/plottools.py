@@ -152,11 +152,10 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
         ind,plottype = 'dos_at_mu','plot'
     else:
         sys.stderr.write('This file is not readable by toybands')
-
     
     for i in range(len(df)):
         if 'N' in df.columns:
-            if df.iloc[i].N != N:
+            if df.iloc[i].N != N or df.iloc[i].Band != iBand:
                 N = df.iloc[i].N
                 if plottype == 'plot':
                     if ind == 'E':
@@ -170,11 +169,9 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
                         line.set_label(f'Band{int(iBand)}')
                     iBand = df.iloc[i].Band
                 x,y = [],[]
-                x.append(df.iloc[i].B)
-                y.append(df.iloc[i][ind])
-            else:
-                x.append(df.iloc[i].B)
-                y.append(df.iloc[i][ind])
+            x.append(df.iloc[i].B)
+            y.append(df.iloc[i][ind])
+
         else:
             if df.iloc[i].Band != iBand:
                 line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
