@@ -142,6 +142,7 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
     else:
         x,y,iBand = [],[],df.iloc[0].Band
     
+    # define plot parameter and type
     if 'System([band density])' in df.columns:
         ind, plottype = 'den','scatter'
     elif 'den' in df.columns:
@@ -153,6 +154,7 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
     else:
         sys.stderr.write('This file is not readable by toybands')
     
+    # plot
     for i in range(len(df)):
         if 'N' in df.columns:
             if df.iloc[i].N != N or df.iloc[i].Band != iBand:
@@ -183,13 +185,14 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
             else:
                 x.append(df.iloc[i].B)
                 y.append(df.iloc[i][ind])
-    # plot the cached last curve
+    # plot the stored last curve
     if 'System([band density])' in df.columns:
         ax.scatter(x, y, color=colors[int(iBand)]) 
     else:        
         line, = ax.plot(x, y, color=colors[int(iBand)],linewidth=DEFAULT_LW)
         line.set_label(f'Band{int(iBand)}')
-
+    
+    # label and legend
     ax.set_xlabel(DEFAULT_XLABEL)
     if ind == 'den':
         ax.set_ylabel(DEFAULT_NBPLOT_YLABEL)
