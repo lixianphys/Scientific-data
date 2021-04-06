@@ -36,7 +36,7 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     return (
         alpha
         * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B/2) ** 2 + (M*e0) ** 2)
-        ** 0.5-alpha*2*hbar*D_PARAM*(N+0.5)/e0/B_perp
+        ** 0.5-alpha*2*e0*B_perp*D_PARAM*(N+0.5)/hbar
     )
     ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017) 
     ## Quadratic term parameter D_PARAM
