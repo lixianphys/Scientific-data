@@ -33,3 +33,5 @@ plt.rcParams['figure.constrained_layout.use'] = True
 # model settings
 SIGMA_COND = 1e-3*e0
 SIGMA_VAL = 3e-4*e0
+D_PARAM = 5.2e-21*e0
+# D_PARAM = 0

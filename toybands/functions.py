@@ -36,9 +36,10 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     return (
         alpha
         * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B/2) ** 2 + (M*e0) ** 2)
-        ** 0.5
+        ** 0.5-alpha*2*hbar*D_PARAM*(N+0.5)/e0/B_perp
     )
-    ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017)
+    ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017) 
+    ## Quadratic term parameter D_PARAM
 
 def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     """Calculate the energy of Landau level in conventional dispersion with a Zeeman term
@@ -59,9 +60,9 @@ def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
 
 def den2en(density,is_dirac,is_cond,vf,meff):
         if is_dirac and is_cond:
-            return -hbar * vf * (4 * np.pi * density) ** 0.5
+            return -hbar * vf * (4 * np.pi * density) ** 0.5+4*D_PARAM*np.pi*density
         elif is_dirac and not is_cond:
-            return hbar * vf * (4 * np.pi * density) ** 0.5
+            return hbar * vf * (4 * np.pi * density) ** 0.5-4*D_PARAM*np.pi*density
         elif not is_dirac and is_cond:
             return -(hbar ** 2) * density/ np.pi / meff/ me
         elif not is_dirac and not is_cond:

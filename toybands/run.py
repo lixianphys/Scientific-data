@@ -280,10 +280,13 @@ def output_xml(args):
     configs = ET.SubElement(data,'configs')
     sig_cond = ET.SubElement(configs,'sigma_cond')
     sig_val = ET.SubElement(configs,'sigma_val')
+    d_param = ET.SubElement(configs,'d_param')
     sig_cond.set('name','SIGMA_COND')
     sig_val.set('name','SIGMA_VAL')
+    d_param.set('name','D_PARAM')
     sig_cond.text = str(SIGMA_COND)
     sig_val.text = str(SIGMA_VAL)
+    d_param.text = str(D_PARAM)
     
     items = ET.SubElement(data,'args')
     for key,arg in vars(args).items():
