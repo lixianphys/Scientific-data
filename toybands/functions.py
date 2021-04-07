@@ -36,7 +36,7 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     return (
         alpha
         * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B/2) ** 2 + (M*e0) ** 2)
-        ** 0.5-alpha*2*e0*B_perp*D_PARAM*(N+0.5)/hbar
+        ** 0.5-alpha*2*e0*B_perp*D_PARAM*(N+0.5)/hbar 
     )
     ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017) 
     ## Quadratic term parameter D_PARAM
@@ -247,7 +247,7 @@ def pretty_print(df):
 
 
 def system_stamp_csv(args,jsfilename=None):
-    csvfilename = args.fnm
+    csvfilename = args.fnm if args.fnm is not None else DEFAULT_AUTONAME
     if jsfilename == None:
         jsfilename = os.path.join(os.getcwd(),'system.json')
     try:
@@ -256,9 +256,9 @@ def system_stamp_csv(args,jsfilename=None):
         sys.stderr.write('Failed to load JSON file for your system\n')
     try:
         if len(csvfilename.split('.'))==1:
-            path = os.path.join(DEFAULT_PATH,csvfilename+'_sysinfo'+'.csv')
+            path = os.path.join(mkdir(csvfilename),csvfilename+'_sysinfo'+'.csv')
         else:
-            path =os.path.join(DEFAULT_PATH,csvfilename.split('.')[-2]+'_sysinfo'+'.csv')
+            path =os.path.join(mkdir(csvfilename),csvfilename.split('.')[-2]+'_sysinfo'+'.csv')
         df.to_csv(path,mode='w')
     except:
         sys.stderr.write('Failed to stamp your sysinfo into csv file\n')
@@ -287,7 +287,7 @@ def extents(f):
     delta = f[1] - f[0]
     return [f[0] - delta/2, f[-1] + delta/2]
 
-def ElementTree_pretty(elem):
+def et_pretty(elem):
     from xml.etree import ElementTree
     from xml.dom import minidom
     """Return a pretty-printed XML string for the Element.
@@ -295,3 +295,9 @@ def ElementTree_pretty(elem):
     rough_string = ElementTree.tostring(elem, 'utf-8')
     reparsed = minidom.parseString(rough_string)
     return reparsed.toprettyxml(indent="  ")
+
+def mkdir(fnm):
+    path = os.path.join(DEFAULT_PATH,fnm.split('.')[0])
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    return path

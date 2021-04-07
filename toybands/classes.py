@@ -339,10 +339,10 @@ class System:
         )
     def databdl_write_csv(self,filename,bfrange,y_databdl,indicator,plotrange=None):
         if filename is None:
-            filename = '[auto]default'
+            filename = DEFAULT_AUTONAME
         elif len(filename.split('.'))>1:
             filename = filename.split('.')[-2]
-        path = os.path.join(DEFAULT_PATH,filename+'.csv')
+        path = os.path.join(mkdir(filename),filename+'.csv')
 
         if indicator == 'enplot':
             columns = ['B','E','N','Band']

@@ -294,10 +294,10 @@ def output_xml(args):
         item.set('name',str(key))
         item.text = str(arg)
     if args.fnm:
-        myfile = open(os.path.join('output',args.fnm+'_args.xml'),'w')
+        myfile = open(os.path.join(mkdir(args.fnm),args.fnm+'_args.xml'),'w')
     else:
-        myfile = open(os.path.join('output','argsauto.xml'),'w')
-    myfile.write(ElementTree_pretty(data))
+        myfile = open(os.path.join(mkdir(DEFAULT_AUTONAME),DEFAULT_AUTONAME+'_args.xml'),'w')
+    myfile.write(et_pretty(data))
 
 if __name__ == "__main__":
     args = run()

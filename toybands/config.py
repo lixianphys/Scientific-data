@@ -5,6 +5,7 @@ from physconst import *
 DEFAULT_PATH = os.path.join(os.getcwd(),'output')
 ALLOW_FORMAT = ['pdf','png','jpeg','tiff']
 DEFAULT_FORMAT = 'pdf'
+DEFAULT_AUTONAME = 'autoGen'
 ## plot settings
 DEFAULT_FIGURE_SIZE = (10,10)
 DEFAULT_LW = 2

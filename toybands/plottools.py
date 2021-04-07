@@ -10,7 +10,7 @@ from matplotlib.backends.backend_pdf import PdfPages
 
 from physconst import *
 from utils import flattenList, div
-from toybands.functions import extract_list,add_list, extents
+from toybands.functions import extract_list,add_list, extents, mkdir
 from toybands.config import *
 
 
@@ -213,9 +213,9 @@ def make_canvas(figsize=DEFAULT_FIGURE_SIZE):
 
 def super_save(filename=None,path=None):
     if filename is None:
-        filename = '[auto]default'
+        filename = DEFAULT_AUTONAME
     if path is None:
-        path = DEFAULT_PATH
+        path = mkdir(filename)
     if not os.path.isdir(path):
         os.mkdir(path)
         sys.stdout.write(f'path created under {path}')
@@ -233,7 +233,7 @@ def pdf_save(filename=None,path=None,end=True):
     if filename is None:
         filename = '[auto]default.pdf'
     if path is None:
-        path = DEFAULT_PATH
+        path = mkdir(filename)
     if len(filename.split('.'))>1:
         filename = filename.split('.')[-2]
     filename = filename+'.pdf'
