@@ -85,30 +85,13 @@ class Band:
                                 x * np.cos(angle_in_deg * np.pi / 180),
                                 N,
                                 self.is_cond,
-                                1,
+                                self.spin,
                                 self.gfactor,
                                 self.meff, 
                             )
                             for x in b_list
                         ]
                     })
-                ll_dict.update(
-                    {
-                        f"#{Nmax+N}": [
-                            self.Ebb
-                            + llconv_gen(
-                                x,
-                                x * np.cos(angle_in_deg * np.pi / 180),
-                                N,
-                                self.is_cond,
-                                -1,
-                                self.gfactor,
-                                self.meff,
-                            )
-                            for x in b_list
-                        ]
-                    }
-                )
             return pd.DataFrame.from_dict(ll_dict)
 
     def cal_idos_b(self, e_list, B, Nmax, angle_in_deg, sigma):
@@ -152,11 +135,11 @@ class Band:
                     B * np.cos(angle_in_deg * np.pi / 180),
                     N,
                     self.is_cond,
-                    spin,
+                    self.spin,
                     self.gfactor,
                     self.meff,
                 )
-                for N in range(Nmax) for spin in [-1,1]
+                for N in range(Nmax)
             ]
             return e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls,compensate_on=False)
         elif not self.is_dirac and not self.is_cond:
@@ -167,11 +150,11 @@ class Band:
                     B * np.cos(angle_in_deg * np.pi / 180),
                     N,
                     self.is_cond,
-                    spin,
+                    self.spin,
                     self.gfactor,
                     self.meff,
                 )
-                for N in range(Nmax) for spin in [-1,1]
+                for N in range(Nmax)
             ]
             return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls,compensate_on=False)
 
@@ -214,11 +197,11 @@ class Band:
                     B * np.cos(angle_in_deg * np.pi / 180),
                     N,
                     self.is_cond,
-                    spin,
+                    self.spin,
                     self.gfactor,
                     self.meff,
                 )
-                for N in range(Nmax)for spin in [-1,1]
+                for N in range(Nmax)
             ]
             return e_density_of_state(E, B, sigma, angle_in_deg, e_lls,compensate_on=False)
         elif not self.is_dirac and not self.is_cond:
@@ -229,11 +212,11 @@ class Band:
                     B * np.cos(angle_in_deg * np.pi / 180),
                     N,
                     self.is_cond,
-                    spin,
+                    self.spin,
                     self.gfactor,
                     self.meff,
                 )
-                for N in range(Nmax) for spin in [-1,1]
+                for N in range(Nmax)
             ]
             return h_density_of_state(E, B, sigma, angle_in_deg, h_lls,compensate_on=False)
 
@@ -258,8 +241,6 @@ class System:
                     self.bands.append(arg)
                 else:
                     raise ValueError(f"{arg} is not an instance of Band")
-        else:
-            warnings.warn(f"Initialization of an empty System\n")
 
     def get_info(self):
         band_info = []
@@ -339,10 +320,10 @@ class System:
         )
     def databdl_write_csv(self,filename,bfrange,y_databdl,indicator,plotrange=None):
         if filename is None:
-            filename = '[auto]default'
+            filename = DEFAULT_AUTONAME
         elif len(filename.split('.'))>1:
             filename = filename.split('.')[-2]
-        path = os.path.join(DEFAULT_PATH,filename+'.csv')
+        path = os.path.join(mkdir(filename),filename+'.csv')
 
         if indicator == 'enplot':
             columns = ['B','E','N','Band']
@@ -413,7 +394,7 @@ class System:
                 band.cal_energy(bfrange, nmax, angle_in_deg)[
                     f"#{N}"
                 ].tolist()
-                for N in range(nmax if band.get('is_dirac') else 2*nmax)
+                for N in range(nmax)
             ]
             for band in self.get_band('a')]
         elif indicator == 'denplot':
@@ -431,7 +412,7 @@ class System:
                         ].tolist()
                     )
                 ]
-                for N in range(nmax if band.get('is_dirac') else 2*nmax)
+                for N in range(nmax)
             ]
             for band in self.get_band('a')]
         elif indicator == 'dos':
