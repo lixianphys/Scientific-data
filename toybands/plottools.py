@@ -133,8 +133,8 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
     except:
         sys.stderr.write(f'Failed to read the csv file')
     if cmap is None:
-        cmap = 'jet'
-    colors = make_n_colors(len(df.Band.unique()),cmap,0.1,0.9)
+        cmap = DEFAULT_CMAP
+    colors = make_n_colors(len(df.Band.unique()),cmap,DEFAULT_CMAP_VMIN,DEFAULT_CMAP_VMAX)
     if ax is None:
         ax = make_canvas()
     if 'N' in df.columns:
@@ -224,7 +224,8 @@ def super_save(filename=None,path=None):
         if fmt in ALLOW_FORMAT:
             plt.savefig(os.path.join(path,filename))
         else:
-            sys.stderr.write(f'The format {fmt} is not supported')
+            plt.savefig(os.path.join(path,filename.split('.')[0]+'.'+DEFAULT_FORMAT))
+            sys.stderr.write(f'The format {fmt} is not supported, save as {DEFAULT_FORMAT} file instead')
     else:
         plt.savefig(os.path.join(path, filename+'.'+DEFAULT_FORMAT))
         sys.stdout.write(f'By default, saved as a {DEFAULT_FORMAT} file')

@@ -121,7 +121,7 @@ def enplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
         y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'enplot')
         if colors is None:
-            colors = make_n_colors(len(newsystem.get_band('a')), "jet", 0.1, 0.9)
+            colors = make_n_colors(len(newsystem.get_band('a')), DEFAULT_CMAP, DEFAULT_CMAP_VMIN, DEFAULT_CMAP_VMAX)
         mu_pos = [
             newsystem.mu(
                 enrange,
@@ -145,7 +145,7 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
         # bundle data from each Landau level originating from each band
         y_databdl = newsystem.ydata_gen(args.nmax,args.angle,bfrange, enrange, 'denplot')
         if colors is None:
-            colors = make_n_colors(len(newsystem.get_band('a')), "jet", 0.1, 0.9)
+            colors = make_n_colors(len(newsystem.get_band('a')), DEFAULT_CMAP, DEFAULT_CMAP_VMIN, DEFAULT_CMAP_VMAX)
         tot_den = newsystem.tot_density()
         make_1d_den_B_plots(bfrange, y_databdl, colors, tot_den)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'denplot')
@@ -166,7 +166,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
         tot_den_int = np.mean([abs(tot_den_list[i]-tot_den_list[i+1]) for i in range(len(tot_den_list)-1)])
         ax = make_canvas()
         if colors is None:
-            colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
+            colors = make_n_colors(len(newsystem.get_band('a')),DEFAULT_CMAP,DEFAULT_CMAP_VMIN,DEFAULT_CMAP_VMAX)
         for den_slice in tqdm(den_slices):
             # colors_p = color will only generate a new pointer to the same list
             colors_p = [color for color in colors]
@@ -191,6 +191,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
                     newsystem.get_band(idx).enable()
         system_stamp_csv(args)    
         super_save(args.fnm,args.dir)
+
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed\n')
 
@@ -198,7 +199,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
 def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
     if args.nmax is not None and args.angle is not None:
         if colors is None:
-            colors = make_n_colors(len(newsystem.get_band('a')),'jet',0.1,0.9)
+            colors = make_n_colors(len(newsystem.get_band('a')),DEFAULT_CMAP,DEFAULT_CMAP_VMIN,DEFAULT_CMAP_VMAX)
         y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'dos')
         make_1d_dos_B_plot(bfrange,y_databdl,colors)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dos')
@@ -210,7 +211,7 @@ def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
 def dos_map(args,newsystem,bfrange,enrange,cmap=None):
     if args.nmax is not None and args.angle is not None:
         if cmap is None:
-            cmap = 'jet'
+            cmap = DEFAULT_CMAP
         if args.allden is not None and args.nos is not None:
             den_slices = make_slices(args.allden,args.nos)
         elif args.loadden is not None:
@@ -294,7 +295,7 @@ def output_xml(args):
         item.set('name',str(key))
         item.text = str(arg)
     if args.fnm:
-        myfile = open(os.path.join(mkdir(args.fnm),args.fnm+'_args.xml'),'w')
+        myfile = open(os.path.join(mkdir(args.fnm),args.fnm.split('.')[0]+'_args.xml'),'w')
     else:
         myfile = open(os.path.join(mkdir(DEFAULT_AUTONAME),DEFAULT_AUTONAME+'_args.xml'),'w')
     myfile.write(et_pretty(data))

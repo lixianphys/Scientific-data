@@ -16,6 +16,9 @@ DEFAULT_EBPLOT_YLABEL = '$E [eV]$'
 DEFAULT_NBPLOT_YLABEL = '$n$ [1/m$^2$]'
 DEFAULT_DOSMAP_YLABEL = '$n$ [1/m$^2$]'
 DEFAULT_DOSBPLOT_YLABEL = 'DOS [a.u.]'
+DEFAULT_CMAP = 'jet'
+DEFAULT_CMAP_VMIN = 0.1
+DEFAULT_CMAP_VMAX = 0.9
 
 plt.rc('lines', lw=1, color='k')  # thicker black lines
 plt.rc('grid', c='0.5', ls='-', lw=0.5)  # solid gray grid lines

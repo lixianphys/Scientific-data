@@ -264,7 +264,7 @@ def system_stamp_csv(args,jsfilename=None):
         sys.stderr.write('Failed to stamp your sysinfo into csv file\n')
 
 
-def read_den_from_csv(csvfilename):
+def read_den_from_csv(csvfilename,unit='cm2'):
     if os.path.isfile(csvfilename) and csvfilename.endswith('.csv'):
         df = pd.read_csv(csvfilename,header=None)
     else:
@@ -272,7 +272,7 @@ def read_den_from_csv(csvfilename):
         exit()
     output = []
     for column in df.columns:
-        output.append([10000*den for den in df[column].tolist()])
+        output.append([10000*den if unit=='cm2' else den for den in df[column].tolist()])
     output = np.array(output)
     output = np.transpose(output)
     return output
