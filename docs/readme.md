@@ -5,7 +5,7 @@
 
 [Main tasks](#main-tasks)
 
-[Command-line-interface CLI](#command-line-interface-(CLI))
+[Command-line-interface CLI](#command-line-interface-CLI)
 
 [Usage Examples below](#usage-examples-below)
 
@@ -34,7 +34,7 @@ All the physics behind is explained in a separate documentation  [[Physics here]
 	- plot the n-B relation of Landau levels at the chemical potential to show the simulation of experimentally obtained Landau fan chart
 	- map the density of state at each (B,n)
 - replot the results stored in csv file(`plotfile.py`)
-### Command-line-interface (CLI)
+### Command line interface CLI
 - If you are the first time to use a CLI:
 	Use a teminal (powershell, gitbash for Win user) and switch current directory to `cd ..\SciData>` and start the command with `python` to invoke your python program and the `toybands` module follows. 
 	An example is `..\SciData> python toybands/xxx.py`.  To access a brief help doc, just add argument `-h` by the end like `python toybands/addband.py -h`. As of now, I will introduce the CLI and its usage, covering common scenarios. Note that you can always interrupt the script by `Ctrl+C` but nothing will be saved after this interruption.
@@ -62,7 +62,7 @@ All the physics behind is explained in a separate documentation  [[Physics here]
  - plot the data from csv file directly from the CLI
  `python toybands/plotfile.py [-f path-to-csvfile]`
 
-### Module  introduction
+### Module introduction
 ##### module `addband` 
 `python toybands/addband.py [-option][parameters]`
 - `density`: positional, density for this band in unit 1/m2
