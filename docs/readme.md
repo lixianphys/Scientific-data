@@ -1,11 +1,11 @@
  # Table of Contents
-[[#Project Overview]]
-[[#Prerequisites]]
-[[#Main tasks]]
-[[#Command-line-interface CLI]]
-[[#Usage Examples below]]
-[[#Module introduction]]
-[[#Features in the future]]
+[Project Overview](#project-overview)
+[Prerequisites](#prerequisites)
+[Main tasks](#main-tasks)
+[Command-line-interface CLI](#command-line-interface-(CLI))
+[Usage Examples below](#usage-examples-below)
+[Module introduction](#module-introduction)
+[Features in the future](#features-in-the-future)
 ### Project Overview
 This toybands model allows one to get some fundamentals of quantum Hall effect and Landau levels in high magnetic field if you happens to have some Dirac or non-Dirac materals, which trends in condensed matter physics in the past ten years or so. 
 You can use some parameters as inputs to describe the properties of electron system of your materials, usually in a simplified form (Fermi velocity, spin projection in the magnetic field direction, effective mass, etc).  In the end, you are enabled to carry out multiple tasks with this model, like plotting the Landau levels in energy or monitoring the effect of density change in Landau levels as the magnetic field ramps. The output will be stored in a separate folder for later check-out. 
