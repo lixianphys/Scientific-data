@@ -13,6 +13,7 @@ from toybands.functions import *
 from toybands.classes import *
 from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, make_2d_dos_map, super_save, make_slices,make_canvas)
 from toybands.config import SIGMA_COND, SIGMA_VAL
+
 def multi_floats(value):
     values = value.split()
     values = map(float, values)
@@ -180,8 +181,9 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
                 if den <= 0:
                     newsystem.get_band(idx).disable()
                     idx_disabled.append(idx)
-                    colors_p.pop(idx)
-            y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax if band.get('is_dirac') else 2*args.nmax)] for band in newsystem.get_band('a')]
+                    colors_p[idx] = None
+            colors_p = [color for color in colors_p if color is not None]
+            y_databdl = [[[np.interp(x=x, xp=enrange, fp=IDOS[index]) for index, x in enumerate(band.cal_energy(bfrange,args.nmax,args.angle)[f'#{N}'].tolist())] for N in range(args.nmax)] for band in newsystem.get_band('a')]
             plotrange = [tot_den-0.5*tot_den_int,tot_den+0.5*tot_den_int]
             ax = make_1d_den_B_plots(bfrange,y_databdl,colors_p,ax=ax,plotrange=plotrange,legend=False)
             newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'simu',plotrange=plotrange)

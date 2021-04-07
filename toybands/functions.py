@@ -53,8 +53,8 @@ def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     Return:
     Energy (IU)
     """
-    if not spin in [1.0, -1.0, 1, -1]:
-        raise ValueError(f"your input spin ={spin} is neither 1 or -1")
+    if not spin in [1.0, -1.0, 0, 1, -1]:
+        raise ValueError(f"your input spin ={spin} is one from 1,0,-1")
     alpha = 1 if is_cond else -1
     return alpha*(N + 0.5) * hbar * e0 * B_perp / meff/ me + spin * gfactor * muB * B / 2
 

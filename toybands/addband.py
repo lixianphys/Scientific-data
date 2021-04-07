@@ -46,7 +46,7 @@ def addband():
         "-convpara",
         type= float,
         nargs = 2,
-        help="(meff,spin) parameters to create a conventional band (float:me,int:-/+1)",
+        help="(meff,spin) parameters to create a conventional band (float:me,int:-1,0,+1)",
     )
 
 
