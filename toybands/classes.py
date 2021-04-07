@@ -241,8 +241,6 @@ class System:
                     self.bands.append(arg)
                 else:
                     raise ValueError(f"{arg} is not an instance of Band")
-        else:
-            warnings.warn(f"Initialization of an empty System\n")
 
     def get_info(self):
         band_info = []
