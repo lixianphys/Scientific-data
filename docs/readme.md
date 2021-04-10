@@ -21,19 +21,6 @@ All the physics behind is explained in a separate documentation  [[Physics here]
 ### Prerequisites
 - Install Python package (v3.8.7 recommended)
 - Pip install dependencies list in requirements.txt `pip install -r requirements.txt`
-### Main tasks
-- build a band with preset parameters and add it to an existing system (`addband.py`)
-- build a system consisting of bands specified above , the system can contain arbitrary number of bands with arbitrary parameters. (`addband.py`)
-- delete band(s) from a system. (`delband.py`)
-- snapshot the system (`peeksys.py`)
-- do some calculations on the system (`run.py`)
-	- calculate the density of state (DOS) at arbitrary B-field and energy E given the position of band bottom/a specific set of carrier densities. (They are equivalent in our model)
-	- Based on DOS results, draw the chemical potentail line at each B-field
-	- plot the E(energy)-B(field) relation of Landau levels
-	- plot the n(density)-B relation of Landau levels. Here we need to use the DOS information to map energy (E) to density (n)
-	- plot the n-B relation of Landau levels at the chemical potential to show the simulation of experimentally obtained Landau fan chart
-	- map the density of state at each (B,n)
-- replot the results stored in csv file(`plotfile.py`)
 ### Command line interface CLI
 - If you are the first time to use a CLI:
 	Use a teminal (powershell, gitbash for Win user) and switch current directory to `cd ..\SciData>` and start the command with `python` to invoke your python program and the `toybands` module follows. 
@@ -45,10 +32,11 @@ All the physics behind is explained in a separate documentation  [[Physics here]
  `python toybands/addband.py [-density] {-is_dirac} {-is_cond} [-gfactor GFACTOR] [{-dp MASS VF} {-cp MEFF SPIN}]` 
  - delete band(s) from the system without UI (useful when you run a script)
  `python toybands/delband.py [-i INDEX or all]`
+ using UI `python toybands/delband.py`
  - have a peek into the system
  `python tobybands/peeksys.py`
  - plot the E-B relationship of Landau levels
- `python toybands/run.py [-enplot] {-dir DIR} {-fnm FNM} [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum] {-nmax NMAX} {-angle ANGLE}` If no `-dir` and `-fnm` is specified, the output figure will be stored in `./output/[auto]default.pdf`  
+ `python toybands/run.py [-enplot] {-dir DIR} {-fnm FNM} [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum] {-nmax NMAX} {-angle ANGLE}` If no `-dir` and `-fnm` is specified, the output figure will be stored in `./DEFAULT_AUTONAME/DEFAULT_AUTONAME.DEFAULT_FORMAT`  
  - plot the n-B relationship of Landau levels
  `python toybands/run.py [-denplot] {-dir DIR} {-fnm FNM} [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum] {-nmax NMAX} {-angle ANGLE}`
  - plot the n-B relationship for a set of given densities (specified by  `--allden` and `-nos`) as a simulation of Landau fan chart.
@@ -61,7 +49,23 @@ All the physics behind is explained in a separate documentation  [[Physics here]
  substitute `[-simu]` with `[-dosm]` in simulation.
  - plot the data from csv file directly from the CLI
  `python toybands/plotfile.py [-f path-to-csvfile]`
+ 
+### Advanced settings
+You can change many of default settings in IO(path, save), plotting and some model parameters (no need to change most of time) in `toymodel/config.py`.
 
+### Main tasks
+- build a band with preset parameters and add it to an existing system (`addband.py`)
+- build a system consisting of bands specified above , the system can contain arbitrary number of bands with arbitrary parameters. (`addband.py`)
+- delete band(s) from a system. (`delband.py`)
+- snapshot the system (`peeksys.py`)
+- do some calculations on the system (`run.py`)
+	- calculate the density of state (DOS) at arbitrary B-field and energy E given the position of band bottom/a specific set of carrier densities. (They are equivalent in our model)
+	- Based on DOS results, draw the chemical potentail line at each B-field
+	- plot the E(energy)-B(field) relation of Landau levels
+	- plot the n(density)-B relation of Landau levels. Here we need to use the DOS information to map energy (E) to density (n)
+	- plot the n-B relation of Landau levels at the chemical potential to show the simulation of experimentally obtained Landau fan chart
+	- map the density of state (DOS) at each (B,n)
+- replot the results stored in csv file(`plotfile.py`)
 ### Module introduction
 ##### module `addband` 
 `python toybands/addband.py [-option][parameters]`
@@ -80,13 +84,14 @@ Peek into the system you created
  
  ##### module `delband`
  Remove bands from a system
- This can be done by `python toybands/delband.py`. It will prompt a dialogue `which band to delete? Input the index number: Or press 'e' to exit`. Type the number in front of all the parameters within a row for that band you want to delete. Or quit by typing `e`. 
+ This can be done by `python toybands/delband.py`. It will prompt a dialogue `which band to delete? Input the index number: Or press 'e' to exit`. Type the number in front of all the parameters within a row for that band you want to delete. Or quit by typing `e`.  In some cases, you need to delete bands in multiple-line scipts, then just using `python toybands/delband.py -i [INDEX or all]`  'all' will let you empty the system. 
  
  ##### module `run`
  `python toybands/run.py [-option][parameters]`
  - `-enplot`: optional, plot the energy versus bfield (yes/no)
  - `-denplot`: optional, plot the density versus bfield (yes/no)
  - `-simu`: optional, dynamically generate relationship between the density and the bfield at steps of input density (yes/no)
+ - `-dosm`:optional, mapping of DOS onto (n,B) (yes/no)
  - `-dos`: optional, plot dos versus bfield (yes/no)
  - `--allden`: optional, densities for each band: start1 end1 start2 end2 ...
  - `-nos`: optional, number of steps in the simulation
