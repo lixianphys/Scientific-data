@@ -7,8 +7,16 @@
         "id": "ead6a023c13d20f8",
         "type": "leaf",
         "state": {
+<<<<<<< HEAD
           "type": "empty",
           "state": {}
+=======
+          "type": "markdown",
+          "state": {
+            "file": "Physics here.md",
+            "mode": "source"
+          }
+>>>>>>> d99434200170543971ba758229bd570422ab1707
         }
       }
     ],
@@ -65,6 +73,10 @@
             "state": {
               "type": "backlink",
               "state": {
+<<<<<<< HEAD
+=======
+                "file": "Physics here.md",
+>>>>>>> d99434200170543971ba758229bd570422ab1707
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -84,9 +96,14 @@
   },
   "active": "ead6a023c13d20f8",
   "lastOpenFiles": [
+<<<<<<< HEAD
     "readme.md",
     "toybands.md",
+=======
+>>>>>>> d99434200170543971ba758229bd570422ab1707
     "Physics here.md",
+    "readme.md",
+    "toybands.md",
     "Documentation-toybands.md",
     "Untitled.md"
   ]
