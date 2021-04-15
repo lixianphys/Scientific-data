@@ -15,12 +15,11 @@ from toybands.config import DEFAULT_AUTONAME,DEFAULT_PATH
 
 
 class Band:
-    def __init__(self, density, is_cond, is_dirac, gfactor, M, vf, dparam, meff, spin):      
+    def __init__(self, density, is_cond, is_dirac, gfactor,vf, dparam, meff, spin):      
         self.density = abs(density)
         self.is_cond = is_cond
         self.is_dirac = is_dirac
         self.gfactor = gfactor
-        self.M = M
         self.vf = vf
         self.dparam = dparam
         self.meff = meff
@@ -65,7 +64,6 @@ class Band:
                                 N,
                                 self.is_cond,
                                 self.gfactor,
-                                self.M,
                                 self.vf,
                                 self.dparam
                             )
@@ -108,7 +106,6 @@ class Band:
                     N,
                     self.is_cond,
                     self.gfactor,
-                    self.M,
                     self.vf,
                     self.dparam
                 )
@@ -124,7 +121,6 @@ class Band:
                     N,
                     self.is_cond,
                     self.gfactor,
-                    self.M,
                     self.vf,
                     self.dparam
                 )
@@ -172,7 +168,6 @@ class Band:
                     N,
                     self.is_cond,
                     self.gfactor,
-                    self.M,
                     self.vf,
                     self.dparam
                 )
@@ -188,7 +183,6 @@ class Band:
                     N,
                     self.is_cond,
                     self.gfactor,
-                    self.M,
                     self.vf,
                     self.dparam
                 )
@@ -278,9 +272,9 @@ class System:
 
     def add_band(self, band):
         if not isinstance(band, Band):
-            raise TypeError(f"{band} is not Band object")
+            raise TypeError(f"{band} is not Band object\n")
         elif band in self.bands:
-            raise ValueError(f"{band} is already a part of System")
+            raise ValueError(f"{band} is already a part of System\n")
         else:
             self.bands.append(band)
 

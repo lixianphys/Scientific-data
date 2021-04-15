@@ -13,7 +13,7 @@ from physconst import e0
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
-from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, make_2d_dos_map, super_save, make_slices,make_canvas)
+from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, make_2d_dos_map, super_save, make_slices,make_canvas,draw_band)
 from toybands.config import *
 
 def multi_floats(value):
@@ -267,6 +267,11 @@ def dos_map(args,newsystem,bfrange,enrange,cmap=None):
     else:
         sys.stderr.write('The arguments -nmax and -angle are needed\n')
 
+def draw(args,newsystem):
+    draw_band(newsystem)
+    super_save(args.fnm+'_bandsketch',os.path.join(DEFAULT_PATH,args.fnm))
+
+
 def loadsys(df):
     load_system = System()
     for i in range(len(df)):
@@ -279,7 +284,6 @@ def loadsys(df):
             meff=dt["meff"],
             spin=dt["spin"],
             dparam = dt["dparam"],
-            M=dt["M"],
             vf=dt["vf"],
         )
         load_system.add_band(load_band)
@@ -343,6 +347,7 @@ if __name__ == "__main__":
             dos_at_mu(args,newsystem,bfrange,enrange)
         if args.dosm:
             dos_map(args,newsystem,bfrange,enrange)
+        draw(args,newsystem)
         output_xml(args)
     else:
         sys.stderr.write("no system (system.json) exist\n")
