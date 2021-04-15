@@ -61,7 +61,7 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
 
 
 
-def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,legend=True):
+def make_1d_den_B_plots(bfrange,y_databdl, colors, tot_den = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,legend=True):
     if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
         raise TypeError(f'either x_databdl or y_databdl or colors is not list')
     if not len(y_databdl)==len(colors):
@@ -78,7 +78,7 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
                 line, = ax.plot(bfrange,y,linewidth=linewidth,color=color)
             line.set_label(f'Band{n_band}')
     else:
-        for y_data, color in zip(y_databdl,colors):
+        for y_data, color in zip(y_databdl, colors):
             for y in y_data:
                 ax.scatter(extract_list(bfrange,[yy>plotrange[0] and yy<plotrange[1] for yy in y]),extract_list(y,[yy>plotrange[0] and yy<plotrange[1] for yy in y]), color=color)
     if legend:
@@ -120,6 +120,7 @@ def make_2d_dos_map(bfrange,y_tot,y_databdl,cmap,figsize=DEFAULT_FIGURE_SIZE,ax=
     ax.set_ylim(min(y_tot),max(y_tot))
     
     return ax
+
 
 def plot_from_csv(path,ax=None,cmap=None,legend=True):
     if not isinstance(path,str):

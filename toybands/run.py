@@ -8,11 +8,13 @@ import pdb
 import xml.etree.ElementTree as ET
 from tqdm import tqdm
 from datetime import datetime
+
+from physconst import e0
 from utils import flattenList, div
 from toybands.functions import *
 from toybands.classes import *
 from toybands.plottools import (make_n_colors, make_1d_E_B_plots, make_1d_den_B_plots, make_1d_dos_B_plot, make_2d_dos_map, super_save, make_slices,make_canvas)
-from toybands.config import SIGMA_COND, SIGMA_VAL
+from toybands.config import *
 
 def multi_floats(value):
     values = value.split()
@@ -22,7 +24,7 @@ def multi_floats(value):
 
 def run():
     my_parser = argparse.ArgumentParser(
-        prog="run", description="A band model to play with"
+        prog="run", description="Run your calculation here by throwing arguments into the <toybands> model"
     )
     plot_group = my_parser.add_mutually_exclusive_group(required=True)
     den_group = my_parser.add_mutually_exclusive_group(required=False)
@@ -112,6 +114,20 @@ def run():
         help="angle in degree made with the sample plane norm by the external field (default=0)",
     )
 
+    my_parser.add_argument(
+        "-scond",
+        action="store",
+        type=float,
+        help="sigma for all conduction bands (meV,default value see config.py)",
+    )
+
+    my_parser.add_argument(
+        "-sval",
+        action="store",
+        type=float,
+        help="sigma for all valence bands (meV,default value see config.py)",
+    )
+
     args = my_parser.parse_args()
     print('Your inputs:\n')
     print(vars(args))
@@ -120,7 +136,7 @@ def run():
 
 def enplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
-        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'enplot')
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'enplot',SIGMA_COND,SIGMA_VAL)
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')), DEFAULT_CMAP, DEFAULT_CMAP_VMIN, DEFAULT_CMAP_VMAX)
         mu_pos = [
@@ -144,7 +160,7 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
 
         # bundle data from each Landau level originating from each band
-        y_databdl = newsystem.ydata_gen(args.nmax,args.angle,bfrange, enrange, 'denplot')
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle,bfrange, enrange, 'denplot',SIGMA_COND,SIGMA_VAL)
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')), DEFAULT_CMAP, DEFAULT_CMAP_VMIN, DEFAULT_CMAP_VMAX)
         tot_den = newsystem.tot_density()
@@ -202,7 +218,7 @@ def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
     if args.nmax is not None and args.angle is not None:
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')),DEFAULT_CMAP,DEFAULT_CMAP_VMIN,DEFAULT_CMAP_VMAX)
-        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'dos')
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'dos',SIGMA_COND,SIGMA_VAL)
         make_1d_dos_B_plot(bfrange,y_databdl,colors)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dos')
         system_stamp_csv(args)
@@ -262,6 +278,7 @@ def loadsys(df):
             gfactor=dt["gfactor"],
             meff=dt["meff"],
             spin=dt["spin"],
+            dparam = dt["dparam"],
             M=dt["M"],
             vf=dt["vf"],
         )
@@ -283,13 +300,10 @@ def output_xml(args):
     configs = ET.SubElement(data,'configs')
     sig_cond = ET.SubElement(configs,'sigma_cond')
     sig_val = ET.SubElement(configs,'sigma_val')
-    d_param = ET.SubElement(configs,'d_param')
     sig_cond.set('name','SIGMA_COND')
     sig_val.set('name','SIGMA_VAL')
-    d_param.set('name','D_PARAM')
     sig_cond.text = str(SIGMA_COND)
     sig_val.text = str(SIGMA_VAL)
-    d_param.text = str(D_PARAM)
     
     items = ET.SubElement(data,'args')
     for key,arg in vars(args).items():
@@ -304,6 +318,10 @@ def output_xml(args):
 
 if __name__ == "__main__":
     args = run()
+    if args.scond is not None:
+        SIGMA_COND = args.scond*e0*1e-3
+    if args.sval is not None:
+        SIGMA_VAL = args.sval*e0*1e-3
     if os.path.isfile("system.json"):
         df = pd.read_json("system.json")
         newsystem = loadsys(df)

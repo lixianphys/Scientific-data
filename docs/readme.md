@@ -14,7 +14,7 @@
 [Features in the future](#features-in-the-future)
 
 ### Project Overview
-This toybands model allows one to get some fundamentals of quantum Hall effect and Landau levels in high magnetic field if you happens to have some Dirac or non-Dirac materals, which trends in condensed matter physics in the past ten years or so. 
+This **toybands** model allows one to get some fundamentals of quantum Hall effect and Landau levels in high magnetic field if you happens to have some Dirac or non-Dirac materials, which trends in condensed matter physics in the past ten years or so. 
 You can use some parameters as inputs to describe the properties of electron system of your materials, usually in a simplified form (Fermi velocity, spin projection in the magnetic field direction, effective mass, etc).  In the end, you are enabled to carry out multiple tasks with this model, like plotting the Landau levels in energy or monitoring the effect of density change in Landau levels as the magnetic field ramps. The output will be stored in a separate folder for later check-out. 
 All the physics behind is explained in a separate documentation  [[Physics here]]. 
 
@@ -53,6 +53,7 @@ All the physics behind is explained in a separate documentation  [[Physics here]
  `python toybands/run.py [-denplot] {-dir DIR} {-fnm FNM} [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum] {-nmax NMAX} {-angle ANGLE}`
  - plot the n-B relationship for a set of given densities (specified by  `--allden` and `-nos`) as a simulation of Landau fan chart.
  `python toybands/run.py [-simu] [--allden "NS1 NE1 NS2 NE2 ..."] [-nos NOS] {-dir DIR} {-fnm FNM} [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum] {-nmax NMAX} {-angle ANGLE}`
+
  	Alternatively, one can load densitites stored in columns of a csv file (no header) elsewhere like:
  `python toybands/run.py [-simu] [--loadden path-to-csvfile] {-dir DIR} {-fnm FNM} [--enrange Estart Eend Enum] [--bfrange Bstart Bend Bnum] {-nmax NMAX} {-angle ANGLE}`
  - plot the DOS-B relationship at a fixed chemical potential
@@ -77,11 +78,11 @@ A system will be initiated at the same time its first band is created.
 #####  module `peeksys`
 Peek into the system you created
  Once you'd like to see what is in your system, how many bands and their parameters, simply type: `python toybands/peaksys.py`.  It will print out a summary of bands in table-like format.
- 
+
  ##### module `delband`
  Remove bands from a system
  This can be done by `python toybands/delband.py`. It will prompt a dialogue `which band to delete? Input the index number: Or press 'e' to exit`. Type the number in front of all the parameters within a row for that band you want to delete. Or quit by typing `e`. 
- 
+
  ##### module `run`
  `python toybands/run.py [-option][parameters]`
  - `-enplot`: optional, plot the energy versus bfield (yes/no)
@@ -97,7 +98,7 @@ Peek into the system you created
  - `-nmax`: optional, number of Landau levels involved (default=20)
  - `-angle`: optional, angle in degree made with the sample plane norm by the external field (default=0)
 
- 
+
  ### Features in the future
  - Input customized E-B relationship [*]
  - allow separate figures in a single pdf file for a batch input [*]

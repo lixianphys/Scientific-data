@@ -11,21 +11,22 @@ from functools import reduce
 
 from physconst import *
 from toybands.functions import *
-from toybands.config import *
+from toybands.config import DEFAULT_AUTONAME,DEFAULT_PATH
 
 
 class Band:
-    def __init__(self, density, is_cond, is_dirac, gfactor, M, vf, meff, spin):        
+    def __init__(self, density, is_cond, is_dirac, gfactor, M, vf, dparam, meff, spin):      
         self.density = abs(density)
         self.is_cond = is_cond
         self.is_dirac = is_dirac
         self.gfactor = gfactor
         self.M = M
         self.vf = vf
+        self.dparam = dparam
         self.meff = meff
         self.spin = spin
         self.active = True
-        self.Ebb = den2en(abs(density),is_dirac,is_cond,vf,meff)
+        self.Ebb = den2en(abs(density),is_dirac,is_cond,vf,dparam,meff)
    
     def get(self, attr):
         if attr in ['density','is_cond','is_dirac','M','vf','meff','spin','Ebb']:
@@ -36,7 +37,7 @@ class Band:
         if not isinstance(value,(int,float)):
             sys.stderr.write(f'value need to be a number\n')
         self.density = value
-        self.Ebb = den2en(self.density,self.is_dirac,self.is_cond,self.vf,self.meff)
+        self.Ebb = den2en(self.density,self.is_dirac,self.is_cond,self.vf,self.dparam,self.meff)
         return None
 
     def disable(self):
@@ -66,6 +67,7 @@ class Band:
                                 self.gfactor,
                                 self.M,
                                 self.vf,
+                                self.dparam
                             )
                             for x in b_list
                         ]
@@ -108,6 +110,7 @@ class Band:
                     self.gfactor,
                     self.M,
                     self.vf,
+                    self.dparam
                 )
                 for N in range(Nmax)
             ]
@@ -123,6 +126,7 @@ class Band:
                     self.gfactor,
                     self.M,
                     self.vf,
+                    self.dparam
                 )
                 for N in range(Nmax)
             ]
@@ -170,6 +174,7 @@ class Band:
                     self.gfactor,
                     self.M,
                     self.vf,
+                    self.dparam
                 )
                 for N in range(Nmax)
             ]
@@ -185,6 +190,7 @@ class Band:
                     self.gfactor,
                     self.M,
                     self.vf,
+                    self.dparam
                 )
                 for N in range(Nmax)
             ]
@@ -387,7 +393,7 @@ class System:
             else:
                 df.to_csv(path,mode='a',index=False)
     
-    def ydata_gen(self, nmax, angle_in_deg, bfrange, enrange, indicator):
+    def ydata_gen(self, nmax, angle_in_deg, bfrange, enrange, indicator,scond, sval):
         if indicator == 'enplot':
             return [
             [
@@ -400,7 +406,7 @@ class System:
         elif indicator == 'denplot':
             IDOS = [
             self.dos_gen(
-                enrange, B, nmax, angle_in_deg, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in self.get_band('a')])
+                enrange, B, nmax, angle_in_deg, [scond if band.get('is_cond') else sval for band in self.get_band('a')])
             for B in bfrange]
             return [
             [
@@ -416,7 +422,7 @@ class System:
             ]
             for band in self.get_band('a')]
         elif indicator == 'dos':
-            mus = [self.mu(enrange, B, nmax, angle_in_deg, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in self.get_band('a')]) for B in bfrange]
-            return [[band.cal_dos(mu_at_B, B, nmax, angle_in_deg, SIGMA_COND if band.get('is_cond') else SIGMA_VAL) for B, mu_at_B in zip(bfrange,mus)] for band in self.get_band('a')]
+            mus = [self.mu(enrange, B, nmax, angle_in_deg, [scond if band.get('is_cond') else sval for band in self.get_band('a')]) for B in bfrange]
+            return [[band.cal_dos(mu_at_B, B, nmax, angle_in_deg, scond if band.get('is_cond') else sval) for B, mu_at_B in zip(bfrange,mus)] for band in self.get_band('a')]
         else:
             raise ValueError(f'Invalid indicator {indicator}, use enplot, denplot, dos instead\n')

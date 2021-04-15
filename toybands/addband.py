@@ -38,8 +38,8 @@ def addband():
         "-dp",
         "-diracpara",
         type=float,
-        nargs=2,
-        help="(M,vf) parameters to create a Dirac-like band (float:eV,float:m/s)",
+        nargs=3,
+        help="(M,vf,dparam) parameters to create a Dirac-like band (float:eV,float:m/s,float:meV nm^2)",
     )
     group.add_argument(
         "-cp",
@@ -70,6 +70,7 @@ def addband():
             gfactor=args.gfactor,
             M=args.dp[0]if isinstance(args.dp[0],(int, float, complex)) else None,
             vf=args.dp[1] if isinstance(args.dp[1],(int, float, complex)) else None,
+            dparam=args.dp[2]*e0*1e-21 if isinstance(args.dp[2],(int, float, complex)) else None,
             meff= None,
             spin= None,
         )
@@ -93,6 +94,7 @@ if __name__ == "__main__":
                 gfactor=dt["gfactor"],
                 meff=dt["meff"],
                 spin=dt["spin"],
+                dparam = dt["dparam"],
                 M=dt["M"],
                 vf=dt["vf"],
             )
