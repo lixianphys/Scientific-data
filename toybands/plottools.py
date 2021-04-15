@@ -127,9 +127,9 @@ def draw_band(system,figsize=DEFAULT_FIGURE_SIZE,legend=True):
     ax = make_canvas(figsize=figsize)
     for n_band,(band,color) in enumerate(zip(system.get_band('a'),colors)):
         if band.is_dirac and band.is_cond:
-            enk = [(band.Ebb-kk*hbar*band.vf-band.dparam*kk**2)/e0 for kk in k if kk<0]+[(band.Ebb+kk*hbar*band.vf+band.dparam*kk**2)/e0 for kk in k if kk>=0]
+            enk = [(band.Ebb-kk*hbar*band.vf+band.dparam*kk**2)/e0 for kk in k if kk<0]+[(band.Ebb+kk*hbar*band.vf+band.dparam*kk**2)/e0 for kk in k if kk>=0]
         elif band.is_dirac and not band.is_cond:
-            enk = [(band.Ebb+kk*hbar*band.vf+band.dparam*kk**2)/e0 for kk in k if kk<0]+[(band.Ebb-kk*hbar*band.vf-band.dparam*kk**2)/e0 for kk in k if kk>=0]
+            enk = [(band.Ebb+kk*hbar*band.vf-band.dparam*kk**2)/e0 for kk in k if kk<0]+[(band.Ebb-kk*hbar*band.vf-band.dparam*kk**2)/e0 for kk in k if kk>=0]
         elif not band.is_dirac and band.is_cond:
             enk = [(band.Ebb+(hbar*kk)**2/2/band.meff/me)/e0 for kk in k]
         elif not band.is_dirac and not band.is_cond:
