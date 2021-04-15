@@ -12,10 +12,9 @@ from functools import reduce
 from scipy.integrate import quad
 
 from physconst import *
-from toybands.config import *
+from toybands.config import DEFAULT_PATH, DEFAULT_AUTONAME
 
-
-def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
+def lldirac_gen(B, B_perp, N, is_cond, gfactor, vf, dparam):
     """Calculate the energy of Landau level in Dirac dispersion with a Zeeman term
     Arguments:
     B: Total magnetic field (IU,Tesla)
@@ -23,8 +22,9 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     N: Landau index
     is_cond: True for conduction and False for valence band
     gfactor: g-factor
-    M: mass term
+    M: Dirac mass term
     vf: Fermi-velocity (m/s)
+    dparam: D paramter in BHZ model, the prefactor of the nonlinear term k^2 for surface states
     Return:
     Energy (IU)
     """
@@ -35,8 +35,8 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, M, vf):
     alpha = 1 if is_cond else -1
     return (
         alpha
-        * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B/2) ** 2 + (M*e0) ** 2)
-        ** 0.5-alpha*2*e0*B_perp*D_PARAM*(N+0.5)/hbar 
+        * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B/2) ** 2)
+        ** 0.5-alpha*2*e0*B_perp*dparam*(N+0.5)/hbar 
     )
     ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017) 
     ## Quadratic term parameter D_PARAM
@@ -58,11 +58,11 @@ def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
     alpha = 1 if is_cond else -1
     return alpha*(N + 0.5) * hbar * e0 * B_perp / meff/ me + spin * gfactor * muB * B / 2
 
-def den2en(density,is_dirac,is_cond,vf,meff):
+def den2en(density,is_dirac,is_cond,vf,dparam,meff):
         if is_dirac and is_cond:
-            return -hbar * vf * (4 * np.pi * density) ** 0.5+4*D_PARAM*np.pi*density
+            return -hbar * vf * (4 * np.pi * density) ** 0.5+4*dparam*np.pi*density
         elif is_dirac and not is_cond:
-            return hbar * vf * (4 * np.pi * density) ** 0.5-4*D_PARAM*np.pi*density
+            return hbar * vf * (4 * np.pi * density) ** 0.5-4*dparam*np.pi*density
         elif not is_dirac and is_cond:
             return -(hbar ** 2) * density/ np.pi / meff/ me
         elif not is_dirac and not is_cond:
@@ -219,7 +219,7 @@ def add_list(a, b):
 
 def extract_list(xlist,bool_list):
     if not len(xlist) == len(bool_list):
-        sys.stderr.write('The list and bool_list must be of the same length')
+        sys.stderr.write('The list and bool_list must be of the same length\n')
     output = []
     for x,bool in zip(xlist,bool_list):
         if bool:
@@ -229,7 +229,7 @@ def extract_list(xlist,bool_list):
 
 def pretty_print(df):
     if not isinstance(df,pd.DataFrame):
-        sys.stderr.write('Input is not a pandas.DataFrame object')
+        sys.stderr.write('Input is not a pandas.DataFrame object\n')
     names = list(df.columns)
     if 'density' in names:
         l = [value/1e16 for value in df['density'].values.tolist()]
@@ -268,7 +268,7 @@ def read_den_from_csv(csvfilename,unit='cm2'):
     if os.path.isfile(csvfilename) and csvfilename.endswith('.csv'):
         df = pd.read_csv(csvfilename,header=None)
     else:
-        sys.stderr.write(f'The file {csvfilename} does not exist or not .csv file')
+        sys.stderr.write(f'The file {csvfilename} does not exist or not .csv file\n')
         exit()
     output = []
     for column in df.columns:

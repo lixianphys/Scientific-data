@@ -61,7 +61,7 @@ def make_1d_E_B_plots(bfrange,y_databdl,colors, mu_pos = None,enrange=None,figsi
 
 
 
-def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,legend=True):
+def make_1d_den_B_plots(bfrange,y_databdl, colors, tot_den = None,enrange=None,figsize=DEFAULT_FIGURE_SIZE,linewidth=DEFAULT_LW, ax=None,plotrange = None,legend=True):
     if not isinstance(bfrange,list) or not isinstance(y_databdl,list) or not isinstance(colors,list):
         raise TypeError(f'either x_databdl or y_databdl or colors is not list')
     if not len(y_databdl)==len(colors):
@@ -78,7 +78,7 @@ def make_1d_den_B_plots(bfrange,y_databdl,colors, tot_den = None,enrange=None,fi
                 line, = ax.plot(bfrange,y,linewidth=linewidth,color=color)
             line.set_label(f'Band{n_band}')
     else:
-        for y_data, color in zip(y_databdl,colors):
+        for y_data, color in zip(y_databdl, colors):
             for y in y_data:
                 ax.scatter(extract_list(bfrange,[yy>plotrange[0] and yy<plotrange[1] for yy in y]),extract_list(y,[yy>plotrange[0] and yy<plotrange[1] for yy in y]), color=color)
     if legend:
@@ -121,17 +121,38 @@ def make_2d_dos_map(bfrange,y_tot,y_databdl,cmap,figsize=DEFAULT_FIGURE_SIZE,ax=
     
     return ax
 
+def draw_band(system,figsize=DEFAULT_FIGURE_SIZE,legend=True):
+    colors = make_n_colors(len(system.get_band('a')), DEFAULT_CMAP, DEFAULT_CMAP_VMIN, DEFAULT_CMAP_VMAX)
+    k = np.linspace(-0.5,0.5,101)*1e9
+    ax = make_canvas(figsize=figsize)
+    for n_band,(band,color) in enumerate(zip(system.get_band('a'),colors)):
+        if band.is_dirac and band.is_cond:
+            enk = [(band.Ebb-kk*hbar*band.vf+band.dparam*kk**2)/e0 for kk in k if kk<0]+[(band.Ebb+kk*hbar*band.vf+band.dparam*kk**2)/e0 for kk in k if kk>=0]
+        elif band.is_dirac and not band.is_cond:
+            enk = [(band.Ebb+kk*hbar*band.vf-band.dparam*kk**2)/e0 for kk in k if kk<0]+[(band.Ebb-kk*hbar*band.vf-band.dparam*kk**2)/e0 for kk in k if kk>=0]
+        elif not band.is_dirac and band.is_cond:
+            enk = [(band.Ebb+(hbar*kk)**2/2/band.meff/me)/e0 for kk in k]
+        elif not band.is_dirac and not band.is_cond:
+            enk = [(band.Ebb-(hbar*kk)**2/2/band.meff/me)/e0 for kk in k]
+        line, = ax.plot(k/1e9,enk,color=color,linewidth = DEFAULT_LW)
+        line.set_label(f'Band{n_band}')
+    if legend:
+        ax.legend(loc=DEFAULT_LEGEND_LOC,bbox_to_anchor=DEFAULT_LEGEND_POS)
+    ax.axhline(y=0, linestyle = '--', linewidth = DEFAULT_LW)
+    ax.set_xlabel('k [nm$^{-1}$]')
+    ax.set_ylabel('E (eV)')
+
 def plot_from_csv(path,ax=None,cmap=None,legend=True):
     if not isinstance(path,str):
-        sys.stderr.write(f'the path {path} is not a string')
+        sys.stderr.write(f'the path {path} is not a string\n')
     if not os.path.isfile(path):
-        sys.stderr.write(f'the file {path} does not exist')
+        sys.stderr.write(f'the file {path} does not exist\n')
     if not path.endswith('.csv'):
-        sys.stderr.write(f'the file {path} is not a csv file')
+        sys.stderr.write(f'the file {path} is not a csv file\n')
     try:
         df = pd.read_csv(path)
     except:
-        sys.stderr.write(f'Failed to read the csv file')
+        sys.stderr.write(f'Failed to read the csv file\n')
     if cmap is None:
         cmap = DEFAULT_CMAP
     colors = make_n_colors(len(df.Band.unique()),cmap,DEFAULT_CMAP_VMIN,DEFAULT_CMAP_VMAX)
@@ -152,7 +173,7 @@ def plot_from_csv(path,ax=None,cmap=None,legend=True):
     elif 'dos_at_mu' in df.columns:
         ind,plottype = 'dos_at_mu','plot'
     else:
-        sys.stderr.write('This file is not readable by toybands')
+        sys.stderr.write('This file is not readable by toybands\n')
     
     # plot
     for i in range(len(df)):
@@ -225,10 +246,10 @@ def super_save(filename=None,path=None):
             plt.savefig(os.path.join(path,filename))
         else:
             plt.savefig(os.path.join(path,filename.split('.')[0]+'.'+DEFAULT_FORMAT))
-            sys.stderr.write(f'The format {fmt} is not supported, save as {DEFAULT_FORMAT} file instead')
+            sys.stderr.write(f'The format {fmt} is not supported, save as {DEFAULT_FORMAT} file instead\n')
     else:
         plt.savefig(os.path.join(path, filename+'.'+DEFAULT_FORMAT))
-        sys.stdout.write(f'By default, saved as a {DEFAULT_FORMAT} file')
+        sys.stdout.write(f'By default, saved as a {DEFAULT_FORMAT} file\n')
 
 def pdf_save(filename=None,path=None,end=True):
     if filename is None:
@@ -248,7 +269,7 @@ def pdf_save(filename=None,path=None,end=True):
 
 def make_slices(den_list,numofsteps):
     if not isinstance(den_list, list):
-        sys.stderr.write('Input is not list')
+        sys.stderr.write('Input is not list\n')
     all_density  = []
     for start,end in zip(den_list[::2],den_list[1::2]):
         all_density.append(np.linspace(start,end,numofsteps).tolist())

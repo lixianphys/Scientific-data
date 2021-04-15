@@ -4,15 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "968801e935580091",
+        "id": "ead6a023c13d20f8",
         "type": "leaf",
-        "active": true,
         "state": {
-          "type": "markdown",
-          "state": {
-            "file": "readme.md",
-            "mode": "source"
-          }
+          "type": "empty",
+          "state": {}
         }
       }
     ],
@@ -69,10 +65,11 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "readme.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
                 "backlinkCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -85,7 +82,9 @@
     "width": 300,
     "collapsed": true
   },
+  "active": "ead6a023c13d20f8",
   "lastOpenFiles": [
+    "readme.md",
     "toybands.md",
     "Physics here.md",
     "Documentation-toybands.md",
