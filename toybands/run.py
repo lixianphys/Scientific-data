@@ -329,6 +329,7 @@ def output_xml(args):
 
 if __name__ == "__main__":
     args = run()
+    output_xml(args)
     if args.scond is not None:
         SIGMA_COND = args.scond*e0*1e-3
     if args.sval is not None:
@@ -355,6 +356,5 @@ if __name__ == "__main__":
         if args.dosm:
             dos_map(args,newsystem,bfrange,enrange)
         draw(args,newsystem)
-        output_xml(args)
     else:
         sys.stderr.write("no system (system.json) exist\n")
