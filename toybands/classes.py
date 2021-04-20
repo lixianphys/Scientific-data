@@ -94,7 +94,7 @@ class Band:
                     })
             return pd.DataFrame.from_dict(ll_dict)
 
-    def cal_idos_b(self, e_list, B, Nmax, angle_in_deg, sigma):
+    def cal_idos_b(self, e_list, B, Nmax, angle_in_deg, sigma, dirac_parity=True):
         if not isinstance(e_list, list):
             raise ValueError(f"e_list = {e_list} is not a list")
         if self.is_dirac and self.is_cond:
@@ -111,7 +111,7 @@ class Band:
                 )
                 for N in range(Nmax)
             ]
-            return e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls,compensate_on=True)
+            return e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls,compensate_on=dirac_parity)
         elif self.is_dirac and not self.is_cond:
             h_lls = [
                 self.Ebb
@@ -126,7 +126,7 @@ class Band:
                 )
                 for N in range(Nmax)
             ]
-            return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls,compensate_on=True)
+            return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls,compensate_on=dirac_parity)
         elif not self.is_dirac and self.is_cond:
             e_lls = [
                 self.Ebb
@@ -158,7 +158,7 @@ class Band:
             ]
             return h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls,compensate_on=False)
 
-    def cal_dos(self, E, B, Nmax, angle_in_deg, sigma):
+    def cal_dos(self, E, B, Nmax, angle_in_deg, sigma,dirac_parity=True):
         if self.is_dirac and self.is_cond:
             e_lls = [
                 self.Ebb
@@ -173,7 +173,7 @@ class Band:
                 )
                 for N in range(Nmax)
             ]
-            return e_density_of_state(E, B, sigma, angle_in_deg, e_lls,compensate_on=True)
+            return e_density_of_state(E, B, sigma, angle_in_deg, e_lls,compensate_on=dirac_parity)
         elif self.is_dirac and not self.is_cond:
             h_lls = [
                 self.Ebb
@@ -188,7 +188,7 @@ class Band:
                 )
                 for N in range(Nmax)
             ]
-            return h_density_of_state(E, B, sigma, angle_in_deg, h_lls,compensate_on=True)
+            return h_density_of_state(E, B, sigma, angle_in_deg, h_lls,compensate_on=dirac_parity)
         elif not self.is_dirac and self.is_cond:
             e_lls = [
                 self.Ebb
@@ -298,7 +298,7 @@ class System:
         else:
             return 0
 
-    def dos_gen(self, e_list, B, Nmax, angle_in_deg, sigma_list):
+    def dos_gen(self, e_list, B, Nmax, angle_in_deg, sigma_list,dirac_parity=True):
         if not isinstance(e_list, list):
             raise TypeError(f"{e_list} is not a list")
         elif not self.get_band('a'):
@@ -307,15 +307,15 @@ class System:
             return reduce(
                 (lambda x, y: add_list(x, y)),
                 [
-                    band.cal_idos_b(e_list, B, Nmax, angle_in_deg, sigma_list[idx])
+                    band.cal_idos_b(e_list, B, Nmax, angle_in_deg, sigma_list[idx],dirac_parity)
                     for idx,band in enumerate(self.get_band('a'))
                 ],
             )
 
-    def mu(self, e_list, B, Nmax, angle_in_deg, sigma_list):
+    def mu(self, e_list, B, Nmax, angle_in_deg, sigma_list,dirac_parity=True):
         return np.interp(
             x=self.tot_density(),
-            xp=self.dos_gen(e_list, B, Nmax, angle_in_deg, sigma_list),
+            xp=self.dos_gen(e_list, B, Nmax, angle_in_deg, sigma_list,dirac_parity),
             fp=e_list,
         )
     def databdl_write_csv(self,filename,bfrange,y_databdl,indicator,plotrange=None):
@@ -387,7 +387,7 @@ class System:
             else:
                 df.to_csv(path,mode='a',index=False)
     
-    def ydata_gen(self, nmax, angle_in_deg, bfrange, enrange, indicator,scond, sval):
+    def ydata_gen(self, nmax, angle_in_deg, bfrange, enrange, indicator,scond, sval, dirac_parity=True):
         if indicator == 'enplot':
             return [
             [
@@ -400,7 +400,7 @@ class System:
         elif indicator == 'denplot':
             IDOS = [
             self.dos_gen(
-                enrange, B, nmax, angle_in_deg, [scond if band.get('is_cond') else sval for band in self.get_band('a')])
+                enrange, B, nmax, angle_in_deg, [scond if band.get('is_cond') else sval for band in self.get_band('a')],dirac_parity)
             for B in bfrange]
             return [
             [
@@ -416,7 +416,7 @@ class System:
             ]
             for band in self.get_band('a')]
         elif indicator == 'dos':
-            mus = [self.mu(enrange, B, nmax, angle_in_deg, [scond if band.get('is_cond') else sval for band in self.get_band('a')]) for B in bfrange]
-            return [[band.cal_dos(mu_at_B, B, nmax, angle_in_deg, scond if band.get('is_cond') else sval) for B, mu_at_B in zip(bfrange,mus)] for band in self.get_band('a')]
+            mus = [self.mu(enrange, B, nmax, angle_in_deg, [scond if band.get('is_cond') else sval for band in self.get_band('a')],dirac_parity) for B in bfrange]
+            return [[band.cal_dos(mu_at_B, B, nmax, angle_in_deg, scond if band.get('is_cond') else sval,dirac_parity) for B, mu_at_B in zip(bfrange,mus)] for band in self.get_band('a')]
         else:
             raise ValueError(f'Invalid indicator {indicator}, use enplot, denplot, dos instead\n')

@@ -128,6 +128,12 @@ def run():
         help="sigma for all valence bands (meV,default value see config.py)",
     )
 
+    my_parser.add_argument(
+        "-parity",
+        action="store_true",
+        help="to decide if reducing the DOS of 0LL to half of others",
+    )
+
     args = my_parser.parse_args()
     print('Your inputs:\n')
     print(vars(args))
@@ -136,7 +142,7 @@ def run():
 
 def enplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
-        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'enplot',SIGMA_COND,SIGMA_VAL)
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'enplot',SIGMA_COND,SIGMA_VAL,args.parity)
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')), DEFAULT_CMAP, DEFAULT_CMAP_VMIN, DEFAULT_CMAP_VMAX)
         mu_pos = [
@@ -146,6 +152,7 @@ def enplot(args,newsystem,bfrange,enrange,colors = None):
                 args.nmax,
                 args.angle,
                 [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')],
+                args.parity
             )
             for B in bfrange
         ]
@@ -160,7 +167,7 @@ def denplot(args,newsystem,bfrange,enrange,colors = None):
     if args.nmax is not None and args.angle is not None:
 
         # bundle data from each Landau level originating from each band
-        y_databdl = newsystem.ydata_gen(args.nmax,args.angle,bfrange, enrange, 'denplot',SIGMA_COND,SIGMA_VAL)
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle,bfrange, enrange, 'denplot',SIGMA_COND,SIGMA_VAL,args.parity)
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')), DEFAULT_CMAP, DEFAULT_CMAP_VMIN, DEFAULT_CMAP_VMAX)
         tot_den = newsystem.tot_density()
@@ -189,7 +196,7 @@ def simu(args,newsystem,bfrange,enrange,colors = None):
             colors_p = [color for color in colors]
             newsystem.set_all_density(den_slice)
             tot_den = newsystem.tot_density()
-            IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')]) for B in bfrange]
+            IDOS = [newsystem.dos_gen(enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')],args.parity) for B in bfrange]
             # disable the band with zero density
             idx_disabled = []
             # if any band has a density <=0 then disable it
@@ -218,7 +225,7 @@ def dos_at_mu(args,newsystem,bfrange,enrange,colors=None):
     if args.nmax is not None and args.angle is not None:
         if colors is None:
             colors = make_n_colors(len(newsystem.get_band('a')),DEFAULT_CMAP,DEFAULT_CMAP_VMIN,DEFAULT_CMAP_VMAX)
-        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'dos',SIGMA_COND,SIGMA_VAL)
+        y_databdl = newsystem.ydata_gen(args.nmax,args.angle, bfrange,enrange, 'dos',SIGMA_COND,SIGMA_VAL,args.parity)
         make_1d_dos_B_plot(bfrange,y_databdl,colors)
         newsystem.databdl_write_csv(args.fnm,bfrange,y_databdl,'dos')
         system_stamp_csv(args)
@@ -252,9 +259,9 @@ def dos_map(args,newsystem,bfrange,enrange,cmap=None):
                     newsystem.get_band(idx).disable()
                     idx_disabled.append(idx)
             # calculate the chemical potential for the new system        
-            mus = [newsystem.mu(enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')]) for B in bfrange]
+            mus = [newsystem.mu(enrange, B, args.nmax, args.angle, [SIGMA_COND if band.get('is_cond') else SIGMA_VAL for band in newsystem.get_band('a')],args.parity) for B in bfrange]
             # calculate the dos for each band at each chemical potential along the B field axis
-            to_append =  [sum([(1 if band.get('is_cond') else -1)*band.cal_dos(mu_at_B, B, args.nmax, args.angle, SIGMA_COND if band.get('is_cond') else SIGMA_VAL) for band in newsystem.get_band('a')]) for B,mu_at_B in zip(bfrange,mus)]
+            to_append =  [sum([(1 if band.get('is_cond') else -1)*band.cal_dos(mu_at_B, B, args.nmax, args.angle, SIGMA_COND if band.get('is_cond') else SIGMA_VAL,args.parity) for band in newsystem.get_band('a')]) for B,mu_at_B in zip(bfrange,mus)]
             y_databdl.append(to_append)
             newsystem.databdl_write_csv(args.fnm,bfrange,to_append,'dosm')
             # enable the disabled band again for next loop
