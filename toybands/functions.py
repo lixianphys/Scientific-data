@@ -149,7 +149,7 @@ def e_density_of_state(E, B, sigma, angle_in_deg, e_lls, compensate_on=False):
             for e_ll in e_lls
         ],
     )
-    return output-compensate if compensate else output 
+    return output-compensate if compensate_on else output 
 
 
 def h_density_of_state(E, B, sigma, angle_in_deg, h_lls, compensate_on=False):
