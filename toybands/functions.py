@@ -166,7 +166,7 @@ def h_density_of_state(E, B, sigma, angle_in_deg, h_lls, compensate_on=False):
     """
     # degeneracy of Landau levels at a certain field
     lldegeneracy = B * np.cos(angle_in_deg * np.pi / 180) * e0 / h0
-    compensate = 0.5 * lldegeneracy * np.exp(-0.5 * (E - min(h_lls)) ** 2 / sigma ** 2) / sigma / (
+    compensate = 0.5 * lldegeneracy * np.exp(-0.5 * (E - min(h_lls)) ** 2 /sigma ** 2) /sigma / (
             2 * np.pi) ** 0.5
     # both top and bottom surfaces right at the chemical potential
     output = reduce(
@@ -183,23 +183,25 @@ def h_density_of_state(E, B, sigma, angle_in_deg, h_lls, compensate_on=False):
 
 
 def e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls, compensate_on=False):
+    sigma_B = sigma*B**0.5 # refer to Novik, et al Phys. Rev. B 72, 035321 (2005)
     lowest_ll_eng = min(e_lls)
     output = _e_integral(
         e_density_of_state,
-        lowest_ll_eng - 3 * sigma,
+        lowest_ll_eng - 3 * sigma_B,
         e_list,
-        (B, sigma, angle_in_deg, e_lls,compensate_on),
+        (B, sigma_B, angle_in_deg, e_lls,compensate_on),
     )
     return output
 
 
 def h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls, compensate_on=False):
+    sigma_B = sigma*B**0.5 # refer to Novik, et al Phys. Rev. B 72, 035321 (2005)
     highest_ll_eng = max(h_lls)
     output = _h_integral(
         h_density_of_state,
-        highest_ll_eng + 3 * sigma,
+        highest_ll_eng + 3 * sigma_B,
         e_list,
-        (B, sigma, angle_in_deg, h_lls,compensate_on),
+        (B, sigma_B, angle_in_deg, h_lls,compensate_on),
     )
     return output
 
