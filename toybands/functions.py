@@ -36,7 +36,7 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, vf, dparam):
     return (
         alpha
         * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B/2) ** 2)
-        ** 0.5-alpha*2*e0*B_perp*dparam*(N+0.5)/hbar 
+        ** 0.5+alpha*2*e0*B_perp*dparam*(N+0.5)/hbar 
     )
     ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017) 
     ## Quadratic term parameter D_PARAM
@@ -60,13 +60,13 @@ def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
 
 def den2en(density,is_dirac,is_cond,vf,dparam,meff):
         if is_dirac and is_cond:
-            return -hbar * vf * (4 * np.pi * density) ** 0.5+4*dparam*np.pi*density
+            return -hbar * vf * (4 * np.pi * density) ** 0.5-4*dparam*np.pi*density
         elif is_dirac and not is_cond:
-            return hbar * vf * (4 * np.pi * density) ** 0.5-4*dparam*np.pi*density
+            return hbar * vf * (4 * np.pi * density) ** 0.5+4*dparam*np.pi*density
         elif not is_dirac and is_cond:
-            return -(hbar ** 2) * density/ np.pi / meff/ me
+            return -2*(hbar ** 2) * density/ np.pi / meff/ me # the factor of 2 is to account for spin non-degenerate case, so if you have a spin-degenerate band, just write it into two spin-split band filled half of the carrier density.
         elif not is_dirac and not is_cond:
-            return (hbar ** 2) * density / np.pi / meff/ me
+            return 2*(hbar ** 2) * density / np.pi / meff/ me
 
 
 def _e_integral(func, ymin, y_list, args):

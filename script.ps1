@@ -28,9 +28,9 @@
 
 
 python toybands/delband.py -i all
-python toybands/addband.py 2e15 -is_dirac -is_cond -gfactor 1.8 -dp 3e5 5.2
-python toybands/addband.py 5e15 -is_dirac -is_cond -gfactor 1.8 -dp 3e5 5.2
+python toybands/addband.py 2e15 -is_dirac -is_cond -gfactor 1.8 -dp 8.5e5 5.2
+python toybands/addband.py 5e15 -is_dirac -is_cond -gfactor 1.8 -dp 8.5e5 5.2
 python toybands/addband.py 3e15 -gfactor 6 -cp 0.2 1
 python toybands/addband.py 4e15 -gfactor 6 -cp 0.2 -1
-python toybands/run.py -simu -loadden density4band.csv -fnm testfor3e5vf --enrange -0.05 0.1 25 --bfrange 1 7 60  -nmax 10 -parity
+python toybands/run.py -simu -loadden density4band.csv -fnm fig4cal --enrange -0.05 0.1 50 --bfrange 1 7 480 -nmax 10 -parity
 
