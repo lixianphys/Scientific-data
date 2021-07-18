@@ -1,37 +1,29 @@
 {
   "main": {
-    "id": "b265a2a1a261b4d9",
+    "id": "18c97ebacfae7e23",
     "type": "split",
     "children": [
       {
-        "id": "ead6a023c13d20f8",
+        "id": "b54b3c5f7cad572c",
         "type": "leaf",
         "state": {
-<<<<<<< HEAD
           "type": "empty",
           "state": {}
-=======
-          "type": "markdown",
-          "state": {
-            "file": "Physics here.md",
-            "mode": "source"
-          }
->>>>>>> d99434200170543971ba758229bd570422ab1707
         }
       }
     ],
     "direction": "vertical"
   },
   "left": {
-    "id": "f589878869ea1a1c",
+    "id": "884bbeb3209be05f",
     "type": "split",
     "children": [
       {
-        "id": "9add3bcc85d3e5c4",
+        "id": "5f6fae18daa584cd",
         "type": "tabs",
         "children": [
           {
-            "id": "d28482ac2f71cf42",
+            "id": "3aae8822d4f817ef",
             "type": "leaf",
             "state": {
               "type": "file-explorer",
@@ -39,7 +31,7 @@
             }
           },
           {
-            "id": "05958999b8084047",
+            "id": "f2aa449f317dcbd9",
             "type": "leaf",
             "state": {
               "type": "search",
@@ -57,26 +49,22 @@
       }
     ],
     "direction": "horizontal",
-    "width": 222
+    "width": 300
   },
   "right": {
-    "id": "a3a108cd51c41d44",
+    "id": "c1d686abbb097217",
     "type": "split",
     "children": [
       {
-        "id": "8cf28f97ecaa2049",
+        "id": "5f4e13b1cd9f507e",
         "type": "tabs",
         "children": [
           {
-            "id": "8f30da9e45567e63",
+            "id": "488cee0653b073c3",
             "type": "leaf",
             "state": {
               "type": "backlink",
               "state": {
-<<<<<<< HEAD
-=======
-                "file": "Physics here.md",
->>>>>>> d99434200170543971ba758229bd570422ab1707
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -94,17 +82,6 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "ead6a023c13d20f8",
-  "lastOpenFiles": [
-<<<<<<< HEAD
-    "readme.md",
-    "toybands.md",
-=======
->>>>>>> d99434200170543971ba758229bd570422ab1707
-    "Physics here.md",
-    "readme.md",
-    "toybands.md",
-    "Documentation-toybands.md",
-    "Untitled.md"
-  ]
+  "active": "b54b3c5f7cad572c",
+  "lastOpenFiles": []
 }

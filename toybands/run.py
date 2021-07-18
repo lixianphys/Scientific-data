@@ -118,14 +118,14 @@ def run():
         "-scond",
         action="store",
         type=float,
-        help="sigma for all conduction bands (meV,default value see config.py)",
+        help="LL broadening parameter sigma at B=1T for all conduction bands (meV,default value see config.py)",
     )
 
     my_parser.add_argument(
         "-sval",
         action="store",
         type=float,
-        help="sigma for all valence bands (meV,default value see config.py)",
+        help="LL broadening parameter sigma at B=1T for all valence bands (meV,default value see config.py)",
     )
 
     my_parser.add_argument(

@@ -36,7 +36,7 @@ def lldirac_gen(B, B_perp, N, is_cond, gfactor, vf, dparam):
     return (
         alpha
         * (2 * e0 * hbar * vf ** 2 * B_perp * N + (gfactor * muB * B/2) ** 2)
-        ** 0.5-alpha*2*e0*B_perp*dparam*(N+0.5)/hbar 
+        ** 0.5+alpha*2*e0*B_perp*dparam*(N+0.5)/hbar 
     )
     ## Reference for the massive Dirac-like E-B relationship: Physical Review B 96,041101(R)(2017) 
     ## Quadratic term parameter D_PARAM
@@ -60,13 +60,13 @@ def llconv_gen(B, B_perp, N, is_cond, spin, gfactor, meff):
 
 def den2en(density,is_dirac,is_cond,vf,dparam,meff):
         if is_dirac and is_cond:
-            return -hbar * vf * (4 * np.pi * density) ** 0.5+4*dparam*np.pi*density
+            return -hbar * vf * (4 * np.pi * density) ** 0.5-4*dparam*np.pi*density
         elif is_dirac and not is_cond:
-            return hbar * vf * (4 * np.pi * density) ** 0.5-4*dparam*np.pi*density
+            return hbar * vf * (4 * np.pi * density) ** 0.5+4*dparam*np.pi*density
         elif not is_dirac and is_cond:
-            return -(hbar ** 2) * density/ np.pi / meff/ me
+            return -2*(hbar ** 2) * density/ np.pi / meff/ me # the factor of 2 is to account for spin non-degenerate case, so if you have a spin-degenerate band, just write it into two spin-split band filled half of the carrier density.
         elif not is_dirac and not is_cond:
-            return (hbar ** 2) * density / np.pi / meff/ me
+            return 2*(hbar ** 2) * density / np.pi / meff/ me
 
 
 def _e_integral(func, ymin, y_list, args):
@@ -166,7 +166,7 @@ def h_density_of_state(E, B, sigma, angle_in_deg, h_lls, compensate_on=False):
     """
     # degeneracy of Landau levels at a certain field
     lldegeneracy = B * np.cos(angle_in_deg * np.pi / 180) * e0 / h0
-    compensate = 0.5 * lldegeneracy * np.exp(-0.5 * (E - min(h_lls)) ** 2 / sigma ** 2) / sigma / (
+    compensate = 0.5 * lldegeneracy * np.exp(-0.5 * (E - min(h_lls)) ** 2 /sigma ** 2) /sigma / (
             2 * np.pi) ** 0.5
     # both top and bottom surfaces right at the chemical potential
     output = reduce(
@@ -183,23 +183,25 @@ def h_density_of_state(E, B, sigma, angle_in_deg, h_lls, compensate_on=False):
 
 
 def e_idos_gen(e_list, B, sigma, angle_in_deg, e_lls, compensate_on=False):
+    sigma_B = sigma*B**0.5 # refer to Novik, et al Phys. Rev. B 72, 035321 (2005)
     lowest_ll_eng = min(e_lls)
     output = _e_integral(
         e_density_of_state,
-        lowest_ll_eng - 3 * sigma,
+        lowest_ll_eng - 3 * sigma_B,
         e_list,
-        (B, sigma, angle_in_deg, e_lls,compensate_on),
+        (B, sigma_B, angle_in_deg, e_lls,compensate_on),
     )
     return output
 
 
 def h_idos_gen(e_list, B, sigma, angle_in_deg, h_lls, compensate_on=False):
+    sigma_B = sigma*B**0.5 # refer to Novik, et al Phys. Rev. B 72, 035321 (2005)
     highest_ll_eng = max(h_lls)
     output = _h_integral(
         h_density_of_state,
-        highest_ll_eng + 3 * sigma,
+        highest_ll_eng + 3 * sigma_B,
         e_list,
-        (B, sigma, angle_in_deg, h_lls,compensate_on),
+        (B, sigma_B, angle_in_deg, h_lls,compensate_on),
     )
     return output
 

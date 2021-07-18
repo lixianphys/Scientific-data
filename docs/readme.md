@@ -15,12 +15,13 @@
 
 ### Project Overview
 This **toybands** model allows one to get some fundamentals of quantum Hall effect and Landau levels in high magnetic field if you happens to have some Dirac or non-Dirac materials, which trends in condensed matter physics in the past ten years or so. 
-You can use some parameters as inputs to describe the properties of electron system of your materials, usually in a simplified form (Fermi velocity, spin projection in the magnetic field direction, effective mass, etc).  In the end, you are enabled to carry out multiple tasks with this model, like plotting the Landau levels in energy or monitoring the effect of density change in Landau levels as the magnetic field ramps. The output will be stored in a separate folder for later check-out. 
+You can use some parameters as inputs to describe the properties of electron system of your materials in a simplified form (Fermi velocity, spin projection in the magnetic field direction, effective mass, etc).  In the end, you are enabled to carry out multiple tasks with this model, like plotting the Landau levels in energy or monitoring the effect of density change in Landau levels as the magnetic field ramps. The output will be stored in a separate folder for later check-out. 
 All the physics behind is explained in a separate documentation  [[Physics here]]. 
 
 ### Prerequisites
 - Install Python package (v3.8.7 recommended)
 - Pip install dependencies list in requirements.txt `pip install -r requirements.txt`
+- It is highly recommended to use `virtualenv` to generate an enviroment for this project. Consult Google if not sure how to do this. 
 ### Command line interface CLI
 - If you are the first time to use a CLI:
 	Use a teminal (powershell, gitbash for Win user) and switch current directory to `cd ..\SciData>` and start the command with `python` to invoke your python program and the `toybands` module follows. 
