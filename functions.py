@@ -12,7 +12,7 @@ from scipy.optimize import curve_fit
 from physconst import *
 
 # General use
-def dir2fnm(directory):
+def dir2fnm(directory,sort_by_fnm=False):
     '''
     Convert a directory to a list of filenames contained inside
     :param directory: directory
@@ -21,7 +21,15 @@ def dir2fnm(directory):
     import glob
     import os
     filename = list(filter(os.path.isfile,glob.glob(os.path.join(directory,'*.dat'))))
-    filename.sort(key=lambda x:os.path.getmtime(x))
+    def getnumber(fnm):
+        fnm_strip = fnm.split(' ')
+        num_str = fnm_strip[-2].replace('T','').replace(',','.').replace('V','')
+        num = float(num_str)
+        return num
+    if sort_by_fnm:
+        filename.sort(key=lambda x:getnumber(x))
+    else:
+        filename.sort(key=lambda x:os.path.getmtime(x))
     return filename
 
 
@@ -38,11 +46,11 @@ def is_close(num_list: list, match_num: float, precision=1e-6) -> bool:
     return [abs(num - match_num) < precision for num in num_list]
 
 
-def read_file(directory):
+def read_file(directory,sort_by_fnm=False):
     '''
     Extract the numbers in the filenames of a batch of files and output them in a list
     '''
-    filenames = dir2fnm(directory)
+    filenames = dir2fnm(directory,sort_by_fnm=sort_by_fnm)
     num_list = [0] * len(filenames)
     for i, fnm in enumerate(filenames):
         fnm_strip = fnm.split()
@@ -285,7 +293,7 @@ def quickplot(path, num_plot, PhyQty, ref, skiprows, nms, ucols, AspRatio=3):
     ucols: Used columns
     AspRatio: The aspect ratio of the Hall bar. Default is 3
 
-    Return: 
+    Return:
     the handle of axes to facilitate further adjustment if necessary
     '''
 
