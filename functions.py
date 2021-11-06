@@ -23,7 +23,10 @@ def dir2fnm(directory,sort_by_fnm=False):
     filename = list(filter(os.path.isfile,glob.glob(os.path.join(directory,'*.dat'))))
     def getnumber(fnm):
         fnm_strip = fnm.split(' ')
-        num_str = fnm_strip[-2].replace('T','').replace(',','.').replace('V','')
+        if fnm_strip[-2].find('B-Field')!=-1:
+            num_str = fnm_strip[-2].split('d')[-1].replace('T','').replace(',','.').replace('V','')
+        else:
+            num_str = fnm_strip[-2].replace('T','').replace(',','.').replace('V','')
         num = float(num_str)
         return num
     if sort_by_fnm:

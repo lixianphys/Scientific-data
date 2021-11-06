@@ -60,8 +60,8 @@ class Databs(Datajungle):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
-            data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
+            data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['gate'] = self.step[i]
             databundle = databundle.append(data)
         return databundle
@@ -162,8 +162,8 @@ class Datags(Datajungle):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
-            data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
+            data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
+            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
             ax_rxx.plot(data.gate,data['rxx'],color = line_color,label=label_value.format(self.step[i]))
             ax_rxy.plot(data.gate,data['rxy'],color = line_color,label=label_value.format(self.step[i]))
             ax_sxy.plot(data.gate,data['sxy'],color = line_color,label=label_value.format(self.step[i]))
