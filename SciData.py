@@ -16,12 +16,12 @@ from functions import *
 
 
 class Datajungle:
-    ''' Parent Class for Generic data type
+    """ Parent Class for Generic data type
     Auguments:
     directory: list of filenames
     step: step values
     ucols: extracted columns from original source file
-    spr: skipped rows in the header of source file 
+    spr: skipped rows in the header of source file
     ref: reference resistance in series
     AspRatio: aspect ratio of Hall bar, set to 3 by default
 
@@ -29,7 +29,7 @@ class Datajungle:
 
     CHILDREN CLASS:
     Databs, Datags, Datafc
-    '''
+    """
     def __init__(self,directory,step,ucols,nms,spr):
         self.dir = directory # directories for all the files in current folder.
         self.step = step # values of parameter B
@@ -40,12 +40,12 @@ class Datajungle:
 
 
 class Databs(Datajungle):
-    '''Inherent from Class Datajungle
+    """Inherent from Class Datajungle
     METHODS:
     getdata: return a panda.DataFrame type data
     hallfit: linear hall fit and return density and mobility in a DataFrame format
     plotdata: plot magnetic field sweep type data in a specific way
-    plotfc: plot fan chart'''
+    plotfc: plot fan chart"""
     def __init__(self,directory,step,ucols,nms,spr,ref,AspRatio=3):
         super().__init__(directory,step,ucols,nms,spr)
         self.ref = ref # reference resistance in series
