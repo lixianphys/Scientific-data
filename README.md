@@ -26,6 +26,6 @@ extended by creating more child class.
 | Datafc      | gate-voltage|gate-voltage|
 | DataX| unknown|unknown|
 
-The former three are most useful when handling (quantum) Hall measurement. For general flexibility,
+The first three are most useful when handling (quantum) Hall measurement. For general flexibility,
 we also provide a less-defined class ```DataX``` to handle many other types of data.
 

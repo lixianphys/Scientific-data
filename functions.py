@@ -133,11 +133,6 @@ def H2nd_ft(Bf,Rxx,Rxy,AspRatio=3):
             print('The fitting program failed')
     return  popt,func_two(Bf, *popt)
 
-
-
-
-
-
 def cutout_bkgd(x,y):
 
     '''
@@ -277,10 +272,6 @@ def fc_interp(x_vec,y_vec,z_df,diff = True,mult_factor=3):
     # interpolation
     grid_z = griddata(points, values, (grid_x, grid_y), method='nearest')
     return grid_z
-
-
-
-
 
 # Plotting
 
