@@ -62,7 +62,7 @@ class Databs(Datajungle):
         ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
@@ -77,7 +77,7 @@ class Databs(Datajungle):
         ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
             bf_fit = data['bf'][(data['bf']<fitrange[1])&(data['bf']>fitrange[0])]
@@ -102,7 +102,7 @@ class Databs(Datajungle):
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
             line_color = next(colors)
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
@@ -130,7 +130,7 @@ class Databs(Datajungle):
         ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
@@ -171,7 +171,7 @@ class Datags(Datajungle):
         ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)/e0**2*h0
@@ -192,7 +192,7 @@ class Datags(Datajungle):
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
             line_color = next(colors)
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
@@ -220,7 +220,7 @@ class Datags(Datajungle):
         ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
@@ -264,7 +264,7 @@ class Datagmap(Datajungle):
         ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
@@ -286,7 +286,7 @@ class Datagmap(Datajungle):
         ref = self.ref
         AspRatio = self.AspRatio
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['rxx'] = data.uxx/data.curr*ref
             data['rxy'] = data.uxy/data.curr*ref
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
@@ -322,7 +322,7 @@ class DataX(Datajungle):
     def getdata(self):
         databundle = pd.DataFrame()
         for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None)
+            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['x'] = self.step[i]
             databundle = databundle.append(data)
         return databundle
