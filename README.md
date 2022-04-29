@@ -15,7 +15,7 @@ parameter B in one ```.dat``` file, and then change the parameter B and sweep A.
 will be stored in a folder with files named by the specific parameter B. Then in this case,
 our defined class can turn all the data in the folder into an instance of this class.
 By adding methods to this class, we can pre-process the data (```getdata(self)```), do Hall
-fit if one dimension is the magnetic field (```hallfit(self,fitrange)```), and quick plot data 
+fit if one dimension is the magnetic field (```hallfit(self,fitrange)```) and quick plot data 
 (```plotdata(self,label_value)```). The functionality of parent class ```Datajungle``` can be 
 extended by creating more child class.
 
@@ -29,3 +29,11 @@ extended by creating more child class.
 The first three are most useful when handling (quantum) Hall measurement. For general flexibility,
 we also provide a less-defined class ```DataX``` to handle many other types of data.
 
+### How to use this package to speed up your work flow
+```startnb.py``` is a script to import default setting of your ```jupyter notebook```, especially
+importing all the packages, scripts and functions to be ready to use and also
+plotting setting under ```plt.rc```. 
+```python
+%run [dir to SciData]/startnb.py
+```
+Add this line in your first cell of opened notebook to start your data processing.

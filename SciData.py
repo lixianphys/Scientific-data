@@ -46,7 +46,8 @@ class Databs(Datajungle):
     hallfit: linear hall fit and return density and mobility in a DataFrame format
     plotdata: plot magnetic field sweep type data in a specific way
     plotfc: plot fan chart"""
-    def __init__(self,directory,step,ucols,nms,spr,ref,AspRatio=3):
+
+    def __init__(self, directory, step, ucols, spr, ref, nms=['bf', 'curr', 'uxx', 'uxy'],AspRatio=3):
         super().__init__(directory,step,ucols,nms,spr)
         self.ref = ref # reference resistance in series
         self.AspRatio = AspRatio  # Aspect ratio of Hall bar structure
@@ -155,7 +156,7 @@ class Datags(Datajungle):
     plotdata: plot gate sweep type data in a specific way
     plotfc: plot fan chart'''
 
-    def __init__(self, directory, step, ucols, spr, ref, AspRatio=3, nms=['gate', 'bf', 'uxx', 'uxy']):
+    def __init__(self, directory, step, ucols, spr, ref, nms=['gate', 'curr', 'uxx', 'uxy'], AspRatio=3):
         super().__init__(directory,step,ucols,nms,spr)
         self.ref = ref # reference resistance in series
         self.AspRatio = AspRatio  # Aspect ratio of Hall bar structure
@@ -243,7 +244,7 @@ class Datagmap(Datajungle):
     getdata: return x, y and a 2D array with z-value
     plotmap: plot gatemapping'''
 
-    def __init__(self,directory,step,ucols,spr,ref,AspRatio=3,nms=['v1','v2','uxx','uxy']):
+    def __init__(self,directory,step,ucols,spr,ref,nms=['v1','v2','uxx','uxy'],AspRatio=3):
         super().__init__(directory,step,ucols,nms,spr)
         self.ref = ref # reference resistance in series
         self.AspRatio = AspRatio  # Aspect ratio of Hall bar structure
@@ -310,11 +311,11 @@ class DataX(Datajungle):
     METHODS:
     getdata: return databundle'''
 
-    def __init__(self,directory,step,ucols,nms,spr):
+    def __init__(self,directory,step,ucols,spr,nms):
         super().__init__(directory,step,ucols,nms,spr)
 
     def __str__(self):
-        return ', '.join(['DataX', ', '.join(['{key} = {value}'.format(key = key, value = self.__dict__[key]) for key in ['AspRatio','ucols','nms','spr','ref']])])
+        return ', '.join(['DataX', ', '.join(['{key} = {value}'.format(key = key, value = self.__dict__[key]) for key in ['ucols','nms','spr','step']])])
 
     def __repr__(self):
         pass

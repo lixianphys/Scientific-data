@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 
 # Local application import
-# from Scientific_data import *
+# from Scientific-data import *
 import SciData
 from SciData import *
 from functions import *

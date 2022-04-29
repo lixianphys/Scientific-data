@@ -1,4 +1,4 @@
-#Copyright 2021 Lixian WANG. All Rights Reserved.
+# Copyright 2021 Lixian WANG. All Rights Reserved.
 # Standard library imports
 import os
 
@@ -11,8 +11,9 @@ from scipy.optimize import curve_fit
 # Local application import
 from physconst import *
 
+
 # General use
-def dir2fnm(directory,sort_by_fnm=False):
+def dir2fnm(directory, sort_by_fnm=False):
     '''
     Convert a directory to a list of filenames contained inside
     :param directory: directory
@@ -20,19 +21,21 @@ def dir2fnm(directory,sort_by_fnm=False):
     '''
     import glob
     import os
-    filename = list(filter(os.path.isfile,glob.glob(os.path.join(directory,'*.dat'))))
+    filename = list(filter(os.path.isfile, glob.glob(os.path.join(directory, '*.dat'))))
+
     def getnumber(fnm):
         fnm_strip = fnm.split(' ')
-        if fnm_strip[-2].find('B-Field')!=-1:
-            num_str = fnm_strip[-2].split('d')[-1].replace('T','').replace(',','.').replace('V','')
+        if fnm_strip[-2].find('B-Field') != -1:
+            num_str = fnm_strip[-2].split('d')[-1].replace('T', '').replace(',', '.').replace('V', '')
         else:
-            num_str = fnm_strip[-2].replace('T','').replace(',','.').replace('V','')
+            num_str = fnm_strip[-2].replace('T', '').replace(',', '.').replace('V', '')
         num = float(num_str)
         return num
+
     if sort_by_fnm:
-        filename.sort(key=lambda x:getnumber(x))
+        filename.sort(key=lambda x: getnumber(x))
     else:
-        filename.sort(key=lambda x:os.path.getmtime(x))
+        filename.sort(key=lambda x: os.path.getmtime(x))
     return filename
 
 
@@ -42,6 +45,7 @@ def pos_neg(num):
     else:
         return -1
 
+
 def is_close(num_list: list, match_num: float, precision=1e-6) -> bool:
     '''
     Target the nearest number in list of numbers (num_list)
@@ -49,11 +53,11 @@ def is_close(num_list: list, match_num: float, precision=1e-6) -> bool:
     return [abs(num - match_num) < precision for num in num_list]
 
 
-def read_file(directory,sort_by_fnm=False):
+def read_file(directory, sort_by_fnm=False):
     '''
     Extract the numbers in the filenames of a batch of files and output them in a list
     '''
-    filenames = dir2fnm(directory,sort_by_fnm=sort_by_fnm)
+    filenames = dir2fnm(directory, sort_by_fnm=sort_by_fnm)
     num_list = [0] * len(filenames)
     for i, fnm in enumerate(filenames):
         fnm_strip = fnm.split()
@@ -63,22 +67,20 @@ def read_file(directory,sort_by_fnm=False):
     return num_list
 
 
-def df_range(df,column,col_range):
+def df_range(df, column, col_range):
+    return df[(df[column] > col_range[0]) & (df[column] < col_range[1])]
 
 
-    return df[(df[column]>col_range[0])&(df[column]<col_range[1])]
-
-
-def range_pick(yourlist,lb,ub):
-    lb_set = yourlist>lb
-    ub_set = yourlist<ub
-    chosen_set = [all([x,y]) for x,y in zip(lb_set,ub_set)]
+def range_pick(yourlist, lb, ub):
+    lb_set = yourlist > lb
+    ub_set = yourlist < ub
+    chosen_set = [all([x, y]) for x, y in zip(lb_set, ub_set)]
     return chosen_set
+
 
 # Calculation
 
-def H1st_ft(Bf,Rxx,Rxy,AspRatio=3,threshold = 25):
-
+def H1st_ft(Bf, Rxx, Rxy, AspRatio=3, threshold=25):
     '''
     Linear fit model for Hall analysis
 
@@ -89,8 +91,10 @@ def H1st_ft(Bf,Rxx,Rxy,AspRatio=3,threshold = 25):
     :param threshold:
     :return:
     '''
+
     def func_one(x, a, b):
         return a + b * x
+
     e0 = 1.6021766208E-19
     try:
         fitParams, fitCovariances = curve_fit(func_one, Bf, Rxy)
@@ -102,16 +106,17 @@ def H1st_ft(Bf,Rxx,Rxy,AspRatio=3,threshold = 25):
         dev = np.sqrt(np.diag(fitCovariances))
         if sum(dev) <= threshold:
             density = 1 / fitParams[1] / e0 / 1e4
-            rxx0 = Rxx.tolist()[list(map(abs,Bf.tolist())).index(min(map(abs,Bf.tolist())))]
+            rxx0 = Rxx.tolist()[list(map(abs, Bf.tolist())).index(min(map(abs, Bf.tolist())))]
             mobility = AspRatio / density / e0 / rxx0
         else:
             print('The fitting results is not acceptable, fitCov is {}'.format(fitCovariances))
             plt.plot(Bf, Rxy, "b-", Bf, func_one(Bf, *fitParams), "r-")
             mobility = 0
             density = 0
-    return density,mobility
+    return density, mobility
 
-def H2nd_ft(Bf,Rxx,Rxy,AspRatio=3):
+
+def H2nd_ft(Bf, Rxx, Rxy, AspRatio=3):
     '''
     Two carrier (electron-hole) model for Hall analysis
 
@@ -121,20 +126,23 @@ def H2nd_ft(Bf,Rxx,Rxy,AspRatio=3):
     :param AspRatio:
     :return:
     '''
+
     def func_two(x, n1, m1, n2, m2):
-        return e0 * x * (n1 * m1 ** 2 / (1 + m1 ** 2 * x ** 2) + n2 * m2 ** 2 / (1 + m2 ** 2 * x ** 2)) #model from PHYSICAL REVIEW B 95, 115126 (2017)
+        return e0 * x * (n1 * m1 ** 2 / (1 + m1 ** 2 * x ** 2) + n2 * m2 ** 2 / (
+                    1 + m2 ** 2 * x ** 2))  # model from PHYSICAL REVIEW B 95, 115126 (2017)
+
     e0 = 1.6021766208E-19
     sxy = Rxy / ((Rxx / AspRatio) ** 2 + Rxy ** 2)
     try:
-            popt, pcov = curve_fit(func_two, Bf, sxy, bounds=((2e13, 1, -1e16, 0.1), (2e15, 100, -1e14, 10)))
-            # plt.plot(Bf, sxy, "b-", Bf, func_two(Bf, *popt), "r-")
-            print('The fitCov is {}'.format(pcov))
+        popt, pcov = curve_fit(func_two, Bf, sxy, bounds=((2e13, 1, -1e16, 0.1), (2e15, 100, -1e14, 10)))
+        # plt.plot(Bf, sxy, "b-", Bf, func_two(Bf, *popt), "r-")
+        print('The fitCov is {}'.format(pcov))
     except:
-            print('The fitting program failed')
-    return  popt,func_two(Bf, *popt)
+        print('The fitting program failed')
+    return popt, func_two(Bf, *popt)
 
-def cutout_bkgd(x,y):
 
+def cutout_bkgd(x, y):
     '''
     Remove the smooth background of a function y = f(x) by subtracting a polynomial function matching the shape of f(x)
     properly
@@ -146,11 +154,13 @@ def cutout_bkgd(x,y):
     '''
     from scipy.optimize import curve_fit
 
-    def func(x,a,b,c,d,e,f,g):
-        return a+b*x+c*x**2+d*x**3+e*x**4+f*x**5+g*x**6
+    def func(x, a, b, c, d, e, f, g):
+        return a + b * x + c * x ** 2 + d * x ** 3 + e * x ** 4 + f * x ** 5 + g * x ** 6
+
     try:
-        fit_params,_ = curve_fit(func,x,y)
-        y_bkgd = fit_params[0]+fit_params[1]*x+fit_params[2]*x**2+fit_params[3]*x**3+fit_params[4]*x**4+fit_params[5]*x**5+fit_params[6]*x**6
+        fit_params, _ = curve_fit(func, x, y)
+        y_bkgd = fit_params[0] + fit_params[1] * x + fit_params[2] * x ** 2 + fit_params[3] * x ** 3 + fit_params[
+            4] * x ** 4 + fit_params[5] * x ** 5 + fit_params[6] * x ** 6
         y_signal = y - y_bkgd
     except:
         y_signal = None
@@ -179,8 +189,7 @@ def interp_user(x, y, n_interp):
     return x_vals, yinterp
 
 
-
-def FFT_bs(x,y):
+def FFT_bs(x, y):
     '''
     Get the FFT result of a function y = f(x)
 
@@ -192,15 +201,15 @@ def FFT_bs(x,y):
     :Y: FFT amplitude
     '''
 
-    Y = np.fft.fft(y)/len(y)
-    Y = Y[np.arange(len(y)/2,dtype = int)]
-    k = np.arange(len(y)/2)
-    FS = len(y)/(max(x)-min(x))
-    frq = k*FS/len(y)
-    return frq,Y
+    Y = np.fft.fft(y) / len(y)
+    Y = Y[np.arange(len(y) / 2, dtype=int)]
+    k = np.arange(len(y) / 2)
+    FS = len(y) / (max(x) - min(x))
+    frq = k * FS / len(y)
+    return frq, Y
 
 
-def diffz_df(dataframe,axes,z_vec,check_output = False):
+def diffz_df(dataframe, axes, z_vec, check_output=False):
     '''
     Perform a one-dimensional diff operation on a 2d data.
 
@@ -220,26 +229,27 @@ def diffz_df(dataframe,axes,z_vec,check_output = False):
     rest_dim = axes[0]
     diff_dim = axes[1]
 
-    ax_rest = sorted(dataframe[rest_dim].unique()) # get the x-vector
-    ax_diff = sorted(dataframe[diff_dim].unique()) # get the y-vector
+    ax_rest = sorted(dataframe[rest_dim].unique())  # get the x-vector
+    ax_diff = sorted(dataframe[diff_dim].unique())  # get the y-vector
 
     z_values = after_diff[z_vec].tolist()
-    z_array = np.zeros([len(ax_rest),len(ax_diff[1:])])
+    z_array = np.zeros([len(ax_rest), len(ax_diff[1:])])
     z_list = []
-    for x_i,x in enumerate(ax_rest):
-        for y_i,y in enumerate(ax_diff[1:]):
-                z_array[x_i,y_i] = z_values[len(ax_diff)*x_i+y_i+1]
-                z_dict = {rest_dim:x,diff_dim:y,z_vec:z_values[len(ax_diff)*x_i+y_i+1]}
-                z_list.append(z_dict)
+    for x_i, x in enumerate(ax_rest):
+        for y_i, y in enumerate(ax_diff[1:]):
+            z_array[x_i, y_i] = z_values[len(ax_diff) * x_i + y_i + 1]
+            z_dict = {rest_dim: x, diff_dim: y, z_vec: z_values[len(ax_diff) * x_i + y_i + 1]}
+            z_list.append(z_dict)
     z_df = pd.DataFrame(z_list)
     if check_output:
-        print('The output array is in shape {}\nwith ax_rest of length of {} and ax_diff of length of {}'.format(z_array.shape,len(ax_rest),len(ax_diff)))
+        print('The output array is in shape {}\nwith ax_rest of length of {} and ax_diff of length of {}'.format(
+            z_array.shape, len(ax_rest), len(ax_diff)))
     else:
         pass
-    return ax_rest,ax_diff,z_array,z_df
+    return ax_rest, ax_diff, z_array, z_df
 
 
-def fc_interp(x_vec,y_vec,z_df,diff = True,mult_factor=3):
+def fc_interp(x_vec, y_vec, z_df, diff=True, mult_factor=3):
     '''
     Interpolate 2d data z_df
 
@@ -256,22 +266,24 @@ def fc_interp(x_vec,y_vec,z_df,diff = True,mult_factor=3):
 
     from scipy.interpolate import griddata
     values = z_df.values
-    points = np.zeros((len(values),2))
+    points = np.zeros((len(values), 2))
     if diff:
-        for x_i,x in enumerate(x_vec):
-            for y_i,y in enumerate(y_vec[:-2],1):
-                points[x_i*(len(y_vec)-1)+y_i,0] = x
-                points[x_i*(len(y_vec)-1)+y_i,1] = y
+        for x_i, x in enumerate(x_vec):
+            for y_i, y in enumerate(y_vec[:-2], 1):
+                points[x_i * (len(y_vec) - 1) + y_i, 0] = x
+                points[x_i * (len(y_vec) - 1) + y_i, 1] = y
     else:
-        for x_i,x in enumerate(x_vec):
-            for y_i,y in enumerate(y_vec):
-                points[x_i*len(y_vec)+y_i,0] = x
-                points[x_i*len(y_vec)+y_i,1] = y
+        for x_i, x in enumerate(x_vec):
+            for y_i, y in enumerate(y_vec):
+                points[x_i * len(y_vec) + y_i, 0] = x
+                points[x_i * len(y_vec) + y_i, 1] = y
     # grids for interpolation
-    grid_x,grid_y = np.mgrid[x_vec[0]:x_vec[-1]:complex(0,len(x_vec)*mult_factor), y_vec[0]:y_vec[-1]:complex(0,len(y_vec)*mult_factor)]
+    grid_x, grid_y = np.mgrid[x_vec[0]:x_vec[-1]:complex(0, len(x_vec) * mult_factor),
+                     y_vec[0]:y_vec[-1]:complex(0, len(y_vec) * mult_factor)]
     # interpolation
     grid_z = griddata(points, values, (grid_x, grid_y), method='nearest')
     return grid_z
+
 
 # Plotting
 
@@ -308,13 +320,14 @@ def quickplot(path, num_plot, PhyQty, ref, skiprows, nms, ucols, AspRatio=3):
         data['rxy'] = data.uxy / data.curr * ref
         data['sxx'] = data['rxx'] / AspRatio / ((data['rxx'] / AspRatio) ** 2 + data['rxy'] ** 2) / e0 ** 2 * h0
         data['sxy'] = data['rxy'] / ((data['rxx'] / AspRatio) ** 2 + data['rxy'] ** 2) / e0 ** 2 * h0
-        if len(PhyQty)>1:
+        if len(PhyQty) > 1:
             for index, phyqty in enumerate(PhyQty):
                 plot_ax = plots_ax[index]
                 plot_ax.plot(data.x, data[phyqty], color=color)
         else:
             plots_ax.plot(data.x, data[PhyQty[0]], color=color)
     return plots_ax
+
 
 def extents(f):
     '''
@@ -324,12 +337,12 @@ def extents(f):
     :return:
     '''
     delta = f[1] - f[0]
-    return [f[0] - delta/2, f[-1] + delta/2]
+    return [f[0] - delta / 2, f[-1] + delta / 2]
+
 
 ## interactive plotting
 
 def plot_fc_analysis(datafc, label, vmin=-0.005, vmax=0, equal_spaced=True, bgortg=True, axis_diff='gate', zoom_in=[]):
-
     from ipywidgets import interactive, FloatSlider, Dropdown
     fc, data = datafc.getdata()
     diffsxy2D = fc['z1']
@@ -445,13 +458,12 @@ def plot_fc_analysis(datafc, label, vmin=-0.005, vmax=0, equal_spaced=True, bgor
                            gate=FloatSlider(min=min(gates), max=max(gates), step=gate_step, continuous_update=False))
 
 
-def plot_fftmap(datafc, vmin=0, vmax=25, tgorbg=True,bf_range = [0.25, 1]):
+def plot_fftmap(datafc, vmin=0, vmax=25, tgorbg=True, bf_range=[0.25, 1]):
     from ipywidgets import interactive, FloatSlider
     _, data = datafc.getdata()
     gates = data['gate'].apply(lambda x: round(x, 3)).unique()
     gate_step = abs(np.mean(np.diff(gates)))
     ## extract pieces of data
-
 
     data_p = df_range(data, 'bf', bf_range)
     fft2d = np.zeros([len(gates), (len(data_p) // len(gates) + 1) // 2])
@@ -460,7 +472,7 @@ def plot_fftmap(datafc, vmin=0, vmax=25, tgorbg=True,bf_range = [0.25, 1]):
         data_pp = df_range(data_p, 'gate', [gate - gate_step / 2, gate + gate_step / 2])
         x_vals, yinterp = interp_user(1 / data_pp.bf.values, cutout_bkgd(1. / data_pp.bf.values, data_pp.rxx.values),
                                       len(data_pp.bf))  # interpolation if applicable
-        frq,Y = FFT_bs(x_vals, yinterp)
+        frq, Y = FFT_bs(x_vals, yinterp)
         fft2d[index, :] = (abs(Y) / np.mean(
             abs(Y))) ** 2  # normalized amplitude of fft and the power square is for color coding.
 
@@ -503,5 +515,3 @@ def plot_fftmap(datafc, vmin=0, vmax=25, tgorbg=True,bf_range = [0.25, 1]):
 
     return interactive(plot_animation,
                        volt_slice=FloatSlider(min=min(gates), max=max(gates), step=gate_step, continuous_update=False))
-
-
