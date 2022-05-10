@@ -4,6 +4,10 @@ This package serves as a tool box to prepare raw data for later plotting
 in matplotlib, largely smoothing the process from reading raw data to generating
 processed data then to plotting them. 
 
+Beyond general data handling, we also offer a toy-band model to calculate Landau
+levels in energy with a changing magnetic field in multiple-band material system
+(user-defined). Check it out [Here](docs/readme.md).
+
 ### Introduction to ```SciData.py```
 In this ```.py``` file, we define all the classes for structing raw data and pre-processing
 them. In many experiments, we take data for a changing parameter A (sweep A) at a fixed
