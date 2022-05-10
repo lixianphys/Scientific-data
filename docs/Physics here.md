@@ -1,2 +1,0 @@
-# Physics behind the model
-
