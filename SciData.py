@@ -238,13 +238,13 @@ class Datags(Datajungle):
         ax.set_xlabel('$V$ (V)')
         return ax
 
-class Datagmap(Datajungle):
+class Datamap(Datajungle):
     '''Inherent from Class Datajungle
     METHODS:
     getdata: return x, y and a 2D array with z-value
-    plotmap: plot gatemapping'''
+    plotmap: plot 2D mapping'''
 
-    def __init__(self,directory,step,ucols,spr,ref,nms=['v1','v2','uxx','uxy'],AspRatio=3):
+    def __init__(self,directory,step,ucols,spr,ref,nms=['v1','curr','uxx','uxy'],AspRatio=3):
         super().__init__(directory,step,ucols,nms,spr)
         self.ref = ref # reference resistance in series
         self.AspRatio = AspRatio  # Aspect ratio of Hall bar structure
@@ -257,7 +257,8 @@ class Datagmap(Datajungle):
 
     def getdata(self):
         databundle = pd.DataFrame()
-        diffsxy2D = pd.DataFrame()
+        diffsxy2D_v1 = pd.DataFrame()
+        diffsxy2D_v2 = pd.DataFrame()
         rxx2D = pd.DataFrame()
         rxy2D = pd.DataFrame()
         sxy2D = pd.DataFrame()
@@ -270,15 +271,17 @@ class Datagmap(Datajungle):
             data['rxy'] = data.uxy/data.curr*ref
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['diffsxy'] = data['sxy'].diff()/(data['v2'][0]-data['v2'][1])
-            data['v1'] = self.step[i]
-            diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
+            data['v2'] = self.step[i]
+            data['diffsxy_v1'] = data['sxy'].diff()/(data['v1'][0]-data['v1'][1])
+            data['diffsxy_v2'] = data['sxy'].diff()/(data['v2'][0]-data['v2'][1])
+            diffsxy2D_v1 = diffsxy2D_v1.append(data['diffsxy_v1'].dropna())
+            diffsxy2D_v2 = diffsxy2D_v1.append(data['diffsxy_v2'].dropna())
             rxx2D = rxx2D.append(data['rxx'])
             rxy2D = rxy2D.append(data['rxy'])
             sxy2D = sxy2D.append(data['sxy'])
             sxx2D = sxx2D.append(data['sxx'])
             databundle = databundle.append(data)
-        datafc = {'x':databundle['gate'].unique(),'y':self.step,'z1':diffsxy2D,'z2':rxx2D,'z3':rxy2D,'z4':sxy2D,'z5':sxx2D}
+        datafc = {'v1':databundle['v1'].unique(),'v2':self.step,'dv1':diffsxy2D_v1,'dv2':diffsxy2D_v2,'rxx2d':rxx2D,'rxy2d':rxy2D,'sxy2d':sxy2D,'sxx2d':sxx2D}
         return datafc, databundle
 
     def plotmap(self,vm,vmx,cmap='inferno'): # plot gate-mapping
