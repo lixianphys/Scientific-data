@@ -24,11 +24,8 @@ def dir2fnm(directory, sort_by_fnm=False):
     filename = list(filter(os.path.isfile, glob.glob(os.path.join(directory, '*.dat'))))
 
     def getnumber(fnm):
-        fnm_strip = fnm.split(' ')
-        if fnm_strip[-2].find('B-Field') != -1:
-            num_str = fnm_strip[-2].split('d')[-1].replace('T', '').replace(',', '.').replace('V', '')
-        else:
-            num_str = fnm_strip[-2].replace('T', '').replace(',', '.').replace('V', '')
+        fnm_strip = fnm.strip('.dat').split('_')
+        num_str = fnm_strip[-1].replace('T', '').replace(',', '.').replace('V', '').replace('m','-').replace('p','.')
         num = float(num_str)
         return num
 
