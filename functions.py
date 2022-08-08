@@ -1,6 +1,7 @@
 # Copyright 2021 Lixian WANG. All Rights Reserved.
 # Standard library imports
 import os
+import re
 
 # Third party imports
 import matplotlib.pyplot as plt
@@ -12,9 +13,8 @@ from scipy.optimize import curve_fit
 from physconst import *
 
 
-# General use
-import re
 
+# General use
 
 def getnumber(fnm):
     fnm_strip = fnm.strip('.dat').split('/')[-1] if '/' in fnm else fnm.strip('.dat').split('\\')[-1]
@@ -26,6 +26,7 @@ def getnumber(fnm):
 
 
 def dir2fnm(directory, sort_by_fnm=False):
+    # TODO: add a custmizable feature in string pattern recognization
     '''
     Convert a directory to a list of filenames contained inside
     :param directory: directory
