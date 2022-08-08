@@ -13,6 +13,18 @@ from physconst import *
 
 
 # General use
+import re
+
+
+def getnumber(fnm):
+    fnm_strip = fnm.strip('.dat').split('/')[-1] if '/' in fnm else fnm.strip('.dat').split('\\')[-1]
+    # num_str = fnm_strip.replace('T', '').replace(',', '.').replace('DCV', '').replace('B-Field', '').replace('V', '').replace('m','-').replace('p','.').replace('(01)','')
+    num_str = re.sub(r"DCV|B-Field|V|T|\(\d\d\)", "", fnm_strip)
+    num_str = re.sub(r"(,)|(p)", ".", num_str)
+    num = float(num_str)
+    return num
+
+
 def dir2fnm(directory, sort_by_fnm=False):
     '''
     Convert a directory to a list of filenames contained inside
@@ -23,12 +35,6 @@ def dir2fnm(directory, sort_by_fnm=False):
     import os
     filename = list(filter(os.path.isfile, glob.glob(os.path.join(directory, '*.dat'))))
 
-    def getnumber(fnm):
-        fnm_strip = fnm.strip('.dat').split('_')
-        num_str = fnm_strip[-1].replace('T', '').replace(',', '.').replace('V', '').replace('m','-').replace('p','.')
-        num = float(num_str)
-        return num
-
     if sort_by_fnm:
         filename.sort(key=lambda x: getnumber(x))
     else:
@@ -36,18 +42,22 @@ def dir2fnm(directory, sort_by_fnm=False):
     return filename
 
 
+def read_file(directory, sort_by_fnm=False):
+    '''
+    Extract the numbers in the filenames of a batch of files and output them in a list
+    '''
+    filenames = dir2fnm(directory, sort_by_fnm=sort_by_fnm)
+    num_list = [0] * len(filenames)
+    for i, fnm in enumerate(filenames):
+        num_list[i] = float(getnumber(fnm))
+    return num_list
+
+
 def pos_neg(num):
     if num > 0:
         return 1
     else:
         return -1
-
-
-def is_close(num_list: list, match_num: float, precision=1e-6) -> bool:
-    '''
-    Target the nearest number in list of numbers (num_list)
-    '''
-    return [abs(num - match_num) < precision for num in num_list]
 
 
 def read_file(directory, sort_by_fnm=False):
@@ -62,6 +72,15 @@ def read_file(directory, sort_by_fnm=False):
         num_str = fnm_strip[-1].replace('T', '').replace(',', '.')
         num_list[i] = float(num_str)
     return num_list
+
+def is_close(num_list: list, match_num: float, precision=1e-6) -> bool:
+    '''
+    Target the nearest number in list of numbers (num_list)
+    '''
+    return [abs(num - match_num) < precision for num in num_list]
+
+
+
 
 
 def df_range(df, column, col_range):
