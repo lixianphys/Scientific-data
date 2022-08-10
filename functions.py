@@ -12,15 +12,14 @@ from scipy.optimize import curve_fit
 # Local application import
 from physconst import *
 
-
-
 # General use
 
 def getnumber(fnm):
     fnm_strip = fnm.strip('.dat').split('/')[-1] if '/' in fnm else fnm.strip('.dat').split('\\')[-1]
     # num_str = fnm_strip.replace('T', '').replace(',', '.').replace('DCV', '').replace('B-Field', '').replace('V', '').replace('m','-').replace('p','.').replace('(01)','')
-    num_str = re.sub(r"DCV|B-Field|V|T|\(\d\d\)", "", fnm_strip)
+    num_str = re.sub(r"DCV|B-Field|V|T|\(\d\d\)", "", fnm_strip.split('_')[-1])
     num_str = re.sub(r"(,)|(p)", ".", num_str)
+    num_str = re.sub(r"(m)", "-", num_str)
     num = float(num_str)
     return num
 
