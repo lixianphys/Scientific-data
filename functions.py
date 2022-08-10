@@ -59,28 +59,11 @@ def pos_neg(num):
     else:
         return -1
 
-
-def read_file(directory, sort_by_fnm=False):
-    '''
-    Extract the numbers in the filenames of a batch of files and output them in a list
-    '''
-    filenames = dir2fnm(directory, sort_by_fnm=sort_by_fnm)
-    num_list = [0] * len(filenames)
-    for i, fnm in enumerate(filenames):
-        fnm_strip = fnm.split()
-        fnm_strip = fnm_strip[-2].split('d')
-        num_str = fnm_strip[-1].replace('T', '').replace(',', '.')
-        num_list[i] = float(num_str)
-    return num_list
-
 def is_close(num_list: list, match_num: float, precision=1e-6) -> bool:
     '''
     Target the nearest number in list of numbers (num_list)
     '''
     return [abs(num - match_num) < precision for num in num_list]
-
-
-
 
 
 def df_range(df, column, col_range):
