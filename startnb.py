@@ -17,7 +17,7 @@ from physconst import *
 # plot default
 plt.rc('lines', lw=1, color='k')  # thicker black lines
 plt.rc('grid', c='0.5', ls='-', lw=0.5)  # solid gray grid lines
-plt.rc('savefig', dpi=600)  # higher res outputs
+plt.rc('savefig', dpi=300)  # higher res outputs
 plt.rc("font", size=20, family='arial', weight='light')
 plt.rc("axes", labelsize=20, titlesize=20, linewidth=1)
 plt.rc("xtick", direction='in', labelsize=20)

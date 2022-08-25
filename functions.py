@@ -8,10 +8,9 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from scipy.optimize import curve_fit
-
 # Local application import
 from physconst import *
-
+from SciData import Datamap, Datags, Databs
 # General use
 
 def getnumber(fnm):
@@ -79,7 +78,8 @@ def range_pick(yourlist, lb, ub):
 
 # Calculation
 
-def H1st_ft(Bf, Rxx, Rxy, AspRatio=3, threshold=25):
+def H1st_ft(Bf,Rxx,Rxy,AspRatio=3,threshold = 25, fitpara_output=False):
+
     '''
     Linear fit model for Hall analysis
 
@@ -90,10 +90,8 @@ def H1st_ft(Bf, Rxx, Rxy, AspRatio=3, threshold=25):
     :param threshold:
     :return:
     '''
-
     def func_one(x, a, b):
         return a + b * x
-
     e0 = 1.6021766208E-19
     try:
         fitParams, fitCovariances = curve_fit(func_one, Bf, Rxy)
@@ -105,14 +103,17 @@ def H1st_ft(Bf, Rxx, Rxy, AspRatio=3, threshold=25):
         dev = np.sqrt(np.diag(fitCovariances))
         if sum(dev) <= threshold:
             density = 1 / fitParams[1] / e0 / 1e4
-            rxx0 = Rxx.tolist()[list(map(abs, Bf.tolist())).index(min(map(abs, Bf.tolist())))]
+            rxx0 = Rxx.tolist()[list(map(abs,Bf.tolist())).index(min(map(abs,Bf.tolist())))]
             mobility = AspRatio / density / e0 / rxx0
         else:
             print('The fitting results is not acceptable, fitCov is {}'.format(fitCovariances))
             plt.plot(Bf, Rxy, "b-", Bf, func_one(Bf, *fitParams), "r-")
             mobility = 0
             density = 0
-    return density, mobility
+    if fitpara_output:
+        return density,mobility,fitParams
+    else:
+        return density,mobility
 
 
 def H2nd_ft(Bf, Rxx, Rxy, AspRatio=3):
@@ -125,20 +126,81 @@ def H2nd_ft(Bf, Rxx, Rxy, AspRatio=3):
     :param AspRatio:
     :return:
     '''
+    e0 = 1.6021766208E-19
 
     def func_two(x, n1, m1, n2, m2):
         return e0 * x * (n1 * m1 ** 2 / (1 + m1 ** 2 * x ** 2) + n2 * m2 ** 2 / (
                     1 + m2 ** 2 * x ** 2))  # model from PHYSICAL REVIEW B 95, 115126 (2017)
 
-    e0 = 1.6021766208E-19
     sxy = Rxy / ((Rxx / AspRatio) ** 2 + Rxy ** 2)
     try:
-        popt, pcov = curve_fit(func_two, Bf, sxy, bounds=((2e13, 1, -1e16, 0.1), (2e15, 100, -1e14, 10)))
+        popt, pcov = curve_fit(func_two, Bf, sxy, bounds=((1e14, 5, -1e16, 0), (5e15, 15, -1e14, 3)))
         # plt.plot(Bf, sxy, "b-", Bf, func_two(Bf, *popt), "r-")
-        print('The fitCov is {}'.format(pcov))
+        return popt, func_two(Bf, *popt)
     except:
         print('The fitting program failed')
-    return popt, func_two(Bf, *popt)
+
+
+def denCal_single(data_formatted, AspRatio, bf_range_to_fit, gate_range_to_fit, residual_field_in_T, call=False):
+    # PURPOSE: calculate the carier density/mobility by the low-field Hall and transverse resistance
+    # INPUT: databs | type class Databs() or Datafc()
+    # OUTPUT: return dens/mob | type list
+    if isinstance(data_formatted, (Databs, Datags)):
+        data = data_formatted.getdata()
+    elif isinstance(data_formatted, Datamap):
+        _, data = data_formatted.getdata()
+    else:
+        raise TypeError('Error: Wrong input data type')
+
+    if call:
+        print('Function dens_cal_hbar_s()')
+
+    gates = gate_range_to_fit
+
+    bf_range = bf_range_to_fit  # range to fit
+
+    dens = []
+    mob = []
+
+    for gate in gates:
+        data_p = df_range(df_range(data, 'bf', bf_range), 'gate', [gate - 0.005, gate + 0.005])  # data
+        para1, para2 = H1st_ft(data_p.bf - residual_field_in_T, data_p.rxx, data_p.rxy, AspRatio=AspRatio,
+                               threshold=1000)
+        dens.append(para1 / 1e11)
+        mob.append(para2)
+    return dens, mob
+
+
+def denCal_double(data_formatted, AspRatio, bf_range_to_fit, gate_range_to_fit, residual_field_in_T, call=False):
+    # PURPOSE: calculate the carier density/mobility by a two-carrier model
+    # INPUT: databs | type class Databs, Datags and Datamap
+    # OUTPUT: return dens/mob | type list
+    if isinstance(data_formatted, (Databs, Datags)):
+        data = data_formatted.getdata()
+    elif isinstance(data_formatted, Datamap):
+        _, data = data_formatted.getdata()
+    else:
+        raise TypeError('Error: Wrong input data type')
+
+    if call:
+        print('Function dens_cal_hbar_s()')
+
+    gates = gate_range_to_fit
+    bf_range = bf_range_to_fit  # range to fit
+    ndens, nmob, pdens, pmob = [], [], [], []
+
+    for gate in gates:
+        fig = plt.figure(figsize=(5, 5), constrained_layout=True)
+        ax1 = fig.add_subplot(111)
+        data_p = df_range(df_range(data, 'bf', bf_range), 'gate', [gate - 0.005, gate + 0.005])  # data
+        para, fun = H2nd_ft(data_p.bf - residual_field_in_T, data_p.rxx, data_p.rxy, AspRatio=AspRatio)
+        ax1.plot(data_p.bf - residual_field_in_T, data_p.sxy * e0 ** 2 / h0, c='r')
+        ax1.plot(data_p.bf - residual_field_in_T, fun, c='k')
+        ndens.append(para[0] / 1e15)
+        nmob.append(para[1] * 1e4)
+        pdens.append(para[2] / 1e15)
+        pmob.append(para[3] * 1e4)
+    return ndens, nmob, pdens, pmob
 
 
 def cutout_bkgd(x, y):
