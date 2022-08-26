@@ -10,7 +10,6 @@ import numpy as np
 from scipy.optimize import curve_fit
 # Local application import
 from physconst import *
-from SciData import Datamap, Datags, Databs
 # General use
 
 def getnumber(fnm):
