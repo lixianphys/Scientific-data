@@ -69,7 +69,8 @@ class Databs(Datajungle):
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['gate'] = self.step[i]
-            databundle = databundle.append(data)
+            # databundle = databundle.append(data) # Deprecated in Pandas 1.4.0 and above
+            pd.concat(databundle, data)
         return databundle
 
     def hallfit(self,fitrange):
@@ -138,8 +139,10 @@ class Databs(Datajungle):
             data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['diffsxy'] = data['sxy'].diff()/(data['gate'][0]-data['gate'][1])
             data['bf'] = self.step[i]
-            diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
-            databundle = databundle.append(data)
+            # diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
+            pd.concat(diffsxy2D,data['diffsxy'].dropna())
+            # databundle = databundle.append(data) # Deprecated in Pandas 1.4.0 and above
+            pd.concat(databundle,data)
         x, y = databundle['gate'].unique(),self.step
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111)
@@ -178,7 +181,8 @@ class Datags(Datajungle):
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['bf'] = self.step[i]
-            databundle = databundle.append(data)
+            # databundle = databundle.append(data) # Deprecated in Pandas 1.4.0 and above
+            pd.concat(databundle,data)
         return databundle
     def plotdata(self,label_value='$B$={:02.2f}T'):
         font = {'family' : 'normal','weight' : 'normal','size' : 15}
@@ -228,8 +232,10 @@ class Datags(Datajungle):
             data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['diffsxy'] = data['sxy'].diff()/(data['gate'][0]-data['gate'][1])
             data['bf'] = self.step[i]
-            diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
-            databundle = databundle.append(data)
+            # diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
+            pd.concat(diffsxy2D,data['diffsxy'].dropna())
+            # databundle = databundle.append(data) # Deprecated in Pandas 1.4.0 and above
+            pd.concat(databundle,data)
         x, y = databundle['gate'].unique(),self.step
         fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111)
@@ -274,13 +280,20 @@ class Datamap(Datajungle):
             data['v2'] = self.step[i]
             data['diffsxy_v1'] = data['sxy'].diff()/(data['v1'][0]-data['v1'][1])
             data['diffsxy_v2'] = data['sxy'].diff()/(data['v2'][0]-data['v2'][1])
-            diffsxy2D_v1 = diffsxy2D_v1.append(data['diffsxy_v1'].dropna())
-            diffsxy2D_v2 = diffsxy2D_v1.append(data['diffsxy_v2'].dropna())
-            rxx2D = rxx2D.append(data['rxx'])
-            rxy2D = rxy2D.append(data['rxy'])
-            sxy2D = sxy2D.append(data['sxy'])
-            sxx2D = sxx2D.append(data['sxx'])
-            databundle = databundle.append(data)
+            # diffsxy2D_v1 = diffsxy2D_v1.append(data['diffsxy_v1'].dropna())
+            pd.concat(diffsxy2D_v1,data['diffsxy_v1'].dropna())
+            # diffsxy2D_v2 = diffsxy2D_v2.append(data['diffsxy_v2'].dropna())
+            pd.concat(diffsxy2D_v2, data['diffsxy_v2'].dropna())
+            # rxx2D = rxx2D.append(data['rxx'])
+            pd.concat(rxx2D,data['rxx'])
+            # rxy2D = rxy2D.append(data['rxy'])
+            pd.concat(rxy2D,data['rxy'])
+            # sxy2D = sxy2D.append(data['sxy'])
+            pd.concat(sxy2D,data['sxy'])
+            # sxx2D = sxx2D.append(data['sxx'])
+            pd.concat(sxx2D,data['sxx'])
+            # databundle = databundle.append(data)
+            pd.concat(databundle,data)
         datafc = {'v1':databundle['v1'].unique(),'v2':self.step,'dv1':diffsxy2D_v1,'dv2':diffsxy2D_v2,'rxx2d':rxx2D,'rxy2d':rxy2D,'sxy2d':sxy2D,'sxx2d':sxx2D}
         return datafc, databundle
 
@@ -297,8 +310,10 @@ class Datamap(Datajungle):
             data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['diffsxy'] = data['sxy'].diff()/(data['v1'][0]-data['v1'][1])
             data['v2'] = self.step[i]
-            diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
-            databundle = databundle.append(data)
+            # diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
+            pd.concat(diffsxy2D,data['diffsxy'].dropna())
+            # databundle = databundle.append(data) # Deprecated in Pandas 1.4.0 and above
+            pd.concat(databundle,data)
         x = databundle['gate'].unique()
 
         y = self.step
@@ -328,7 +343,8 @@ class DataX(Datajungle):
         for i in range(len(self.dir)):
             data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
             data['x'] = self.step[i]
-            databundle = databundle.append(data)
+            # databundle = databundle.append(data) # Deprecated in Pandas 1.4.0 and above
+            pd.concat(databundle,data)
         return databundle
 
 
