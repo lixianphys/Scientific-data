@@ -126,31 +126,6 @@ class Databs(Datajungle):
                    ax_rxy.axhline(y=h0/e0**2/mark,linestyle=':',color='c')
         return ax_rxx,ax_rxy,ax_sxy
 
-    def plotfc(self,vm,vmx,cmap='inferno',figsize=(15,8)): # plot fan chart
-        diffsxy2D = pd.DataFrame()
-        databundle = pd.DataFrame()
-        ref = self.ref
-        AspRatio = self.AspRatio
-        for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
-            data['rxx'] = data.uxx/data.curr*ref
-            data['rxy'] = data.uxy/data.curr*ref
-            data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['diffsxy'] = data['sxy'].diff()/(data['gate'][0]-data['gate'][1])
-            data['bf'] = self.step[i]
-            # diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
-            diffsxy2D = pd.concat([diffsxy2D,data['diffsxy'].dropna()],ignore_index=False)
-            # databundle = databundle.append(data) # Deprecated in Pandas 1.4.0 and above
-            databundle = pd.concat([databundle,data],ignore_index=False)
-        x, y = databundle['gate'].unique(),self.step
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111)
-        ax.imshow(diffsxy2D,aspect='auto', interpolation='none',extent=extents(x.tolist()) + extents(y), origin='lower',cmap=cmap,vmin=vm, vmax=vmx)
-        ax.set_ylabel('$B$ (T)')
-        ax.set_xlabel('$V$ (V)')
-        return ax
-
 
 class Datags(Datajungle):
     '''Inherent from Class Datajungle
@@ -219,31 +194,6 @@ class Datags(Datajungle):
                    ax_rxy.axhline(y=h0/e0**2/mark,linestyle=':',color='c')
         return ax_rxx,ax_rxy,ax_sxy
 
-    def plotfc(self,vm,vmx,cmap='inferno',figsize=(15,8)): # plot fan chart
-        diffsxy2D = pd.DataFrame()
-        databundle = pd.DataFrame()
-        ref = self.ref
-        AspRatio = self.AspRatio
-        for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
-            data['rxx'] = data.uxx/data.curr*ref
-            data['rxy'] = data.uxy/data.curr*ref
-            data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['diffsxy'] = data['sxy'].diff()/(data['gate'][0]-data['gate'][1])
-            data['bf'] = self.step[i]
-            # diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
-            diffsxy2D = pd.concat([diffsxy2D,data['diffsxy'].dropna()],ignore_index=False)
-            # databundle = databundle.append(data) # Deprecated in Pandas 1.4.0 and above
-            databundle = pd.concat([databundle,data],ignore_index=False)
-        x, y = databundle['gate'].unique(),self.step
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111)
-        ax.imshow(diffsxy2D,aspect='auto', interpolation='none',extent=extents(x.tolist()) + extents(y), origin='lower',cmap=cmap,vmin=vm, vmax=vmx)
-        ax.set_ylabel('$B$ (T)')
-        ax.set_xlabel('$V$ (V)')
-        return ax
-
 class Datamap(Datajungle):
     '''Inherent from Class Datajungle
     METHODS:
@@ -278,51 +228,45 @@ class Datamap(Datajungle):
             data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
             data['v2'] = self.step[i]
-            data['diffsxy_v1'] = data['sxy'].diff()/(data['v1'][0]-data['v1'][1])
-            data['diffsxy_v2'] = data['sxy'].diff()/(data['v2'][0]-data['v2'][1])
-            # diffsxy2D_v1 = diffsxy2D_v1.append(data['diffsxy_v1'].dropna())
-            diffsxy2D_v1 = pd.concat([diffsxy2D_v1,data['diffsxy_v1'].dropna()],ignore_index=False)
-            # diffsxy2D_v2 = diffsxy2D_v2.append(data['diffsxy_v2'].dropna())
-            diffsxy2D_v2 = pd.concat([diffsxy2D_v2, data['diffsxy_v2'].dropna()],ignore_index=False)
-            # rxx2D = rxx2D.append(data['rxx'])
-            rxx2D = pd.concat([rxx2D,data['rxx']],ignore_index=False)
+            rxx2D = pd.concat([rxx2D,data['rxx']],axis=1)
             # rxy2D = rxy2D.append(data['rxy'])
-            rxy2D = pd.concat([rxy2D,data['rxy']],ignore_index=False)
+            rxy2D = pd.concat([rxy2D,data['rxy']],axis=1)
             # sxy2D = sxy2D.append(data['sxy'])
-            sxy2D = pd.concat([sxy2D,data['sxy']],ignore_index=False)
+            sxy2D = pd.concat([sxy2D,data['sxy']],axis=1)
             # sxx2D = sxx2D.append(data['sxx'])
-            sxx2D = pd.concat([sxx2D,data['sxx']],ignore_index=False)
+            sxx2D = pd.concat([sxx2D,data['sxx']],axis=1)
             # databundle = databundle.append(data)
             databundle = pd.concat([databundle,data],ignore_index=False)
+
+        diffsxy2D_v1 = sxy2D.diff(axis=0)/abs(databundle['v1'].unique()[0]-databundle['v1'].unique()[1])
+        diffsxy2D_v2 = sxy2D.diff(axis=1)/abs(self.step[0]-self.step[1])
+
         datafc = {'v1':databundle['v1'].unique(),'v2':self.step,'dv1':diffsxy2D_v1,'dv2':diffsxy2D_v2,'rxx2d':rxx2D,'rxy2d':rxy2D,'sxy2d':sxy2D,'sxx2d':sxx2D}
         return datafc, databundle
 
-    def plotmap(self,vm,vmx,cmap='inferno'): # plot gate-mapping
-        diffsxy2D = pd.DataFrame()
-        databundle = pd.DataFrame()
-        ref = self.ref
-        AspRatio = self.AspRatio
-        for i in range(len(self.dir)):
-            data = pd.read_csv(self.dir[i], sep="\t",skiprows=self.spr, usecols=self.ucols, names=self.nms, header=None, encoding='unicode_escape')
-            data['rxx'] = data.uxx/data.curr*ref
-            data['rxy'] = data.uxy/data.curr*ref
-            data['sxx'] = data['rxx']/AspRatio/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['sxy'] = data['rxy']/((data['rxx']/AspRatio)**2+data['rxy']**2)
-            data['diffsxy'] = data['sxy'].diff()/(data['v1'][0]-data['v1'][1])
-            data['v2'] = self.step[i]
-            # diffsxy2D = diffsxy2D.append(data['diffsxy'].dropna())
-            diffsxy2D = pd.concat([diffsxy2D,data['diffsxy'].dropna()],ignore_index=False)
-            # databundle = databundle.append(data) # Deprecated in Pandas 1.4.0 and above
-            databundle = pd.concat([databundle,data],ignore_index=False)
-        x = databundle['gate'].unique()
+    def plotmap(self,vmin1,vmax1,vmin2,vmax2,cmap='terrain'): # plot gate-mapping
+        fc,_ = self.getdata()
+        v1 = fc['v1']
+        v2 = fc['v2']
+        diffsxy2D_v1 = fc['dv1']
+        diffsxy2D_v2 = fc['dv2']
 
-        y = self.step
-        fig = plt.figure(figsize=(15,8))
-        ax = fig.add_subplot(111)
-        ax.imshow(diffsxy2D,aspect='auto', interpolation='none',extent=extents(x.tolist()) + extents(y), origin='lower',cmap=cmap,vmin=vm, vmax=vmx)
-        ax.set_ylabel('$V_{2}(V)$')
-        ax.set_xlabel('$V_{1}(V)$')
-        return ax
+        fig = plt.figure(figsize=(8,12),constrained_layout=True)
+        gs = fig.add_gridspec(2, 1)
+        ax1,ax2 = [fig.add_subplot(x) for x in gs]
+        dv1plot = ax1.imshow(diffsxy2D_v1,aspect='auto', interpolation='none',extent=extents(v1.tolist()) + extents(v2.tolist()), origin='lower',cmap=cmap,vmin=vmin1, vmax=vmax1)
+        cbaxes1 = fig.add_axes([.8, .9, 0.15, 0.01])
+        cb1 = fig.colorbar(dv1plot, cax=cbaxes1, orientation='horizontal', pad=10)
+        cb1.ax.set_xlabel('$d\sigma_{xy}/dV_{1}$')
+        dv2plot = ax2.imshow(diffsxy2D_v2,aspect='auto', interpolation='none',extent=extents(v1.tolist()) + extents(v2.tolist()), origin='lower',cmap=cmap,vmin=vmin2, vmax=vmax2)
+        cbaxes2 = fig.add_axes([.8, .4, 0.15, 0.01])
+        cb2 = fig.colorbar(dv2plot, cax=cbaxes2, orientation='horizontal', pad=10)
+        cb2.ax.set_xlabel('$d\sigma_{xy}/dV_{2}$')
+        ax1.set_ylabel('$V_{2}$')
+        ax1.set_xlabel('$V_{1}$')
+        ax2.set_ylabel('$V_{2}$')
+        ax2.set_xlabel('$V_{1}$')
+        return [ax1,ax2]
 
 class DataX(Datajungle):
     '''Inherent from Class Datajungle
