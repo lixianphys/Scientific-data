@@ -152,7 +152,7 @@ def twocarrierfit(Bf, Rxy):
         return  -((n2*m2**2-n1*m1**2)+m2**2*m1**2*x**2*(n2-n1))*x/e0/((n2*m2+n1*m1)**2+m2**2*m1**2*x**2*(n2-n1)**2)  # Reference: Li, Cai-Zhen, et al. ACS nano 10.6 (2016): 6020-6028.
 
     try:
-        popt, pcov = curve_fit(func, Bf, Rxy, bounds=((1e14, 5, 1e14, 0), (5e15, 15, 1e16, 3)))
+        popt, pcov = curve_fit(func, Bf, Rxy, bounds=((1e14, 10, 1e14, 1), (1e16, 25, 1e16, 10)))
         # plt.plot(Bf, sxy, "b-", Bf, func_two(Bf, *popt), "r-")
         return popt, func(Bf, *popt)
     except:
