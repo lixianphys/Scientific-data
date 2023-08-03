@@ -15,7 +15,7 @@ from physconst import *
 def getnumber(fnm):
     fnm_strip = fnm.strip('.dat').split('/')[-1] if '/' in fnm else fnm.strip('.dat').split('\\')[-1]
     # num_str = fnm_strip.replace('T', '').replace(',', '.').replace('DCV', '').replace('B-Field', '').replace('V', '').replace('m','-').replace('p','.').replace('(01)','')
-    num_str = re.sub(r"DCV|set|B-Field|Heater|Ch4|Ch2A|power|%|V|mT|LakeShore|lowfield|T|\(\d\d\)", "", fnm_strip.split('_')[-1])
+    num_str = re.sub(r"DCV|set|B-Field|Heater|Ch4|Ch2A|power|%|Vappl1|Vappl2|V|mT|LakeShore|lowfield|T|\(\d\d\)", "", fnm_strip.split('_')[-1])
     num_str = re.sub(r"(,)|(p)", ".", num_str)
     num_str = re.sub(r"(m)", "-", num_str)
     num = float(num_str)
@@ -139,67 +139,24 @@ def H2nd_ft(Bf, Rxx, Rxy, AspRatio=3):
     except:
         print('The fitting program failed')
 
+def twocarrierfit(Bf, Rxy):
+    '''
+    Two carrier (electron-hole) model for Hall analysis
+    :param Bf:
+    :param Rxy:
+    :return:
+    '''
+    e0 = 1.6021766208E-19
 
-def denCal_single(data_formatted, AspRatio, bf_range_to_fit, gate_range_to_fit, residual_field_in_T, call=False):
-    # PURPOSE: calculate the carier density/mobility by the low-field Hall and transverse resistance
-    # INPUT: databs | type class Databs() or Datafc()
-    # OUTPUT: return dens/mob | type list
-    if isinstance(data_formatted, (Databs, Datags)):
-        data = data_formatted.getdata()
-    elif isinstance(data_formatted, Datamap):
-        _, data = data_formatted.getdata()
-    else:
-        raise TypeError('Error: Wrong input data type')
+    def func(x, n1, m1, n2, m2):
+        return  -((n2*m2**2-n1*m1**2)+m2**2*m1**2*x**2*(n2-n1))*x/e0/((n2*m2+n1*m1)**2+m2**2*m1**2*x**2*(n2-n1)**2)  # Reference: Li, Cai-Zhen, et al. ACS nano 10.6 (2016): 6020-6028.
 
-    if call:
-        print('Function dens_cal_hbar_s()')
-
-    gates = gate_range_to_fit
-
-    bf_range = bf_range_to_fit  # range to fit
-
-    dens = []
-    mob = []
-
-    for gate in gates:
-        data_p = df_range(df_range(data, 'bf', bf_range), 'gate', [gate - 0.005, gate + 0.005])  # data
-        para1, para2 = H1st_ft(data_p.bf - residual_field_in_T, data_p.rxx, data_p.rxy, AspRatio=AspRatio,
-                               threshold=1000)
-        dens.append(para1 / 1e11)
-        mob.append(para2)
-    return dens, mob
-
-
-def denCal_double(data_formatted, AspRatio, bf_range_to_fit, gate_range_to_fit, residual_field_in_T, call=False):
-    # PURPOSE: calculate the carier density/mobility by a two-carrier model
-    # INPUT: databs | type class Databs, Datags and Datamap
-    # OUTPUT: return dens/mob | type list
-    if isinstance(data_formatted, (Databs, Datags)):
-        data = data_formatted.getdata()
-    elif isinstance(data_formatted, Datamap):
-        _, data = data_formatted.getdata()
-    else:
-        raise TypeError('Error: Wrong input data type')
-
-    if call:
-        print('Function dens_cal_hbar_s()')
-
-    gates = gate_range_to_fit
-    bf_range = bf_range_to_fit  # range to fit
-    ndens, nmob, pdens, pmob = [], [], [], []
-
-    for gate in gates:
-        fig = plt.figure(figsize=(5, 5), constrained_layout=True)
-        ax1 = fig.add_subplot(111)
-        data_p = df_range(df_range(data, 'bf', bf_range), 'gate', [gate - 0.005, gate + 0.005])  # data
-        para, fun = H2nd_ft(data_p.bf - residual_field_in_T, data_p.rxx, data_p.rxy, AspRatio=AspRatio)
-        ax1.plot(data_p.bf - residual_field_in_T, data_p.sxy * e0 ** 2 / h0, c='r')
-        ax1.plot(data_p.bf - residual_field_in_T, fun, c='k')
-        ndens.append(para[0] / 1e15)
-        nmob.append(para[1] * 1e4)
-        pdens.append(para[2] / 1e15)
-        pmob.append(para[3] * 1e4)
-    return ndens, nmob, pdens, pmob
+    try:
+        popt, pcov = curve_fit(func, Bf, Rxy, bounds=((1e14, 10, 1e14, 1), (1e16, 25, 1e16, 10)))
+        # plt.plot(Bf, sxy, "b-", Bf, func_two(Bf, *popt), "r-")
+        return popt, func(Bf, *popt)
+    except:
+        print('The two carrier fit failed')
 
 
 def cutout_bkgd(x, y):

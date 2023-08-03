@@ -291,6 +291,66 @@ class DataX(Datajungle):
             databundle = pd.concat([databundle,data],ignore_index=False)
         return databundle
 
+def denCal_single(data_formatted, AspRatio, bf_range_to_fit, gate_range_to_fit, residual_field_in_T, call=False):
+    # PURPOSE: calculate the carier density/mobility by the low-field Hall and transverse resistance
+    # INPUT: databs | type class Databs() or Datafc()
+    # OUTPUT: return dens/mob | type list
+    if isinstance(data_formatted, (Databs, Datags)):
+        data = data_formatted.getdata()
+    elif isinstance(data_formatted, Datamap):
+        _, data = data_formatted.getdata()
+    else:
+        raise TypeError('Error: Wrong input data type')
+
+    gates = gate_range_to_fit
+
+    bf_range = bf_range_to_fit  # range to fit
+
+    dens = []
+    mob = []
+
+    for gate in gates:
+        data_p = df_range(df_range(data, 'bf', bf_range), 'gate', [gate - 0.005, gate + 0.005])  # data
+        para1, para2 = H1st_ft(data_p.bf - residual_field_in_T, data_p.rxx, data_p.rxy, AspRatio=AspRatio,
+                               threshold=1000)
+        dens.append(para1 / 1e11)
+        mob.append(para2)
+    return dens, mob
+
+
+def denCal_double(data_formatted, AspRatio, bf_range_to_fit, gate_range_to_fit, residual_field_in_T, alternating=False, call=False):
+    # PURPOSE: calculate the carier density/mobility by a two-carrier model
+    # INPUT: databs | type class Databs, Datags and Datamap
+    # OUTPUT: return dens/mob | type list
+    if isinstance(data_formatted, (Databs, Datags)):
+        data = data_formatted.getdata()
+    elif isinstance(data_formatted, Datamap):
+        _, data = data_formatted.getdata()
+    else:
+        raise TypeError('Error: Wrong input data type')
+
+    gates = gate_range_to_fit
+    bf_range = bf_range_to_fit  # range to fit
+    ndens, nmob, pdens, pmob = [], [], [], []
+
+    if call == True:
+        fig = plt.figure(figsize=(5, 5), constrained_layout=True)
+        ax1 = fig.add_subplot(111)
+    for n, gate in enumerate(gates):
+        if alternating == True:
+            residual_field_in_T = -residual_field_in_T
+        data_p = df_range(df_range(data, 'bf', bf_range), 'gate', [gate - 0.005, gate + 0.005])  # data
+        para, fun = twocarrierfit(data_p.bf - residual_field_in_T, data_p.rxy)
+        if call == True:
+            ax1.plot(data_p.bf - residual_field_in_T, data_p.rxy, c='r')
+            ax1.plot(data_p.bf - residual_field_in_T, fun, c='k')
+        ndens.append(para[0] / 1e15)
+        nmob.append(para[1] * 1e4)
+        pdens.append(para[2] / 1e15)
+        pmob.append(para[3] * 1e4)
+    return ndens, nmob, pdens, pmob
+
+
 
 
 def main():
