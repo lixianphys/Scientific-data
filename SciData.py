@@ -10,10 +10,10 @@ import numpy as np
 from scipy.optimize import curve_fit
 
 # Local application
-from physconst import *
-from functions import *
+from .physconst import *
+from .functions import *
 
-
+__all__ = ['Databs','Datags','Datamap','DataX']
 
 class Datajungle:
     """ Parent Class for Generic data type

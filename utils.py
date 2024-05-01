@@ -4,6 +4,8 @@ import functools
 from itertools import chain as ic
 import numpy as np
 
+__all__ = ['deprecated','flattenList','div']
+
 def deprecated(func):
     """This is a decorator which can be used to mark functions
     as deprecated. It will result in a warning being emitted
