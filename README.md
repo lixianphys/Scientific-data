@@ -2,7 +2,7 @@
 
 This package serves as a tool box to prepare raw data for later plotting
 in matplotlib, largely smoothing the process from reading raw data to generating
-processed data then to plotting them. 
+processed data then to plotting them. To dive deeper, please visit [my personal website](http://lixianphwang.com/projects/2_project/)
 
 ### Introduction to ```SciData.py```
 In this ```.py``` file, we define all the classes for structing raw data and pre-processing

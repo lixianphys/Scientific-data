@@ -21,7 +21,7 @@ __all__ = ['getnumber','dir2fnm','read_file','pos_neg','is_close',
 def getnumber(fnm):
     fnm_strip = fnm.strip('.dat').split('/')[-1] if '/' in fnm else fnm.strip('.dat').split('\\')[-1]
     # num_str = fnm_strip.replace('T', '').replace(',', '.').replace('DCV', '').replace('B-Field', '').replace('V', '').replace('m','-').replace('p','.').replace('(01)','')
-    num_str = re.sub(r"DCV|set|B-Field|Heater|Ch4|power|%|Vappl1|Vappl2|V|mT|LakeShore|lowfield|T|\(\d\d\)", "", fnm_strip.split('_')[-1])
+    num_str = re.sub(r"DCV|set|B-Field|Heater|Ch4|Ch2A|power|%|Vappl1|Vappl2|V|mT|LakeShore|lowfield|T|\(\d\d\)", "", fnm_strip.split('_')[-1])
     num_str = re.sub(r"(,)|(p)", ".", num_str)
     num_str = re.sub(r"(m)", "-", num_str)
     num = float(num_str)
